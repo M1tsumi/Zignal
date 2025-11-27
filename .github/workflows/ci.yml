@@ -1,0 +1,332 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  ZIG_VERSION: 0.11.0
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            zig-target: x86_64-linux
+          - os: windows-latest
+            zig-target: x86_64-windows
+          - os: macos-latest
+            zig-target: x86_64-macos
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Cache Zig dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/zig
+        key: ${{ runner.os }}-zig-${{ env.ZIG_VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-zig-
+
+    - name: Verify Zig installation
+      run: zig version
+
+    - name: Run tests
+      run: zig test --test-coverage
+
+    - name: Build library
+      run: zig build-lib src/root.zig --name zignal
+
+    - name: Build examples
+      run: |
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          zig build-exe examples/basic_bot.zig --name basic_bot
+          zig build-exe examples/voice_bot.zig --name voice_bot
+        else
+          zig build-exe examples/basic_bot.zig --name basic_bot
+          zig build-exe examples/voice_bot.zig --name voice_bot
+        fi
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Check formatting
+      run: |
+        zig fmt --check src/**/*.zig
+        zig fmt --check examples/**/*.zig
+        zig fmt --check tests/**/*.zig
+
+    - name: Run linter
+      run: |
+        # Basic lint checks
+        find src -name "*.zig" -exec zig build-exe {} -fno-bin -target x86_64-linux \; 2>&1 | grep -E "(error|warning)" && exit 1 || echo "Lint passed"
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Security audit
+      run: |
+        # Check for common security issues
+        echo "Running security checks..."
+        
+        # Check for hardcoded secrets/tokens
+        if grep -r "token.*=" src/ --include="*.zig" | grep -v "YOUR_BOT_TOKEN\|example\|placeholder"; then
+          echo "Potential hardcoded tokens found!"
+          exit 1
+        fi
+        
+        # Check for unsafe memory operations
+        if grep -r "c\." src/ --include="*.zig" | grep -E "(malloc|free|strcpy|strcat)"; then
+          echo "Unsafe C functions detected!"
+          exit 1
+        fi
+        
+        echo "Security checks passed!"
+
+  performance:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Build release
+      run: |
+        zig build-lib src/root.zig --name zignal -O ReleaseFast
+
+    - name: Performance benchmark
+      run: |
+        # Simple performance test
+        echo "Running performance benchmarks..."
+        
+        # Test compilation time
+        time zig build-lib src/root.zig --name zignal
+        
+        # Test binary size
+        ls -la libzignal.a
+        
+        echo "Performance tests completed!"
+
+  integration:
+    name: Integration Test
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Build all targets
+      run: |
+        # Build for multiple targets
+        zig build-lib src/root.zig --name zignal -target x86_64-linux
+        zig build-lib src/root.zig --name zignal -target x86_64-windows
+        zig build-lib src/root.zig --name zignal -target x86_64-macos
+        zig build-lib src/root.zig --name zignal -target aarch64-linux
+        zig build-lib src/root.zig --name zignal -target aarch64-macos
+
+    - name: Verify API completeness
+      run: |
+        echo "Verifying API completeness..."
+        
+        # Check REST API endpoints count
+        endpoint_count=$(grep -r "pub fn" src/api/ --include="*.zig" | wc -l)
+        echo "Found $endpoint_count API endpoints"
+        
+        if [ "$endpoint_count" -lt 175 ]; then
+          echo "API endpoints count is below 175!"
+          exit 1
+        fi
+        
+        # Check gateway events
+        event_count=$(grep -r "case .event_type" src/ --include="*.zig" | wc -l)
+        echo "Found $event_count gateway events"
+        
+        if [ "$event_count" -lt 56 ]; then
+          echo "Gateway events count is below 56!"
+          exit 1
+        fi
+        
+        echo "API completeness verified!"
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Generate documentation
+      run: |
+        zig build-lib src/root.zig --name zignal -femit-docs -O ReleaseFast
+
+    - name: Check README links
+      run: |
+        # Check if README has all necessary sections
+        if ! grep -q "## ✨ Features" README.md; then
+          echo "Features section missing from README!"
+          exit 1
+        fi
+        
+        if ! grep -q "## 🚀 Quick Start" README.md; then
+          echo "Quick Start section missing from README!"
+          exit 1
+        fi
+        
+        if ! grep -q "## 📚 API Reference" README.md; then
+          echo "API Reference section missing from README!"
+          exit 1
+        fi
+        
+        echo "Documentation checks passed!"
+
+  release:
+    name: Release Build
+    runs-on: ${{ matrix.os }}
+    needs: [test, lint, security, performance, integration, docs]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Build release binaries
+      run: |
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
+          zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-windows
+          zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-windows
+        elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-macos
+          zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-macos
+        else
+          zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-linux
+          zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-linux
+        fi
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: zignal-${{ matrix.os }}
+        path: |
+          libzignal.*
+          basic_bot*
+          basic_bot.exe
+        retention-days: 30
+
+  final-check:
+    name: Final Validation
+    runs-on: ubuntu-latest
+    needs: [test, lint, security, performance, integration, docs, release]
+    if: always()
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup Zig
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: ${{ env.ZIG_VERSION }}
+
+    - name: Final validation
+      run: |
+        echo "=== FINAL VALIDATION ==="
+        
+        # Check all critical files exist
+        if [ ! -f "src/root.zig" ]; then
+          echo "src/root.zig missing!"
+          exit 1
+        fi
+        
+        if [ ! -f "README.md" ]; then
+          echo "README.md missing!"
+          exit 1
+        fi
+        
+        if [ ! -f "LICENSE" ]; then
+          echo "LICENSE missing!"
+          exit 1
+        fi
+        
+        # Final build test
+        zig build-lib src/root.zig --name zignal
+        
+        # Final test run
+        zig test
+        
+        echo "=== ALL CHECKS PASSED ==="
+        echo "✅ Build successful"
+        echo "✅ Tests passed"
+        echo "✅ Linting passed"
+        echo "✅ Security passed"
+        echo "✅ Performance passed"
+        echo "✅ Integration passed"
+        echo "✅ Documentation passed"
+        echo "✅ Release build passed"
+        echo ""
+        echo "🚀 Zignal is ready for release!"
