@@ -1,0 +1,34 @@
+# Zig build artifacts
+zig-cache/
+zig-out/
+zig-build-lib/
+zig-build-exe/
+zig-build-run/
+zig-test/
+
+# Zig compiler binaries
+zig*.exe
+zig*.zip
+zig-windows-*/
+zig-linux-*/
+zig-macos-*/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Test outputs
+test_results/
