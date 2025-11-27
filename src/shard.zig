@@ -2,6 +2,8 @@ const std = @import("std");
 const Gateway = @import("Gateway.zig");
 const models = @import("models.zig");
 const utils = @import("utils.zig");
+const events = @import("events.zig");
+const EventHandler = events.EventHandler;
 
 pub const ShardManager = struct {
     allocator: std.mem.Allocator,
@@ -37,7 +39,7 @@ pub const ShardManager = struct {
 
     pub fn calculateShards(guild_count: u32) u32 {
         // Discord's recommended sharding calculation
-        return @max(1, @divCeil(guild_count, 2500));
+        return @max(1, @divTrunc(guild_count + 2499, 2500));
     }
 
     pub fn getShardId(guild_id: u64, total_shards: u32) u32 {
@@ -192,11 +194,11 @@ pub const Shard = struct {
         try identify_data.put("op", std.json.Value{ .integer = 2 });
         try identify_data.put("d", std.json.Value{ .object = d_data });
 
-        const json_string = try std.json.stringifyAlloc(self.allocator, identify_data, .{});
+        var json_string: []const u8 = try std.json.stringifyAlloc(self.allocator, identify_data, .{});
         defer self.allocator.free(json_string);
 
         // Send identify through gateway
-        _ = json_string; // In a real implementation, this would be sent
+        // In a real implementation, this would be sent
     }
 
     pub fn shardResume(self: *Shard) !void {
@@ -219,12 +221,12 @@ pub const Shard = struct {
         defer self.allocator.free(json_string);
 
         // Send resume through gateway
-        _ = json_string; // In a real implementation, this would be sent
+        // In a real implementation, this would be sent
     }
 
     pub fn eventLoop(self: *Shard) !void {
         while (self.connected) {
-            if (self.gateway) |gw| {
+            if (self.gateway) |_| {
                 // Handle gateway events
                 // In a real implementation, this would process incoming messages
                 std.time.sleep(1 * std.time.ns_per_s); // Placeholder
@@ -306,12 +308,12 @@ pub const AutoSharder = struct {
     allocator: std.mem.Allocator,
     token: []const u8,
     shard_manager: ?*ShardManager,
-    event_handler: anytype,
+    event_handler: EventHandler,
     intents: u32,
     compression: bool,
     recommended_shards: u32,
 
-    pub fn init(allocator: std.mem.Allocator, token: []const u8, event_handler: anytype, intents: u32, compression: bool) !*AutoSharder {
+    pub fn init(allocator: std.mem.Allocator, token: []const u8, event_handler: EventHandler, intents: u32, compression: bool) !*AutoSharder {
         const auto_sharder = try allocator.create(AutoSharder);
         auto_sharder.* = .{
             .allocator = allocator,
@@ -331,7 +333,7 @@ pub const AutoSharder = struct {
         self.allocator.destroy(self);
     }
 
-    pub async fn getGatewayInfo(self: *AutoSharder) !struct {
+    pub fn getGatewayInfo(self: *AutoSharder) !struct {
         url: []const u8,
         shards: u32,
         session_start_limit: struct {
@@ -355,7 +357,7 @@ pub const AutoSharder = struct {
         };
     }
 
-    pub async fn start(self: *AutoSharder) !void {
+    pub fn start(self: *AutoSharder) !void {
         const gateway_info = try self.getGatewayInfo();
         self.recommended_shards = gateway_info.shards;
 

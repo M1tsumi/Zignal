@@ -1,7 +1,7 @@
 const std = @import("std");
 const models = @import("models.zig");
 
-const Gateway = @This();
+pub const Gateway = @This();
 
 allocator: std.mem.Allocator,
 token: []const u8,
@@ -23,7 +23,7 @@ pub fn init(allocator: std.mem.Allocator, token: []const u8) !*Gateway {
 }
 
 pub fn deinit(self: *Gateway) void {
-    if (self.websocket) |ws| ws.deinit();
+    if (self.websocket) |*ws| ws.deinit();
     if (self.session_id) |sid| self.allocator.free(sid);
     self.allocator.free(self.token);
     self.allocator.destroy(self);

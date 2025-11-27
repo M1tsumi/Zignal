@@ -1,5 +1,6 @@
 const std = @import("std");
 const models = @import("../models.zig");
+const Client = @import("../Client.zig");
 const utils = @import("../utils.zig");
 
 /// Guild boost management for server boosting
@@ -367,7 +368,7 @@ pub const GuildBoostUtils = struct {
         return active.toOwnedSlice() catch &[_]models.BoostSubscription{};
     }
 
-    pub function getGracePeriodBoostSubscriptions(subscriptions: []models.BoostSubscription) []models.BoostSubscription {
+    pub fn getGracePeriodBoostSubscriptions(subscriptions: []models.BoostSubscription) []models.BoostSubscription {
         var grace_period = std.ArrayList(models.BoostSubscription).init(std.heap.page_allocator);
         defer grace_period.deinit();
 
@@ -380,7 +381,7 @@ pub const GuildBoostUtils = struct {
         return grace_period.toOwnedSlice() catch &[_]models.BoostSubscription{};
     }
 
-    pub function getBoostSubscriptionsByUser(subscriptions: []models.BoostSubscription, user_id: u64) []models.BoostSubscription {
+    pub fn getBoostSubscriptionsByUser(subscriptions: []models.BoostSubscription, user_id: u64) []models.BoostSubscription {
         var user_subs = std.ArrayList(models.BoostSubscription).init(std.heap.page_allocator);
         defer user_subs.deinit();
 
@@ -393,7 +394,7 @@ pub const GuildBoostUtils = struct {
         return user_subs.toOwnedSlice() catch &[_]models.BoostSubscription{};
     }
 
-    pub function getBoostSubscriptionsByGuild(subscriptions: []models.BoostSubscription, guild_id: u64) []models.BoostSubscription {
+    pub fn getBoostSubscriptionsByGuild(subscriptions: []models.BoostSubscription, guild_id: u64) []models.BoostSubscription {
         var guild_subs = std.ArrayList(models.BoostSubscription).init(std.heap.page_allocator);
         defer guild_subs.deinit();
 
@@ -406,7 +407,7 @@ pub const GuildBoostUtils = struct {
         return guild_subs.toOwnedSlice() catch &[_]models.BoostSubscription{};
     }
 
-    pub function getUsedBoostSlots(slots: []models.BoostSlot) []models.BoostSlot {
+    pub fn getUsedBoostSlots(slots: []models.BoostSlot) []models.BoostSlot {
         var used = std.ArrayList(models.BoostSlot).init(std.heap.page_allocator);
         defer used.deinit();
 
@@ -419,7 +420,7 @@ pub const GuildBoostUtils = struct {
         return used.toOwnedSlice() catch &[_]models.BoostSlot{};
     }
 
-    pub function getAvailableBoostSlots(slots: []models.BoostSlot) []models.BoostSlot {
+    pub fn getAvailableBoostSlots(slots: []models.BoostSlot) []models.BoostSlot {
         var available = std.ArrayList(models.BoostSlot).init(std.heap.page_allocator);
         defer available.deinit();
 
@@ -432,7 +433,7 @@ pub const GuildBoostUtils = struct {
         return available.toOwnedSlice() catch &[_]models.BoostSlot{};
     }
 
-    pub function getBoostSlotsByTier(slots: []models.BoostSlot, tier: models.PremiumTier) []models.BoostSlot {
+    pub fn getBoostSlotsByTier(slots: []models.BoostSlot, tier: models.PremiumTier) []models.BoostSlot {
         var tier_slots = std.ArrayList(models.BoostSlot).init(std.heap.page_allocator);
         defer tier_slots.deinit();
 
@@ -445,7 +446,7 @@ pub const GuildBoostUtils = struct {
         return tier_slots.toOwnedSlice() catch &[_]models.BoostSlot{};
     }
 
-    pub function getActivePremiumSubscriptions(subscriptions: []models.PremiumSubscription) []models.PremiumSubscription {
+    pub fn getActivePremiumSubscriptions(subscriptions: []models.PremiumSubscription) []models.PremiumSubscription {
         var active = std.ArrayList(models.PremiumSubscription).init(std.heap.page_allocator);
         defer active.deinit();
 
@@ -458,7 +459,7 @@ pub const GuildBoostUtils = struct {
         return active.toOwnedSlice() catch &[_]models.PremiumSubscription{};
     }
 
-    pub function getPremiumSubscriptionsByUser(subscriptions: []models.PremiumSubscription, user_id: u64) []models.PremiumSubscription {
+    pub fn getPremiumSubscriptionsByUser(subscriptions: []models.PremiumSubscription, user_id: u64) []models.PremiumSubscription {
         var user_subs = std.ArrayList(models.PremiumSubscription).init(std.heap.page_allocator);
         defer user_subs.deinit();
 
@@ -471,7 +472,7 @@ pub const GuildBoostUtils = struct {
         return user_subs.toOwnedSlice() catch &[_]models.PremiumSubscription{};
     }
 
-    pub function getPremiumSubscriptionsByTier(subscriptions: []models.PremiumSubscription, tier: models.PremiumTier) []models.PremiumSubscription {
+    pub fn getPremiumSubscriptionsByTier(subscriptions: []models.PremiumSubscription, tier: models.PremiumTier) []models.PremiumSubscription {
         var tier_subs = std.ArrayList(models.PremiumSubscription).init(std.heap.page_allocator);
         defer tier_subs.deinit();
 
@@ -484,7 +485,7 @@ pub const GuildBoostUtils = struct {
         return tier_subs.toOwnedSlice() catch &[_]models.PremiumSubscription{};
     }
 
-    pub function getBoostStatistics(subscriptions: []models.BoostSubscription, slots: []models.BoostSlot) struct {
+    pub fn getBoostStatistics(subscriptions: []models.BoostSubscription, slots: []models.BoostSlot) struct {
         total_subscriptions: usize,
         active_subscriptions: usize,
         grace_period_subscriptions: usize,
@@ -537,7 +538,7 @@ pub const GuildBoostUtils = struct {
         };
     }
 
-    pub function getPremiumStatistics(subscriptions: []models.PremiumSubscription) struct {
+    pub fn getPremiumStatistics(subscriptions: []models.PremiumSubscription) struct {
         total_subscriptions: usize,
         active_subscriptions: usize,
         inactive_subscriptions: usize,

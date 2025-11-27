@@ -1,12 +1,23 @@
 const std = @import("std");
 const testing = std.testing;
-const zignal = @import("root.zig");
+
+// Import modules directly
+const client_module = @import("Client.zig");
+const Client = client_module.Client;
+
+const gateway_module = @import("Gateway.zig");
+const Gateway = gateway_module.Gateway;
+
+const events_module = @import("events.zig");
+const EventHandler = events_module.EventHandler;
+
+const models = @import("models.zig");
 
 test "Client initialization" {
     const allocator = testing.allocator;
     const token = "test_token";
     
-    var client = zignal.Client.init(allocator, token);
+    var client = Client.init(allocator, token);
     defer client.deinit();
     
     try testing.expect(std.mem.eql(u8, client.token, token));
@@ -16,7 +27,7 @@ test "Gateway initialization" {
     const allocator = testing.allocator;
     const token = "test_token";
     
-    var gateway = try zignal.Gateway.init(allocator, token);
+    var gateway = try Gateway.init(allocator, token);
     defer gateway.deinit();
     
     try testing.expect(std.mem.eql(u8, gateway.token, token));
@@ -25,16 +36,14 @@ test "Gateway initialization" {
 test "EventHandler initialization" {
     const allocator = testing.allocator;
     
-    var event_handler = zignal.EventHandler.init(allocator);
+    var event_handler = EventHandler.init(allocator);
     defer event_handler.deinit();
     
     try testing.expect(event_handler.handlers.count() == 0);
 }
 
 test "Model creation" {
-    const allocator = testing.allocator;
-    
-    const user = zignal.models.User{
+    const user = models.User{
         .id = 12345,
         .username = "testuser",
         .discriminator = "0001",
@@ -58,9 +67,7 @@ test "Model creation" {
 }
 
 test "Embed creation" {
-    const allocator = testing.allocator;
-    
-    const embed = zignal.models.Embed{
+    const embed = models.Embed{
         .title = null,
         .type = null,
         .description = null,
@@ -73,7 +80,7 @@ test "Embed creation" {
         .video = null,
         .provider = null,
         .author = null,
-        .fields = &[_]zignal.models.EmbedField{},
+        .fields = &[_]models.EmbedField{},
     };
     
     try testing.expect(embed.color == 0xFF0000);

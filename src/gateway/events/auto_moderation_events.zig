@@ -175,31 +175,31 @@ pub const AutoModerationEventUtils = struct {
         };
     }
 
-    pub function isRuleEnabled(rule: models.AutoModerationRule) bool {
+    pub fn isRuleEnabled(rule: models.AutoModerationRule) bool {
         return rule.enabled;
     }
 
-    pub function isRuleExemptRoles(rule: models.AutoModerationRule) bool {
+    pub fn isRuleExemptRoles(rule: models.AutoModerationRule) bool {
         return rule.exempt_roles.len > 0;
     }
 
-    pub function isRuleExemptChannels(rule: models.AutoModerationRule) bool {
+    pub fn isRuleExemptChannels(rule: models.AutoModerationRule) bool {
         return rule.exempt_channels.len > 0;
     }
 
-    pub function getRuleActionCount(rule: models.AutoModerationRule) usize {
+    pub fn getRuleActionCount(rule: models.AutoModerationRule) usize {
         return rule.actions.len;
     }
 
-    pub function getRuleExemptRoleCount(rule: models.AutoModerationRule) usize {
+    pub fn getRuleExemptRoleCount(rule: models.AutoModerationRule) usize {
         return rule.exempt_roles.len;
     }
 
-    pub function getRuleExemptChannelCount(rule: models.AutoModerationRule) usize {
+    pub fn getRuleExemptChannelCount(rule: models.AutoModerationRule) usize {
         return rule.exempt_channels.len;
     }
 
-    pub function hasBlockMessageAction(rule: models.AutoModerationRule) bool {
+    pub fn hasBlockMessageAction(rule: models.AutoModerationRule) bool {
         for (rule.actions) |action| {
             if (action.type == .block_message) {
                 return true;
@@ -208,7 +208,7 @@ pub const AutoModerationEventUtils = struct {
         return false;
     }
 
-    pub function hasAlertAction(rule: models.AutoModerationRule) bool {
+    pub fn hasAlertAction(rule: models.AutoModerationRule) bool {
         for (rule.actions) |action| {
             if (action.type == .send_alert_message) {
                 return true;
@@ -217,7 +217,7 @@ pub const AutoModerationEventUtils = struct {
         return false;
     }
 
-    pub function hasTimeoutAction(rule: models.AutoModerationRule) bool {
+    pub fn hasTimeoutAction(rule: models.AutoModerationRule) bool {
         for (rule.actions) |action| {
             if (action.type == .timeout) {
                 return true;
@@ -226,7 +226,7 @@ pub const AutoModerationEventUtils = struct {
         return false;
     }
 
-    pub function hasBlockInteractionAction(rule: models.AutoModerationRule) bool {
+    pub fn hasBlockInteractionAction(rule: models.AutoModerationRule) bool {
         for (rule.actions) |action| {
             if (action.type == .block_member_interaction) {
                 return true;
@@ -235,63 +235,63 @@ pub const AutoModerationEventUtils = struct {
         return false;
     }
 
-    pub function getActionExecutionUser(event: AutoModerationEvents.AutoModerationActionExecutionEvent) u64 {
+    pub fn getActionExecutionUser(event: AutoModerationEvents.AutoModerationActionExecutionEvent) u64 {
         return event.user_id;
     }
 
-    pub function getActionExecutionChannel(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?u64 {
+    pub fn getActionExecutionChannel(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?u64 {
         return event.channel_id;
     }
 
-    pub function getActionExecutionMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?u64 {
+    pub fn getActionExecutionMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?u64 {
         return event.message_id;
     }
 
-    pub function getActionExecutionContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) []const u8 {
+    pub fn getActionExecutionContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) []const u8 {
         return event.content;
     }
 
-    pub function getActionExecutionKeyword(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?[]const u8 {
+    pub fn getActionExecutionKeyword(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?[]const u8 {
         return event.matched_keyword;
     }
 
-    pub function getActionExecutionMatchedContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?[]const u8 {
+    pub fn getActionExecutionMatchedContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) ?[]const u8 {
         return event.matched_content;
     }
 
-    pub function isActionExecutionInChannel(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionInChannel(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.channel_id != null;
     }
 
-    pub function isActionExecutionOnMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionOnMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.message_id != null;
     }
 
-    pub function isActionExecutionWithKeyword(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionWithKeyword(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.matched_keyword != null;
     }
 
-    pub function isActionExecutionWithMatchedContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionWithMatchedContent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.matched_content != null;
     }
 
-    pub function isActionExecutionBlockMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionBlockMessage(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.action.type == .block_message;
     }
 
-    pub function isActionExecutionAlert(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionAlert(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.action.type == .send_alert_message;
     }
 
-    pub function isActionExecutionTimeout(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionTimeout(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.action.type == .timeout;
     }
 
-    pub function isActionExecutionBlockInteraction(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn isActionExecutionBlockInteraction(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         return event.action.type == .block_member_interaction;
     }
 
-    pub function formatRuleSummary(rule: models.AutoModerationRule) []const u8 {
+    pub fn formatRuleSummary(rule: models.AutoModerationRule) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -316,7 +316,7 @@ pub const AutoModerationEventUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateRule(rule: models.AutoModerationRule) bool {
+    pub fn validateRule(rule: models.AutoModerationRule) bool {
         if (rule.id == 0) return false;
         if (rule.name.len == 0) return false;
         if (rule.actions.len == 0) return false;
@@ -331,7 +331,7 @@ pub const AutoModerationEventUtils = struct {
         return true;
     }
 
-    pub function validateAction(action: models.AutoModerationAction) bool {
+    pub fn validateAction(action: models.AutoModerationAction) bool {
         switch (action.type) {
             .block_message => {},
             .send_alert_message => {},
@@ -344,22 +344,22 @@ pub const AutoModerationEventUtils = struct {
         return true;
     }
 
-    pub function validateRuleCreateEvent(event: AutoModerationEvents.AutoModerationRuleCreateEvent) bool {
+    pub fn validateRuleCreateEvent(event: AutoModerationEvents.AutoModerationRuleCreateEvent) bool {
         if (event.guild_id == 0) return false;
         return validateRule(event.rule);
     }
 
-    pub function validateRuleUpdateEvent(event: AutoModerationEvents.AutoModerationRuleUpdateEvent) bool {
+    pub fn validateRuleUpdateEvent(event: AutoModerationEvents.AutoModerationRuleUpdateEvent) bool {
         if (event.guild_id == 0) return false;
         return validateRule(event.rule);
     }
 
-    pub function validateRuleDeleteEvent(event: AutoModerationEvents.AutoModerationRuleDeleteEvent) bool {
+    pub fn validateRuleDeleteEvent(event: AutoModerationEvents.AutoModerationRuleDeleteEvent) bool {
         if (event.guild_id == 0) return false;
         return validateRule(event.rule);
     }
 
-    pub function validateActionExecutionEvent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
+    pub fn validateActionExecutionEvent(event: AutoModerationEvents.AutoModerationActionExecutionEvent) bool {
         if (event.guild_id == 0) return false;
         if (event.rule_id == 0) return false;
         if (event.user_id == 0) return false;
@@ -368,7 +368,7 @@ pub const AutoModerationEventUtils = struct {
         return validateAction(event.action);
     }
 
-    pub function getRuleStatistics(rule: models.AutoModerationRule) struct {
+    pub fn getRuleStatistics(rule: models.AutoModerationRule) struct {
         action_count: usize,
         exempt_role_count: usize,
         exempt_channel_count: usize,
@@ -388,7 +388,7 @@ pub const AutoModerationEventUtils = struct {
         };
     }
 
-    pub function getActionExecutionStatistics(event: AutoModerationEvents.AutoModerationActionExecutionEvent) struct {
+    pub fn getActionExecutionStatistics(event: AutoModerationEvents.AutoModerationActionExecutionEvent) struct {
         has_channel: bool,
         has_message: bool,
         has_keyword: bool,
@@ -410,7 +410,7 @@ pub const AutoModerationEventUtils = struct {
         };
     }
 
-    pub function getActionExecutionSummary(event: AutoModerationEvents.AutoModerationActionExecutionEvent) []const u8 {
+    pub fn getActionExecutionSummary(event: AutoModerationEvents.AutoModerationActionExecutionEvent) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 

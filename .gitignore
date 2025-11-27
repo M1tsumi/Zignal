@@ -13,6 +13,17 @@ zig-windows-*/
 zig-linux-*/
 zig-macos-*/
 
+# Build outputs and object files
+*.o
+*.obj
+*.obj.obj
+*.lib
+*.dll
+*.so
+*.dylib
+*.exe
+*.a
+
 # IDE files
 .vscode/
 .idea/
@@ -23,6 +34,7 @@ zig-macos-*/
 # OS files
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # Dependencies
 node_modules/
@@ -32,3 +44,45 @@ node_modules/
 
 # Test outputs
 test_results/
+
+# Temporary files
+*.tmp
+*.temp
+test_*.zig
+test_*.exe
+
+# Configuration files (if they contain sensitive data)
+config.json
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+*_backup.*
+*backup.*
+
+# Cache and temporary directories
+.cache/
+tmp/
+temp/
+
+# Editor and tool files
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# Documentation build
+docs/_build/
+docs/site/
+
+# Performance and profiling
+*.prof
+*.trace
+
+# Security and credentials
+*.pem
+*.key
+*.crt
+private/
+secrets/

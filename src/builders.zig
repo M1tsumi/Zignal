@@ -38,13 +38,13 @@ pub const MessageBuilder = struct {
         for (self.components.items) |*component_obj| {
             component_obj.deinit(self.allocator);
         }
-        for (self.attachments.items) |*attachment| {
+        for (self.attachments.items) |_| {
             // Attachment deinit would be handled by models
         }
-        for (self.stickers.items) |*sticker| {
+        for (self.stickers.items) |_| {
             // StickerItem deinit would be handled by models
         }
-        if (self.poll) |*poll| {
+        if (self.poll) |_| {
             // Poll deinit would be handled by models
         }
         self.embeds.deinit();
@@ -269,18 +269,18 @@ pub const EmbedBuilder = struct {
         if (self.description) |description_val| self.allocator.free(description_val);
         if (self.url) |url_val| self.allocator.free(url_val);
         if (self.timestamp) |timestamp_val| self.allocator.free(timestamp_val);
-        if (self.footer) |*footer| {
-            self.allocator.free(footer.text);
-            if (footer.icon_url) |icon_url| self.allocator.free(icon_url);
-            if (footer.proxy_icon_url) |proxy_icon_url| self.allocator.free(proxy_icon_url);
+        if (self.footer) |*footer_val| {
+            self.allocator.free(footer_val.text);
+            if (footer_val.icon_url) |icon_url| self.allocator.free(icon_url);
+            if (footer_val.proxy_icon_url) |proxy_icon_url| self.allocator.free(proxy_icon_url);
         }
-        if (self.image) |*image| {
-            self.allocator.free(image.url);
-            if (image.proxy_url) |proxy_url| self.allocator.free(proxy_url);
+        if (self.image) |*image_val| {
+            self.allocator.free(image_val.url);
+            if (image_val.proxy_url) |proxy_url| self.allocator.free(proxy_url);
         }
-        if (self.thumbnail) |*thumbnail| {
-            self.allocator.free(thumbnail.url);
-            if (thumbnail.proxy_url) |proxy_url| self.allocator.free(proxy_url);
+        if (self.thumbnail) |*thumbnail_val| {
+            self.allocator.free(thumbnail_val.url);
+            if (thumbnail_val.proxy_url) |proxy_url| self.allocator.free(proxy_url);
         }
         if (self.video) |*video| {
             self.allocator.free(video.url);
@@ -288,17 +288,17 @@ pub const EmbedBuilder = struct {
         }
         if (self.provider) |*provider| {
             if (provider.name) |name| self.allocator.free(name);
-            if (provider.url) |url| self.allocator.free(url);
+            if (provider.url) |url_val| self.allocator.free(url_val);
         }
-        if (self.author) |*author| {
-            self.allocator.free(author.name);
-            if (author.url) |url| self.allocator.free(url);
-            if (author.icon_url) |icon_url| self.allocator.free(icon_url);
-            if (author.proxy_icon_url) |proxy_icon_url| self.allocator.free(proxy_icon_url);
+        if (self.author) |*author_val| {
+            self.allocator.free(author_val.name);
+            if (author_val.url) |url_val| self.allocator.free(url_val);
+            if (author_val.icon_url) |icon_url| self.allocator.free(icon_url);
+            if (author_val.proxy_icon_url) |proxy_icon_url| self.allocator.free(proxy_icon_url);
         }
-        for (self.fields.items) |*field| {
-            self.allocator.free(field.name);
-            self.allocator.free(field.value);
+        for (self.fields.items) |*field_obj| {
+            self.allocator.free(field_obj.name);
+            self.allocator.free(field_obj.value);
         }
         self.fields.deinit();
     }
@@ -422,33 +422,33 @@ pub const EmbedBuilder = struct {
             .url = if (self.url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             .timestamp = if (self.timestamp) |timestamp_val| try self.allocator.dupe(u8, timestamp_val) else null,
             .color = self.color,
-            .footer = if (self.footer) |footer| models.Embed.Footer{
-                .text = try self.allocator.dupe(u8, footer.text),
-                .icon_url = if (footer.icon_url) |icon_url| try self.allocator.dupe(u8, icon_url) else null,
-                .proxy_icon_url = if (footer.proxy_icon_url) |proxy_icon_url| try self.allocator.dupe(u8, proxy_icon_url) else null,
+            .footer = if (self.footer) |footer_val| models.Embed.Footer{
+                .text = try self.allocator.dupe(u8, footer_val.text),
+                .icon_url = if (footer_val.icon_url) |icon_url| try self.allocator.dupe(u8, icon_url) else null,
+                .proxy_icon_url = if (footer_val.proxy_icon_url) |proxy_icon_url| try self.allocator.dupe(u8, proxy_icon_url) else null,
             } else null,
-            .image = if (self.image) |image| models.Embed.Image{
-                .url = try self.allocator.dupe(u8, image.url),
-                .proxy_url = if (image.proxy_url) |proxy_url| try self.allocator.dupe(u8, proxy_url) else null,
-                .height = image.height,
-                .width = image.width,
+            .image = if (self.image) |image_val| models.Embed.Image{
+                .url = try self.allocator.dupe(u8, image_val.url),
+                .proxy_url = if (image_val.proxy_url) |proxy_url| try self.allocator.dupe(u8, proxy_url) else null,
+                .height = image_val.height,
+                .width = image_val.width,
             } else null,
-            .thumbnail = if (self.thumbnail) |thumbnail| models.Embed.Thumbnail{
-                .url = try self.allocator.dupe(u8, thumbnail.url),
-                .proxy_url = if (thumbnail.proxy_url) |proxy_url| try self.allocator.dupe(u8, proxy_url) else null,
-                .height = thumbnail.height,
-                .width = thumbnail.width,
+            .thumbnail = if (self.thumbnail) |thumbnail_val| models.Embed.Thumbnail{
+                .url = try self.allocator.dupe(u8, thumbnail_val.url),
+                .proxy_url = if (thumbnail_val.proxy_url) |proxy_url| try self.allocator.dupe(u8, proxy_url) else null,
+                .height = thumbnail_val.height,
+                .width = thumbnail_val.width,
             } else null,
             .video = null, // Video is read-only
             .provider = if (self.provider) |provider| models.Embed.Provider{
                 .name = if (provider.name) |name| try self.allocator.dupe(u8, name) else null,
-                .url = if (provider.url) |url| try self.allocator.dupe(u8, url) else null,
+                .url = if (provider.url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             } else null,
-            .author = if (self.author) |author| models.Embed.Author{
-                .name = try self.allocator.dupe(u8, author.name),
-                .url = if (author.url) |url| try self.allocator.dupe(u8, url) else null,
-                .icon_url = if (author.icon_url) |icon_url| try self.allocator.dupe(u8, icon_url) else null,
-                .proxy_icon_url = if (author.proxy_icon_url) |proxy_icon_url| try self.allocator.dupe(u8, proxy_icon_url) else null,
+            .author = if (self.author) |author_val| models.Embed.Author{
+                .name = try self.allocator.dupe(u8, author_val.name),
+                .url = if (author_val.url) |url_val| try self.allocator.dupe(u8, url_val) else null,
+                .icon_url = if (author_val.icon_url) |icon_url| try self.allocator.dupe(u8, icon_url) else null,
+                .proxy_icon_url = if (author_val.proxy_icon_url) |proxy_icon_url| try self.allocator.dupe(u8, proxy_icon_url) else null,
             } else null,
             .fields = try self.allocator.dupe(models.Embed.Field, &[_]models.Embed.Field{}),
         };
@@ -492,21 +492,21 @@ pub const EmbedBuilder = struct {
         }
 
         // Validate author name length
-        if (self.author) |author| {
-            if (author.name.len > 256) {
+        if (self.author) |author_val| {
+            if (author_val.name.len > 256) {
                 return error.AuthorNameTooLong;
             }
         }
 
         // Validate total embed length
         var total_length: usize = 0;
-        if (self.title) |title| total_length += title.len;
-        if (self.description) |description| total_length += description.len;
-        for (self.fields.items) |field| {
-            total_length += field.name.len + field.value.len;
+        if (self.title) |title_val| total_length += title_val.len;
+        if (self.description) |description_val| total_length += description_val.len;
+        for (self.fields.items) |field_obj| {
+            total_length += field_obj.name.len + field_obj.value.len;
         }
-        if (self.footer) |footer| total_length += footer.text.len;
-        if (self.author) |author| total_length += author.name.len;
+        if (self.footer) |footer_val| total_length += footer_val.text.len;
+        if (self.author) |author_val| total_length += author_val.name.len;
 
         if (total_length > 6000) {
             return error.EmbedTooLong;

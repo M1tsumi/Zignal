@@ -111,42 +111,42 @@ pub const Logger = struct {
 
     pub const LogHandler = struct {
         level: LogLevel,
-        formatter: *const fn (entry: LogEntry, allocator: std.mem.Allocator) ![]const u8,
+        formatter: *const fn (entry: LogEntry, allocator: std.mem.Allocator) []const u8,
         output: *const fn (formatted: []const u8) void,
 
-        pub fn consoleFormatter(entry: LogEntry, allocator: std.mem.Allocator) ![]const u8 {
-            const timestamp_str = try std.fmt.allocPrint(allocator, "{d}", .{entry.timestamp});
+        pub fn consoleFormatter(entry: LogEntry, allocator: std.mem.Allocator) []const u8 {
+            const timestamp_str = std.fmt.allocPrint(allocator, "{d}", .{entry.timestamp}) catch return "";
             defer allocator.free(timestamp_str);
             
             const level_str = entry.level.toString();
-            const file_line = try std.fmt.allocPrint(allocator, "{s}:{d}", .{ entry.file, entry.line });
+            const file_line = std.fmt.allocPrint(allocator, "{s}:{d}", .{ entry.file, entry.line }) catch return "";
             defer allocator.free(file_line);
 
             var components = std.ArrayList([]const u8).init(allocator);
             defer components.deinit();
 
-            try components.append(try std.fmt.allocPrint(allocator, "[{s}]", .{timestamp_str}));
-            try components.append(try std.fmt.allocPrint(allocator, "[{s}]", .{level_str}));
-            try components.append(try std.fmt.allocPrint(allocator, "[{s}]", .{file_line}));
-            try components.append(try std.fmt.allocPrint(allocator, "{s}", .{entry.message}));
+            components.append(std.fmt.allocPrint(allocator, "[{s}]", .{timestamp_str}) catch "") catch {};
+            components.append(std.fmt.allocPrint(allocator, "[{s}]", .{level_str}) catch "") catch {};
+            components.append(std.fmt.allocPrint(allocator, "[{s}]", .{file_line}) catch "") catch {};
+            components.append(std.fmt.allocPrint(allocator, "{s}", .{entry.message}) catch "") catch {};
 
             if (entry.error_info) |*err_ctx| {
-                try components.append(try std.fmt.allocPrint(allocator, "({s}: {s})", .{ @tagName(err_ctx.error_code), err_ctx.message }));
+                components.append(std.fmt.allocPrint(allocator, "({s}: {s})", .{ @tagName(err_ctx.error_code), err_ctx.message }) catch "") catch {};
             }
 
-            return std.mem.join(allocator, " ", components.items);
+            return std.mem.join(allocator, " ", components.items) catch "";
         }
 
-        pub fn consoleOutput(formatted: []const u8) !void {
+        pub fn consoleOutput(formatted: []const u8) void {
             std.log.info("{s}", .{formatted});
         }
 
-        pub fn jsonFormatter(entry: LogEntry, allocator: std.mem.Allocator) ![]const u8 {
-            const json_value = try entry.toJson(allocator);
-            return std.json.stringifyAlloc(allocator, json_value, .{ .whitespace = .indent_2 });
+        pub fn jsonFormatter(entry: LogEntry, allocator: std.mem.Allocator) []const u8 {
+            const json_value = entry.toJson(allocator) catch return "";
+            return std.json.stringifyAlloc(allocator, json_value, .{ .whitespace = .indent_2 }) catch "";
         }
 
-        pub fn fileOutput(formatted: []const u8) !void {
+        pub fn fileOutput(formatted: []const u8) void {
             // In a real implementation, this would write to a file
             _ = formatted;
         }

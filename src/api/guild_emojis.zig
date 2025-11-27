@@ -1,5 +1,6 @@
 const std = @import("std");
 const models = @import("../models.zig");
+const Client = @import("../Client.zig");
 const utils = @import("../utils.zig");
 
 /// Guild emoji management for custom emoji operations
@@ -323,7 +324,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getEmojisByRole(emojis: []models.Emoji, role_id: u64) []models.Emoji {
+    pub fn getEmojisByRole(emojis: []models.Emoji, role_id: u64) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -341,7 +342,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getAnimatedEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getAnimatedEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -354,7 +355,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getStaticEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getStaticEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -367,7 +368,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getAvailableEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getAvailableEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -380,7 +381,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getUnavailableEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getUnavailableEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -393,7 +394,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getManagedEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getManagedEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -406,7 +407,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function getRestrictedEmojis(emojis: []models.Emoji) []models.Emoji {
+    pub fn getRestrictedEmojis(emojis: []models.Emoji) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -419,7 +420,7 @@ pub const GuildEmojiUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function searchEmojis(emojis: []models.Emoji, query: []const u8) []models.Emoji {
+    pub fn searchEmojis(emojis: []models.Emoji, query: []const u8) []models.Emoji {
         var results = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -432,23 +433,23 @@ pub const GuildEmojiUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Emoji{};
     }
 
-    pub function sortEmojisByName(emojis: []models.Emoji) void {
+    pub fn sortEmojisByName(emojis: []models.Emoji) void {
         std.sort.sort(models.Emoji, emojis, {}, compareEmojisByName);
     }
 
-    pub function sortEmojisById(emojis: []models.Emoji) void {
+    pub fn sortEmojisById(emojis: []models.Emoji) void {
         std.sort.sort(models.Emoji, emojis, {}, compareEmojisById);
     }
 
-    fn compareEmojisByName(context: void, a: models.Emoji, b: models.Emoji) std.math.Order {
+    fn compareEmojisByName(_: void, a: models.Emoji, b: models.Emoji) std.math.Order {
         return std.mem.compare(u8, getEmojiName(a), getEmojiName(b));
     }
 
-    fn compareEmojisById(context: void, a: models.Emoji, b: models.Emoji) std.math.Order {
+    fn compareEmojisById(_: void, a: models.Emoji, b: models.Emoji) std.math.Order {
         return std.math.order(getEmojiId(a), getEmojiId(b));
     }
 
-    pub function getEmojiStatistics(emojis: []models.Emoji) struct {
+    pub fn getEmojiStatistics(emojis: []models.Emoji) struct {
         total_emojis: usize,
         custom_emojis: usize,
         animated_emojis: usize,
@@ -504,7 +505,7 @@ pub const GuildEmojiUtils = struct {
         };
     }
 
-    pub function hasEmoji(emojis: []models.Emoji, emoji_id: u64) bool {
+    pub fn hasEmoji(emojis: []models.Emoji, emoji_id: u64) bool {
         for (emojis) |emoji| {
             if (getEmojiId(emoji) == emoji_id) {
                 return true;
@@ -513,7 +514,7 @@ pub const GuildEmojiUtils = struct {
         return false;
     }
 
-    pub function getEmoji(emojis: []models.Emoji, emoji_id: u64) ?models.Emoji {
+    pub fn getEmoji(emojis: []models.Emoji, emoji_id: u64) ?models.Emoji {
         for (emojis) |emoji| {
             if (getEmojiId(emoji) == emoji_id) {
                 return emoji;
@@ -522,11 +523,11 @@ pub const GuildEmojiUtils = struct {
         return null;
     }
 
-    pub function getEmojiCount(emojis: []models.Emoji) usize {
+    pub fn getEmojiCount(emojis: []models.Emoji) usize {
         return emojis.len;
     }
 
-    pub function formatEmojiSummary(emoji: models.Emoji) []const u8 {
+    pub fn formatEmojiSummary(emoji: models.Emoji) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -557,7 +558,7 @@ pub const GuildEmojiUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function formatFullEmojiInfo(emoji: models.Emoji) []const u8 {
+    pub fn formatFullEmojiInfo(emoji: models.Emoji) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 

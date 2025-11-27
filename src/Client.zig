@@ -741,7 +741,7 @@ pub const Client = struct {
         const writer = path_stream.writer();
 
         try writer.print("/channels/{d}/messages", .{channel_id});
-        
+
         var first_param = true;
         const addParam = struct {
             fn add(w: anytype, first: *bool, name: []const u8, value: anytype) !void {

@@ -1,5 +1,6 @@
 const std = @import("std");
 const models = @import("../models.zig");
+const Client = @import("../Client.zig");
 const utils = @import("../utils.zig");
 
 /// Guild ban management for moderating guild members
@@ -257,7 +258,7 @@ pub const GuildBanUtils = struct {
         return ban.reason != null;
     }
 
-    pub fn getBanCreatedAt(ban: models.Ban) ?[]const u8 {
+    pub fn getBanCreatedAt(_: models.Ban) ?[]const u8 {
         // This would need to be added to the Ban model if Discord provides it
         return null;
     }
@@ -327,7 +328,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function getBansByUser(bans: []models.Ban, user_id: u64) ?models.Ban {
+    pub fn getBansByUser(bans: []models.Ban, user_id: u64) ?models.Ban {
         for (bans) |ban| {
             if (getBannedUserId(ban) == user_id) {
                 return ban;
@@ -336,7 +337,7 @@ pub const GuildBanUtils = struct {
         return null;
     }
 
-    pub function getBansWithoutReason(bans: []models.Ban) []models.Ban {
+    pub fn getBansWithoutReason(bans: []models.Ban) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -349,7 +350,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function getBansWithReason(bans: []models.Ban) []models.Ban {
+    pub fn getBansWithReason(bans: []models.Ban) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -362,7 +363,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function getBotBans(bans: []models.Ban) []models.Ban {
+    pub fn getBotBans(bans: []models.Ban) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -375,7 +376,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function getHumanBans(bans: []models.Ban) []models.Ban {
+    pub fn getHumanBans(bans: []models.Ban) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -388,7 +389,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function searchBans(bans: []models.Ban, query: []const u8) []models.Ban {
+    pub fn searchBans(bans: []models.Ban, query: []const u8) []models.Ban {
         var results = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -403,25 +404,25 @@ pub const GuildBanUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function sortBansByUsername(bans: []models.Ban) void {
+    pub fn sortBansByUsername(bans: []models.Ban) void {
         std.sort.sort(models.Ban, bans, {}, compareBansByUsername);
     }
 
-    pub function sortBansByReason(bans: []models.Ban) void {
+    pub fn sortBansByReason(bans: []models.Ban) void {
         std.sort.sort(models.Ban, bans, {}, compareBansByReason);
     }
 
-    fn compareBansByUsername(context: void, a: models.Ban, b: models.Ban) std.math.Order {
+    fn compareBansByUsername(_: void, a: models.Ban, b: models.Ban) std.math.Order {
         return std.mem.compare(u8, getBannedUsername(a), getBannedUsername(b));
     }
 
-    fn compareBansByReason(context: void, a: models.Ban, b: models.Ban) std.math.Order {
+    fn compareBansByReason(_: void, a: models.Ban, b: models.Ban) std.math.Order {
         const a_reason = getBanReason(a) orelse "";
         const b_reason = getBanReason(b) orelse "";
         return std.mem.compare(u8, a_reason, b_reason);
     }
 
-    pub function getBanStatistics(bans: []models.Ban) struct {
+    pub fn getBanStatistics(bans: []models.Ban) struct {
         total_bans: usize,
         bans_with_reason: usize,
         bans_without_reason: usize,
@@ -453,15 +454,15 @@ pub const GuildBanUtils = struct {
         };
     }
 
-    pub function hasUserBans(bans: []models.Ban, user_id: u64) bool {
+    pub fn hasUserBans(bans: []models.Ban, user_id: u64) bool {
         return getBansByUser(bans, user_id) != null;
     }
 
-    pub function getBanCount(bans: []models.Ban) usize {
+    pub fn getBanCount(bans: []models.Ban) usize {
         return bans.len;
     }
 
-    pub function getBannedUserIds(bans: []models.Ban) []u64 {
+    pub fn getBannedUserIds(bans: []models.Ban) []u64 {
         var user_ids = std.ArrayList(u64).init(std.heap.page_allocator);
         defer user_ids.deinit();
 
@@ -472,7 +473,7 @@ pub const GuildBanUtils = struct {
         return user_ids.toOwnedSlice() catch &[_]u64{};
     }
 
-    pub function formatFullBanInfo(ban: models.Ban) []const u8 {
+    pub fn formatFullBanInfo(ban: models.Ban) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 
@@ -496,7 +497,7 @@ pub const GuildBanUtils = struct {
         return info.toOwnedSlice();
     }
 
-    pub function getCommonBanReasons(bans: []models.Ban) []struct { reason: []const u8, count: usize } {
+    pub fn getCommonBanReasons(bans: []models.Ban) []struct { reason: []const u8, count: usize } {
         var reason_counts = std.hash_map.StringHashMap(usize).init(std.heap.page_allocator);
         defer reason_counts.deinit();
 
@@ -523,7 +524,7 @@ pub const GuildBanUtils = struct {
         return reasons;
     }
 
-    fn compareReasonCounts(context: void, a: struct { reason: []const u8, count: usize }, b: struct { reason: []const u8, count: usize }) std.math.Order {
+    fn compareReasonCounts(_: void, a: struct { reason: []const u8, count: usize }, b: struct { reason: []const u8, count: usize }) std.math.Order {
         return std.math.order(b.count, a.count); // Descending order
     }
 };
