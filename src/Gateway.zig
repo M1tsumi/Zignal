@@ -156,7 +156,7 @@ pub fn identify(self: *Gateway) !void {
     try self.websocket.?.writeMessage(json_string);
 }
 
-pub fn resume(self: *Gateway) !void {
+pub fn gatewayResume(self: *Gateway) !void {
     if (self.session_id == null or self.sequence == null) return error.CannotResume;
 
     const resume_data = std.json.ObjectMap.init(self.allocator);
@@ -205,12 +205,12 @@ pub fn startEventLoop(self: *Gateway, event_handler: anytype) !void {
                 try self.sendHeartbeat();
             },
             7 => { // Reconnect
-                try self.resume();
+                try self.gatewayResume();
             },
             9 => { // Invalid Session
                 if (parsed.value.d) |d| {
                     if (d == .bool and d.bool) {
-                        try self.resume();
+                        try self.gatewayResume();
                     } else {
                         try self.identify();
                     }
@@ -533,7 +533,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
     }
 }
 
-pub fn updatePresence(self: *Gateway, status: []const u8, activities: []models.Activity) !void {
+pub fn updatePresence(self: *Gateway, status: []const u8, _: []models.Activity) !void {
     const presence_data = std.json.ObjectMap.init(self.allocator);
     defer presence_data.deinit();
 

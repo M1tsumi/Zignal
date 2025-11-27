@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild security management for Discord server security features
 pub const GuildSecurityManager = struct {

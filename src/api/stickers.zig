@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Sticker management for guild customization
 pub const StickerManager = struct {

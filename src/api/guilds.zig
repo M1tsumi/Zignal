@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild management for Discord servers
 pub const GuildManager = struct {
@@ -220,7 +221,7 @@ pub const GuildManager = struct {
         self: *GuildManager,
         guild_id: u64,
         name: []const u8,
-        type: models.ChannelType,
+        channel_type: models.ChannelType,
         topic: ?[]const u8,
         position: ?i64,
         permission_overwrites: ?[]models.PermissionOverwrite,
@@ -243,7 +244,7 @@ pub const GuildManager = struct {
 
         const payload = CreateGuildChannelPayload{
             .name = name,
-            .type = type,
+            .type = channel_type,
             .topic = topic,
             .position = position,
             .permission_overwrites = permission_overwrites,

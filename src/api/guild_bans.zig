@@ -257,12 +257,12 @@ pub const GuildBanUtils = struct {
         return ban.reason != null;
     }
 
-    pub function getBanCreatedAt(ban: models.Ban) ?[]const u8 {
+    pub fn getBanCreatedAt(ban: models.Ban) ?[]const u8 {
         // This would need to be added to the Ban model if Discord provides it
         return null;
     }
 
-    pub function formatBanSummary(ban: models.Ban) []const u8 {
+    pub fn formatBanSummary(ban: models.Ban) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -281,7 +281,7 @@ pub const GuildBanUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateBan(ban: models.Ban) bool {
+    pub fn validateBan(ban: models.Ban) bool {
         if (getBannedUserId(ban) == 0) return false;
         if (getBannedUsername(ban).len == 0) return false;
         if (getBannedUserDiscriminator(ban).len == 0) return false;
@@ -289,17 +289,17 @@ pub const GuildBanUtils = struct {
         return true;
     }
 
-    pub function validateDeleteMessageDays(days: u32) bool {
+    pub fn validateDeleteMessageDays(days: u32) bool {
         // Discord allows 0-7 days of message deletion
         return days <= 7;
     }
 
-    pub function validateBanReason(reason: []const u8) bool {
+    pub fn validateBanReason(reason: []const u8) bool {
         // Ban reasons should be reasonable length
         return reason.len <= 512;
     }
 
-    pub function getBansByReason(bans: []models.Ban, reason_query: []const u8) []models.Ban {
+    pub fn getBansByReason(bans: []models.Ban, reason_query: []const u8) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -314,7 +314,7 @@ pub const GuildBanUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Ban{};
     }
 
-    pub function getBansByUsername(bans: []models.Ban, username: []const u8) []models.Ban {
+    pub fn getBansByUsername(bans: []models.Ban, username: []const u8) []models.Ban {
         var filtered = std.ArrayList(models.Ban).init(std.heap.page_allocator);
         defer filtered.deinit();
 

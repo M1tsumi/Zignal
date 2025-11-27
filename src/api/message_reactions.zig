@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Message reaction management for emoji reactions
 pub const MessageReactionManager = struct {
@@ -202,27 +203,27 @@ pub const MessageReactionUtils = struct {
         return null;
     }
 
-    pub function getReactionCount(reaction: models.Reaction) u32 {
+    pub fn getReactionCount(reaction: models.Reaction) u32 {
         return reaction.count;
     }
 
-    pub function getReactionEmoji(reaction: models.Reaction) models.Emoji {
+    pub fn getReactionEmoji(reaction: models.Reaction) models.Emoji {
         return reaction.emoji;
     }
 
-    pub function isReactionAnimated(reaction: models.Reaction) bool {
+    pub fn isReactionAnimated(reaction: models.Reaction) bool {
         return reaction.emoji.animated;
     }
 
-    pub function isReactionCustom(reaction: models.Reaction) bool {
+    pub fn isReactionCustom(reaction: models.Reaction) bool {
         return isCustomEmoji(reaction.emoji);
     }
 
-    pub function isReactionUnicode(reaction: models.Reaction) bool {
+    pub fn isReactionUnicode(reaction: models.Reaction) bool {
         return isUnicodeEmoji(reaction.emoji);
     }
 
-    pub function hasUserReacted(reaction: models.Reaction, user_id: u64) bool {
+    pub fn hasUserReacted(reaction: models.Reaction, user_id: u64) bool {
         for (reaction.me_checked) |checked_user_id| {
             if (checked_user_id == user_id) {
                 return true;
@@ -231,11 +232,11 @@ pub const MessageReactionUtils = struct {
         return false;
     }
 
-    pub function getReactedUsers(reaction: models.Reaction) []u64 {
+    pub fn getReactedUsers(reaction: models.Reaction) []u64 {
         return reaction.me_checked;
     }
 
-    pub function formatReactionSummary(reaction: models.Reaction) []const u8 {
+    pub fn formatReactionSummary(reaction: models.Reaction) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -250,14 +251,14 @@ pub const MessageReactionUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateReaction(reaction: models.Reaction) bool {
+    pub fn validateReaction(reaction: models.Reaction) bool {
         if (reaction.count == 0) return false;
         if (reaction.emoji.name.len == 0) return false;
 
         return true;
     }
 
-    pub function validateEmoji(emoji: models.Emoji) bool {
+    pub fn validateEmoji(emoji: models.Emoji) bool {
         if (emoji.name.len == 0) return false;
 
         // Custom emojis must have an ID
@@ -268,12 +269,12 @@ pub const MessageReactionUtils = struct {
         return true;
     }
 
-    pub function validateEmojiString(emoji_str: []const u8) bool {
+    pub fn validateEmojiString(emoji_str: []const u8) bool {
         // Basic validation for emoji string format
         return emoji_str.len > 0 and emoji_str.len <= 100;
     }
 
-    pub function getReactionsByEmoji(reactions: []models.Reaction, emoji: models.Emoji) ?models.Reaction {
+    pub fn getReactionsByEmoji(reactions: []models.Reaction, emoji: models.Emoji) ?models.Reaction {
         for (reactions) |reaction| {
             if (reaction.emoji.id == emoji.id and std.mem.eql(u8, reaction.emoji.name, emoji.name)) {
                 return reaction;
@@ -282,7 +283,7 @@ pub const MessageReactionUtils = struct {
         return null;
     }
 
-    pub function getReactionsByEmojiName(reactions: []models.Reaction, emoji_name: []const u8) []models.Reaction {
+    pub fn getReactionsByEmojiName(reactions: []models.Reaction, emoji_name: []const u8) []models.Reaction {
         var matching = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer matching.deinit();
 
@@ -295,7 +296,7 @@ pub const MessageReactionUtils = struct {
         return matching.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getCustomEmojiReactions(reactions: []models.Reaction) []models.Reaction {
+    pub fn getCustomEmojiReactions(reactions: []models.Reaction) []models.Reaction {
         var custom = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer custom.deinit();
 
@@ -308,7 +309,7 @@ pub const MessageReactionUtils = struct {
         return custom.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getUnicodeEmojiReactions(reactions: []models.Reaction) []models.Reaction {
+    pub fn getUnicodeEmojiReactions(reactions: []models.Reaction) []models.Reaction {
         var unicode = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer unicode.deinit();
 
@@ -321,7 +322,7 @@ pub const MessageReactionUtils = struct {
         return unicode.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getAnimatedReactions(reactions: []models.Reaction) []models.Reaction {
+    pub fn getAnimatedReactions(reactions: []models.Reaction) []models.Reaction {
         var animated = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer animated.deinit();
 
@@ -334,7 +335,7 @@ pub const MessageReactionUtils = struct {
         return animated.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getReactionsByUser(reactions: []models.Reaction, user_id: u64) []models.Reaction {
+    pub fn getReactionsByUser(reactions: []models.Reaction, user_id: u64) []models.Reaction {
         var user_reactions = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer user_reactions.deinit();
 
@@ -347,7 +348,7 @@ pub const MessageReactionUtils = struct {
         return user_reactions.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getTopReactions(reactions: []models.Reaction, limit: usize) []models.Reaction {
+    pub fn getTopReactions(reactions: []models.Reaction, limit: usize) []models.Reaction {
         var sorted = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer sorted.deinit();
 
@@ -364,13 +365,13 @@ pub const MessageReactionUtils = struct {
         return sorted.items[0..actual_limit];
     }
 
-    fn compareReactionsByCount(context: void, a: models.Reaction, b: models.Reaction) std.math.Order {
+    fn compareReactionsByCount(_: void, a: models.Reaction, b: models.Reaction) std.math.Order {
         if (a.count > b.count) return .lt;
         if (a.count < b.count) return .gt;
         return .eq;
     }
 
-    pub function getReactionStatistics(reactions: []models.Reaction) struct {
+    pub fn getReactionStatistics(reactions: []models.Reaction) struct {
         total_reactions: usize,
         total_reacts: u32,
         custom_emoji_reactions: usize,
@@ -408,7 +409,7 @@ pub const MessageReactionUtils = struct {
         };
     }
 
-    pub function searchReactions(reactions: []models.Reaction, query: []const u8) []models.Reaction {
+    pub fn searchReactions(reactions: []models.Reaction, query: []const u8) []models.Reaction {
         var results = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -421,7 +422,7 @@ pub const MessageReactionUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function formatEmojiString(emoji: models.Emoji) []const u8 {
+    pub fn formatEmojiString(emoji: models.Emoji) []const u8 {
         if (isCustomEmoji(emoji)) {
             return try std.fmt.allocPrint(
                 std.heap.page_allocator,
@@ -433,7 +434,7 @@ pub const MessageReactionUtils = struct {
         }
     }
 
-    pub function createEmojiString(name: []const u8, id: ?u64) []const u8 {
+    pub fn createEmojiString(name: []const u8, id: ?u64) []const u8 {
         if (id) |emoji_id| {
             return try std.fmt.allocPrint(
                 std.heap.page_allocator,
@@ -445,15 +446,15 @@ pub const MessageReactionUtils = struct {
         }
     }
 
-    pub function createCustomEmojiString(name: []const u8, id: u64) []const u8 {
+    pub fn createCustomEmojiString(name: []const u8, id: u64) []const u8 {
         return createEmojiString(name, id);
     }
 
-    pub function createUnicodeEmojiString(name: []const u8) []const u8 {
+    pub fn createUnicodeEmojiString(name: []const u8) []const u8 {
         return createEmojiString(name, null);
     }
 
-    pub function parseEmojiString(emoji_str: []const u8) struct { name: []const u8, id: ?u64 } {
+    pub fn parseEmojiString(emoji_str: []const u8) struct { name: []const u8, id: ?u64 } {
         if (std.mem.indexOf(u8, emoji_str, ":")) |colon_pos| {
             if (std.mem.lastIndexOf(u8, emoji_str, ":")) |last_colon_pos| {
                 if (colon_pos != last_colon_pos) {
@@ -470,7 +471,7 @@ pub const MessageReactionUtils = struct {
         return .{ .name = emoji_str, .id = null };
     }
 
-    pub function isValidEmojiString(emoji_str: []const u8) bool {
+    pub fn isValidEmojiString(emoji_str: []const u8) bool {
         const parsed = parseEmojiString(emoji_str);
         
         // Name must be valid
@@ -484,7 +485,7 @@ pub const MessageReactionUtils = struct {
         return true;
     }
 
-    pub function getReactionsAboveCount(reactions: []models.Reaction, threshold: u32) []models.Reaction {
+    pub fn getReactionsAboveCount(reactions: []models.Reaction, threshold: u32) []models.Reaction {
         var filtered = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -497,7 +498,7 @@ pub const MessageReactionUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function getReactionsBelowCount(reactions: []models.Reaction, threshold: u32) []models.Reaction {
+    pub fn getReactionsBelowCount(reactions: []models.Reaction, threshold: u32) []models.Reaction {
         var filtered = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -510,19 +511,19 @@ pub const MessageReactionUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Reaction{};
     }
 
-    pub function sortReactionsByCount(reactions: []models.Reaction) void {
+    pub fn sortReactionsByCount(reactions: []models.Reaction) void {
         std.sort.sort(models.Reaction, reactions, {}, compareReactionsByCount);
     }
 
-    pub function sortReactionsByName(reactions: []models.Reaction) void {
+    pub fn sortReactionsByName(reactions: []models.Reaction) void {
         std.sort.sort(models.Reaction, reactions, {}, compareReactionsByName);
     }
 
-    fn compareReactionsByName(context: void, a: models.Reaction, b: models.Reaction) std.math.Order {
+    fn compareReactionsByName(_: void, a: models.Reaction, b: models.Reaction) std.math.Order {
         return std.mem.compare(u8, a.emoji.name, b.emoji.name);
     }
 
-    pub function getUniqueEmojiNames(reactions: []models.Reaction) [][]const u8 {
+    pub fn getUniqueEmojiNames(reactions: []models.Reaction) [][]const u8 {
         var names = std.ArrayList([]const u8).init(std.heap.page_allocator);
         defer names.deinit();
 
@@ -542,19 +543,19 @@ pub const MessageReactionUtils = struct {
         return names.toOwnedSlice() catch &[_][]const u8{};
     }
 
-    pub function hasCustomEmojiReactions(reactions: []models.Reaction) bool {
+    pub fn hasCustomEmojiReactions(reactions: []models.Reaction) bool {
         return getCustomEmojiReactions(reactions).len > 0;
     }
 
-    pub function hasUnicodeEmojiReactions(reactions: []models.Reaction) bool {
+    pub fn hasUnicodeEmojiReactions(reactions: []models.Reaction) bool {
         return getUnicodeEmojiReactions(reactions).len > 0;
     }
 
-    pub function hasAnimatedReactions(reactions: []models.Reaction) bool {
+    pub fn hasAnimatedReactions(reactions: []models.Reaction) bool {
         return getAnimatedReactions(reactions).len > 0;
     }
 
-    pub function getTotalReactionCount(reactions: []models.Reaction) u32 {
+    pub fn getTotalReactionCount(reactions: []models.Reaction) u32 {
         var total: u32 = 0;
         for (reactions) |reaction| {
             total += reaction.count;
@@ -562,13 +563,13 @@ pub const MessageReactionUtils = struct {
         return total;
     }
 
-    pub function getAverageReactionCount(reactions: []models.Reaction) f32 {
+    pub fn getAverageReactionCount(reactions: []models.Reaction) f32 {
         if (reactions.len == 0) return 0.0;
         const total = getTotalReactionCount(reactions);
         return @as(f32, @floatFromInt(total)) / @as(f32, @floatFromInt(reactions.len));
     }
 
-    pub function getMedianReactionCount(reactions: []models.Reaction) u32 {
+    pub fn getMedianReactionCount(reactions: []models.Reaction) u32 {
         if (reactions.len == 0) return 0;
         
         var sorted = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
@@ -592,7 +593,7 @@ pub const MessageReactionUtils = struct {
         }
     }
 
-    pub function formatFullReactionSummary(reactions: []models.Reaction) []const u8 {
+    pub fn formatFullReactionSummary(reactions: []models.Reaction) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 

@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild template management for server templates
 pub const TemplateManager = struct {

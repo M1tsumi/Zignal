@@ -167,9 +167,9 @@ pub const VoiceConnection = struct {
             .state = .disconnected,
             .encryption = EncryptionState.init(.xsalsa20_poly1305),
             .audio = AudioState{
-                .encoder = AudioEncoder.init(48000, 2, 64000),
-                .decoder = AudioDecoder.init(48000, 2),
-                .buffer = AudioBuffer.init(allocator, 4096),
+                .encoder = AudioState.AudioEncoder.init(48000, 2, 64000),
+                .decoder = AudioState.AudioDecoder.init(48000, 2),
+                .buffer = AudioState.AudioBuffer.init(allocator, 4096),
                 .sequence = 0,
                 .timestamp = 0,
             },
@@ -272,7 +272,7 @@ pub const VoiceConnection = struct {
         defer self.allocator.free(json_string);
 
         // Send speaking notification via websocket
-        _ = json_string; // Would be sent through websocket
+        // TODO: Actually send through websocket connection
 
         self.state = if (speaking) .speaking else .connected;
     }
@@ -314,7 +314,7 @@ pub const VoiceConnection = struct {
         defer self.allocator.free(json_string);
 
         // Send authentication via websocket
-        _ = json_string; // Would be sent through websocket
+        // TODO: Actually send through websocket connection
 
         self.state = .authenticating;
     }

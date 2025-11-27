@@ -107,7 +107,7 @@ pub const ErrorSeverity = enum(u8) {
     debug = 1,
     info = 2,
     warning = 3,
-    error = 4,
+    err = 4,
     critical = 5,
     fatal = 6,
 };
@@ -600,32 +600,32 @@ pub const ErrorHandler = struct {
 pub fn Result(comptime T: type) type {
     return struct {
         value: ?T,
-        error: ?ErrorContext,
+        err: ?ErrorContext,
 
         pub fn success(value: T) @This() {
             return @This(){
                 .value = value,
-                .error = null,
+                .err = null,
             };
         }
 
-        pub fn failure(error: ErrorContext) @This() {
+        pub fn failure(err_val: ErrorContext) @This() {
             return @This(){
                 .value = null,
-                .error = error,
+                .err = err_val,
             };
         }
 
         pub fn isSuccess(self: @This()) bool {
-            return self.error == null;
+            return self.err == null;
         }
 
         pub fn isError(self: @This()) bool {
-            return self.error != null;
+            return self.err != null;
         }
 
         pub fn unwrap(self: @This()) T {
-            if (self.error) |err| {
+            if (self.err) |err| {
                 std.log.err("Attempted to unwrap error result: {s}", .{@tagName(err.error_code)});
                 unreachable;
             }
@@ -633,14 +633,14 @@ pub fn Result(comptime T: type) type {
         }
 
         pub fn unwrapOr(self: @This(), default: T) T {
-            if (self.error != null) {
+            if (self.err != null) {
                 return default;
             }
             return self.value.?;
         }
 
         pub fn map(self: @This(), comptime U: type, mapper: *const fn (value: T) U) Result(U) {
-            if (self.error) |err| {
+            if (self.err) |err| {
                 return Result(U).failure(err);
             }
             return Result(U).success(mapper(self.value.?));

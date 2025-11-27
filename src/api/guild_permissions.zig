@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild permission management for Discord server permissions
 pub const GuildPermissionManager = struct {
@@ -126,7 +127,7 @@ pub const GuildPermissionManager = struct {
         overwrite_id: u64,
         allow: u64,
         deny: u64,
-        type: models.OverwriteType,
+        _: models.OverwriteType,
         reason: ?[]const u8,
     ) !void {
         const url = try std.fmt.allocPrint(

@@ -223,31 +223,31 @@ pub const GuildEmojiUtils = struct {
         return null;
     }
 
-    pub function isEmojiAnimated(emoji: models.Emoji) bool {
+    pub fn isEmojiAnimated(emoji: models.Emoji) bool {
         return emoji.animated;
     }
 
-    pub function isEmojiAvailable(emoji: models.Emoji) bool {
+    pub fn isEmojiAvailable(emoji: models.Emoji) bool {
         return emoji.available;
     }
 
-    pub function isEmojiManaged(emoji: models.Emoji) bool {
+    pub fn isEmojiManaged(emoji: models.Emoji) bool {
         return emoji.managed;
     }
 
-    pub function isEmojiCustom(emoji: models.Emoji) bool {
+    pub fn isEmojiCustom(emoji: models.Emoji) bool {
         return emoji.id != 0;
     }
 
-    pub function isEmojiUnicode(emoji: models.Emoji) bool {
+    pub fn isEmojiUnicode(emoji: models.Emoji) bool {
         return emoji.id == 0;
     }
 
-    pub function isEmojiRestricted(emoji: models.Emoji) bool {
+    pub fn isEmojiRestricted(emoji: models.Emoji) bool {
         return emoji.roles != null and emoji.roles.?.len > 0;
     }
 
-    pub function formatEmojiString(emoji: models.Emoji) []const u8 {
+    pub fn formatEmojiString(emoji: models.Emoji) []const u8 {
         if (isEmojiCustom(emoji)) {
             if (isEmojiAnimated(emoji)) {
                 return try std.fmt.allocPrint(
@@ -267,7 +267,7 @@ pub const GuildEmojiUtils = struct {
         }
     }
 
-    pub function formatEmojiUrl(emoji: models.Emoji, size: u16) []const u8 {
+    pub fn formatEmojiUrl(emoji: models.Emoji, size: u16) []const u8 {
         if (isEmojiCustom(emoji)) {
             if (isEmojiAnimated(emoji)) {
                 return try std.fmt.allocPrint(
@@ -287,7 +287,7 @@ pub const GuildEmojiUtils = struct {
         }
     }
 
-    pub function validateEmojiName(name: []const u8) bool {
+    pub fn validateEmojiName(name: []const u8) bool {
         // Emoji names must be 2-32 characters and can include alphanumeric and underscores
         return name.len >= 2 and name.len <= 32 and std.mem.all(u8, isEmojiNameChar, name);
     }
@@ -296,12 +296,12 @@ pub const GuildEmojiUtils = struct {
         return std.ascii.isAlphanumeric(char) or char == '_';
     }
 
-    pub function validateEmojiImage(image: []const u8) bool {
+    pub fn validateEmojiImage(image: []const u8) bool {
         // Image should be base64 encoded and reasonable size
         return image.len > 0 and image.len <= 1024 * 1024; // 1MB max
     }
 
-    pub function validateEmoji(emoji: models.Emoji) bool {
+    pub fn validateEmoji(emoji: models.Emoji) bool {
         if (!isEmojiCustom(emoji)) return true; // Unicode emojis are always valid
         
         if (!validateEmojiName(getEmojiName(emoji))) return false;
@@ -310,7 +310,7 @@ pub const GuildEmojiUtils = struct {
         return true;
     }
 
-    pub function getEmojisByName(emojis: []models.Emoji, name: []const u8) []models.Emoji {
+    pub fn getEmojisByName(emojis: []models.Emoji, name: []const u8) []models.Emoji {
         var filtered = std.ArrayList(models.Emoji).init(std.heap.page_allocator);
         defer filtered.deinit();
 

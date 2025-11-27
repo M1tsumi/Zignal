@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild invite management for server invitation operations
 pub const GuildInviteManager = struct {
@@ -282,61 +283,61 @@ pub const GuildInviteUtils = struct {
         return invite.stage_instance;
     }
 
-    pub function isInviteExpired(invite: models.Invite) bool {
-        if (getInviteExpiresAt(invite)) |expires_at| {
+    pub fn isInviteExpired(invite: models.Invite) bool {
+        if (getInviteExpiresAt(invite)) |_| {
             // This would require date parsing, for now assume not expired
             return false;
         }
         return false;
     }
 
-    pub function isInviteTemporary(invite: models.Invite) bool {
+    pub fn isInviteTemporary(_: models.Invite) bool {
         // This would need to be added to the Invite model
         return false;
     }
 
-    pub function isInviteTemporaryMembership(invite: models.Invite) bool {
+    pub fn isInviteTemporaryMembership(_: models.Invite) bool {
         // This would need to be added to the Invite model
         return false;
     }
 
-    pub function hasInviteGuild(invite: models.Invite) bool {
+    pub fn hasInviteGuild(invite: models.Invite) bool {
         return invite.guild != null;
     }
 
-    pub function hasInviteChannel(invite: models.Invite) bool {
+    pub fn hasInviteChannel(invite: models.Invite) bool {
         return invite.channel != null;
     }
 
-    pub function hasInviteInviter(invite: models.Invite) bool {
+    pub fn hasInviteInviter(invite: models.Invite) bool {
         return invite.inviter != null;
     }
 
-    pub function hasInviteTarget(invite: models.Invite) bool {
+    pub fn hasInviteTarget(invite: models.Invite) bool {
         return invite.target_user != null or invite.target_application != null;
     }
 
-    pub function hasInviteTargetUser(invite: models.Invite) bool {
+    pub fn hasInviteTargetUser(invite: models.Invite) bool {
         return invite.target_user != null;
     }
 
-    pub function hasInviteTargetApplication(invite: models.Invite) bool {
+    pub fn hasInviteTargetApplication(invite: models.Invite) bool {
         return invite.target_application != null;
     }
 
-    pub function hasInviteStageInstance(invite: models.Invite) bool {
+    pub fn hasInviteStageInstance(invite: models.Invite) bool {
         return invite.stage_instance != null;
     }
 
-    pub function hasInviteCounts(invite: models.Invite) bool {
+    pub fn hasInviteCounts(invite: models.Invite) bool {
         return invite.approximate_presence_count != null and invite.approximate_member_count != null;
     }
 
-    pub function hasInviteExpiration(invite: models.Invite) bool {
+    pub fn hasInviteExpiration(invite: models.Invite) bool {
         return invite.expires_at != null;
     }
 
-    pub function formatInviteUrl(invite: models.Invite) []const u8 {
+    pub fn formatInviteUrl(invite: models.Invite) []const u8 {
         return try std.fmt.allocPrint(
             std.heap.page_allocator,
             "https://discord.gg/{s}",
@@ -344,7 +345,7 @@ pub const GuildInviteUtils = struct {
         );
     }
 
-    pub function formatInviteSummary(invite: models.Invite) []const u8 {
+    pub fn formatInviteSummary(invite: models.Invite) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -376,12 +377,12 @@ pub const GuildInviteUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateInviteCode(code: []const u8) bool {
+    pub fn validateInviteCode(code: []const u8) bool {
         // Invite codes should be valid length and characters
         return code.len >= 1 and code.len <= 50;
     }
 
-    pub function validateInvite(invite: models.Invite) bool {
+    pub fn validateInvite(invite: models.Invite) bool {
         if (!validateInviteCode(getInviteCode(invite))) return false;
         if (!hasInviteGuild(invite)) return false;
         if (!hasInviteChannel(invite)) return false;
@@ -389,7 +390,7 @@ pub const GuildInviteUtils = struct {
         return true;
     }
 
-    pub function getInvitesByGuild(invites: []models.Invite, guild_id: u64) []models.Invite {
+    pub fn getInvitesByGuild(invites: []models.Invite, guild_id: u64) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -402,7 +403,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesByChannel(invites: []models.Invite, channel_id: u64) []models.Invite {
+    pub fn getInvitesByChannel(invites: []models.Invite, channel_id: u64) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -415,7 +416,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesByInviter(invites: []models.Invite, inviter_id: u64) []models.Invite {
+    pub fn getInvitesByInviter(invites: []models.Invite, inviter_id: u64) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -428,7 +429,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesByTarget(invites: []models.Invite, target_user_id: u64) []models.Invite {
+    pub fn getInvitesByTarget(invites: []models.Invite, target_user_id: u64) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -441,7 +442,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithTarget(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithTarget(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -454,7 +455,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithTargetUser(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithTargetUser(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -467,7 +468,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithTargetApplication(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithTargetApplication(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -480,7 +481,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithStageInstance(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithStageInstance(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -493,7 +494,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithCounts(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithCounts(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -506,7 +507,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function getInvitesWithExpiration(invites: []models.Invite) []models.Invite {
+    pub fn getInvitesWithExpiration(invites: []models.Invite) []models.Invite {
         var filtered = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -519,7 +520,7 @@ pub const GuildInviteUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function searchInvites(invites: []models.Invite, query: []const u8) []models.Invite {
+    pub fn searchInvites(invites: []models.Invite, query: []const u8) []models.Invite {
         var results = std.ArrayList(models.Invite).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -535,45 +536,45 @@ pub const GuildInviteUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Invite{};
     }
 
-    pub function sortInvitesByCode(invites: []models.Invite) void {
+    pub fn sortInvitesByCode(invites: []models.Invite) void {
         std.sort.sort(models.Invite, invites, {}, compareInvitesByCode);
     }
 
-    pub function sortInvitesByGuild(invites: []models.Invite) void {
+    pub fn sortInvitesByGuild(invites: []models.Invite) void {
         std.sort.sort(models.Invite, invites, {}, compareInvitesByGuild);
     }
 
-    pub function sortInvitesByChannel(invites: []models.Invite) void {
+    pub fn sortInvitesByChannel(invites: []models.Invite) void {
         std.sort.sort(models.Invite, invites, {}, compareInvitesByChannel);
     }
 
-    pub function sortInvitesByInviter(invites: []models.Invite) void {
+    pub fn sortInvitesByInviter(invites: []models.Invite) void {
         std.sort.sort(models.Invite, invites, {}, compareInvitesByInviter);
     }
 
-    fn compareInvitesByCode(context: void, a: models.Invite, b: models.Invite) std.math.Order {
+    fn compareInvitesByCode(_: void, a: models.Invite, b: models.Invite) std.math.Order {
         return std.mem.compare(u8, getInviteCode(a), getInviteCode(b));
     }
 
-    fn compareInvitesByGuild(context: void, a: models.Invite, b: models.Invite) std.math.Order {
+    fn compareInvitesByGuild(_: void, a: models.Invite, b: models.Invite) std.math.Order {
         const a_name = if (hasInviteGuild(a)) getInviteGuild(a).?.name else "";
         const b_name = if (hasInviteGuild(b)) getInviteGuild(b).?.name else "";
         return std.mem.compare(u8, a_name, b_name);
     }
 
-    fn compareInvitesByChannel(context: void, a: models.Invite, b: models.Invite) std.math.Order {
+    fn compareInvitesByChannel(_: void, a: models.Invite, b: models.Invite) std.math.Order {
         const a_name = if (hasInviteChannel(a)) getInviteChannel(a).?.name else "";
         const b_name = if (hasInviteChannel(b)) getInviteChannel(b).?.name else "";
         return std.mem.compare(u8, a_name, b_name);
     }
 
-    fn compareInvitesByInviter(context: void, a: models.Invite, b: models.Invite) std.math.Order {
+    fn compareInvitesByInviter(_: void, a: models.Invite, b: models.Invite) std.math.Order {
         const a_name = if (hasInviteInviter(a)) getInviteInviter(a).?.username else "";
         const b_name = if (hasInviteInviter(b)) getInviteInviter(b).?.username else "";
         return std.mem.compare(u8, a_name, b_name);
     }
 
-    pub function getInviteStatistics(invites: []models.Invite) struct {
+    pub fn getInviteStatistics(invites: []models.Invite) struct {
         total_invites: usize,
         invites_with_target: usize,
         invites_with_target_user: usize,
@@ -626,7 +627,7 @@ pub const GuildInviteUtils = struct {
         };
     }
 
-    pub function hasInvite(invites: []models.Invite, invite_code: []const u8) bool {
+    pub fn hasInvite(invites: []models.Invite, invite_code: []const u8) bool {
         for (invites) |invite| {
             if (std.mem.eql(u8, getInviteCode(invite), invite_code)) {
                 return true;
@@ -635,7 +636,7 @@ pub const GuildInviteUtils = struct {
         return false;
     }
 
-    pub function getInvite(invites: []models.Invite, invite_code: []const u8) ?models.Invite {
+    pub fn getInvite(invites: []models.Invite, invite_code: []const u8) ?models.Invite {
         for (invites) |invite| {
             if (std.mem.eql(u8, getInviteCode(invite), invite_code)) {
                 return invite;
@@ -644,11 +645,11 @@ pub const GuildInviteUtils = struct {
         return null;
     }
 
-    pub function getInviteCount(invites: []models.Invite) usize {
+    pub fn getInviteCount(invites: []models.Invite) usize {
         return invites.len;
     }
 
-    pub function formatFullInviteInfo(invite: models.Invite) []const u8 {
+    pub fn formatFullInviteInfo(invite: models.Invite) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 

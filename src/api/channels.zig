@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Channel management for Discord channels
 pub const ChannelManager = struct {
@@ -38,7 +39,7 @@ pub const ChannelManager = struct {
         self: *ChannelManager,
         channel_id: u64,
         name: ?[]const u8,
-        type: ?models.ChannelType,
+        channel_type: ?models.ChannelType,
         position: ?i64,
         topic: ?[]const u8,
         nsfw: ?bool,
@@ -62,7 +63,7 @@ pub const ChannelManager = struct {
 
         const payload = ModifyChannelPayload{
             .name = name,
-            .type = type,
+            .type = channel_type,
             .position = position,
             .topic = topic,
             .nsfw = nsfw,

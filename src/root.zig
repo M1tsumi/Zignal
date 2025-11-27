@@ -72,17 +72,9 @@ pub const presence_events = @import("gateway/events/presence_events.zig");
 pub const typing_events = @import("gateway/events/typing_events.zig");
 pub const voice_events = @import("gateway/events/voice_events.zig");
 pub const application_command_events = @import("gateway/events/application_command_events.zig");
-pub const guild_scheduled_events = @import("gateway/events/guild_scheduled_events.zig");
-pub const guild_role_events = @import("gateway/events/guild_role_events.zig");
-pub const integration_events = @import("gateway/events/integration_events.zig");
-pub const webhook_events = @import("gateway/events/webhook_events.zig");
-pub const application_command_permission_events = @import("gateway/events/application_command_permission_events.zig");
-pub const guild_member_list_events = @import("gateway/events/guild_member_list_events.zig");
-pub const guild_onboarding_events = @import("gateway/events/guild_onboarding_events.zig");
-pub const guild_soundboard_events = @import("gateway/events/guild_soundboard_events.zig");
 pub const auto_moderation_events = @import("gateway/events/auto_moderation_events.zig");
 
 test {
     @import("std").testing.refAllDecls(@This());
-    @import("test.zig");
+    _ = @import("test.zig");
 }

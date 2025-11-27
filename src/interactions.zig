@@ -84,10 +84,10 @@ pub const Interaction = struct {
 
     pub fn deinit(self: Interaction, allocator: std.mem.Allocator) void {
         if (self.data) |data| data.deinit(allocator);
-        if (self.member) |*member| {
+        if (self.member) |_| {
             // Member deinit would be handled by models
         }
-        if (self.user) |*user| {
+        if (self.user) |_| {
             // User deinit would be handled by models
         }
         allocator.free(self.token);
@@ -165,7 +165,7 @@ pub const InteractionData = union(InteractionType) {
         id: u64,
         name: []const u8,
         type: ApplicationCommandType,
-        options: []ApplicationCommandOption,
+        options: []InteractionData.ApplicationCommandInteractionData.ApplicationCommandOption,
         guild_id: ?u64,
         target_id: ?u64,
     };
@@ -250,7 +250,7 @@ pub const Component = union(ComponentType) {
             if (self.label) |label| allocator.free(label);
             if (self.custom_id) |custom_id| allocator.free(custom_id);
             if (self.url) |url| allocator.free(url);
-            if (self.emoji) |*emoji| {
+            if (self.emoji) |_| {
                 // Emoji deinit would be handled by models
             }
         }
@@ -276,7 +276,7 @@ pub const Component = union(ComponentType) {
                 allocator.free(self.label);
                 allocator.free(self.value);
                 if (self.description) |desc| allocator.free(desc);
-                if (self.emoji) |*emoji| {
+                if (self.emoji) |_| {
                     // Emoji deinit would be handled by models
                 }
             }
@@ -514,7 +514,7 @@ pub const InteractionResponse = struct {
         if (self.data) |*data| {
             if (data.content) |content| allocator.free(content);
             allocator.free(data.embeds);
-            if (data.allowed_mentions) |*am| {
+            if (data.allowed_mentions) |_| {
                 // AllowedMentions deinit would be handled by models
             }
             allocator.free(data.components);
@@ -653,7 +653,7 @@ pub const InteractionHandler = struct {
                 if (interaction.data) |data| {
                     const command_data = data.application_command;
                     if (self.slash_commands.get(command_data.name)) |handler| {
-                        const ctx = SlashCommandContext{
+                        const ctx = SlashCommandHandler.SlashCommandContext{
                             .interaction = interaction,
                             .allocator = self.allocator,
                             .respond = undefined, // Would be implemented
@@ -668,7 +668,7 @@ pub const InteractionHandler = struct {
                 if (interaction.data) |data| {
                     const component_data = data.message_component;
                     if (self.component_handlers.get(component_data.custom_id)) |handler| {
-                        const ctx = ComponentContext{
+                        const ctx = ComponentHandler.ComponentContext{
                             .interaction = interaction,
                             .allocator = self.allocator,
                             .respond = undefined, // Would be implemented
@@ -683,7 +683,7 @@ pub const InteractionHandler = struct {
                 if (interaction.data) |data| {
                     const modal_data = data.modal_submit;
                     if (self.modal_handlers.get(modal_data.custom_id)) |handler| {
-                        const ctx = ModalContext{
+                        const ctx = ModalHandler.ModalContext{
                             .interaction = interaction,
                             .allocator = self.allocator,
                             .respond = undefined, // Would be implemented
@@ -700,7 +700,7 @@ pub const InteractionHandler = struct {
                     const key = try std.fmt.allocPrint(self.allocator, "{s}:{s}", .{ autocomplete_data.name, "focused_option" });
                     defer self.allocator.free(key);
                     if (self.autocomplete_handlers.get(key)) |handler| {
-                        const ctx = AutocompleteContext{
+                        const ctx = AutocompleteHandler.AutocompleteContext{
                             .interaction = interaction,
                             .allocator = self.allocator,
                             .respond = undefined, // Would be implemented

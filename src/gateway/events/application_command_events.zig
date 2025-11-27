@@ -234,7 +234,7 @@ pub const ApplicationCommandEventUtils = struct {
         return "Unknown";
     }
 
-    pub fn hasUserPermissions(interaction: ApplicationCommandEvents.ApplicationCommandInteractionEvent, permission: []const u8) bool {
+    pub fn hasUserPermissions(interaction: ApplicationCommandEvents.ApplicationCommandInteractionEvent, _: []const u8) bool {
         if (interaction.app_permissions) |permissions| {
             // This would require parsing the permission string
             // For now, return true as a placeholder

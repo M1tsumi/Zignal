@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild soundboard sound management for custom server sounds
 pub const GuildSoundboardSoundManager = struct {
@@ -185,7 +186,7 @@ pub const GuildSoundboardSoundUtils = struct {
     }
 
     pub fn getSoundVolumePercentage(sound: models.Sound) u32 {
-        return @floatToInt(u32, sound.volume * 100);
+        return @intFromFloat(sound.volume * 100);
     }
 
     pub fn getSoundId(sound: models.Sound) u64 {
@@ -608,23 +609,23 @@ pub const GuildSoundboardSoundUtils = struct {
         std.sort.sort(models.Sound, sounds, {}, compareSoundsByUser);
     }
 
-    fn compareSoundsByName(context: void, a: models.Sound, b: models.Sound) std.math.Order {
+    fn compareSoundsByName(_: void, a: models.Sound, b: models.Sound) std.math.Order {
         return std.mem.compare(u8, a.name, b.name);
     }
 
-    fn compareSoundsByDuration(context: void, a: models.Sound, b: models.Sound) std.math.Order {
+    fn compareSoundsByDuration(_: void, a: models.Sound, b: models.Sound) std.math.Order {
         if (a.duration < b.duration) return .lt;
         if (a.duration > b.duration) return .gt;
         return .eq;
     }
 
-    fn compareSoundsByVolume(context: void, a: models.Sound, b: models.Sound) std.math.Order {
+    fn compareSoundsByVolume(_: void, a: models.Sound, b: models.Sound) std.math.Order {
         if (a.volume < b.volume) return .lt;
         if (a.volume > b.volume) return .gt;
         return .eq;
     }
 
-    fn compareSoundsByUser(context: void, a: models.Sound, b: models.Sound) std.math.Order {
+    fn compareSoundsByUser(_: void, a: models.Sound, b: models.Sound) std.math.Order {
         if (a.user_id < b.user_id) return .lt;
         if (a.user_id > b.user_id) return .gt;
         return .eq;

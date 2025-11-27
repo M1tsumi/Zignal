@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Voice region management for voice channel optimization
 pub const VoiceRegionManager = struct {
@@ -85,20 +86,22 @@ pub const VoiceRegionManager = struct {
         const regions = try self.getVoiceRegions();
         defer self.allocator.free(regions);
 
-        // Sort regions by latency
-        var sorted_regions = try self.allocator.dupe(models.VoiceRegion, regions);
-        defer self.allocator.free(sorted_regions);
-
-        std.sort.sort(models.VoiceRegion, sorted_regions, struct {
+        const SortContext = struct {
             latencies: std.json.ObjectMap,
-            fn compare(ctx: @This(), a: models.VoiceRegion, b: models.VoiceRegion) bool {
+            
+            fn compare(ctx: @This(), a: models.VoiceRegion, b: models.VoiceRegion) std.math.Order {
                 const a_latency = ctx.latencies.get(a.id).?.float;
                 const b_latency = ctx.latencies.get(b.id).?.float;
-                return a_latency < b_latency;
+                if (a_latency < b_latency) return .lt;
+                if (a_latency > b_latency) return .gt;
+                return .eq;
             }
-        }{ .latencies = latencies }.compare);
+        };
+        const sort_context = SortContext{ .latencies = latencies };
+        
+        std.sort.sort(models.VoiceRegion, regions, sort_context, SortContext.compare);
 
-        return sorted_regions;
+        return regions;
     }
 
     /// Get regions with VIP support

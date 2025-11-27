@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild sticker management for custom sticker operations
 pub const GuildStickerManager = struct {
@@ -250,35 +251,35 @@ pub const GuildStickerUtils = struct {
         return sticker.pack_id;
     }
 
-    pub function isStickerAvailable(sticker: models.Sticker) bool {
+    pub fn isStickerAvailable(sticker: models.Sticker) bool {
         return sticker.available;
     }
 
-    pub function isStickerGuild(sticker: models.Sticker) bool {
+    pub fn isStickerGuild(sticker: models.Sticker) bool {
         return getStickerType(sticker) == 1; // GUILD type
     }
 
-    pub function isStickerStandard(sticker: models.Sticker) bool {
+    pub fn isStickerStandard(sticker: models.Sticker) bool {
         return getStickerType(sticker) == 2; // STANDARD type
     }
 
-    pub function isStickerPNG(sticker: models.Sticker) bool {
+    pub fn isStickerPNG(sticker: models.Sticker) bool {
         return getStickerFormatType(sticker) == 1; // PNG format
     }
 
-    pub function isStickerAPNG(sticker: models.Sticker) bool {
+    pub fn isStickerAPNG(sticker: models.Sticker) bool {
         return getStickerFormatType(sticker) == 2; // APNG format
     }
 
-    pub function isStickerLottie(sticker: models.Sticker) bool {
+    pub fn isStickerLottie(sticker: models.Sticker) bool {
         return getStickerFormatType(sticker) == 3; // Lottie format
     }
 
-    pub function isStickerGIF(sticker: models.Sticker) bool {
+    pub fn isStickerGIF(sticker: models.Sticker) bool {
         return getStickerFormatType(sticker) == 4; // GIF format
     }
 
-    pub function formatStickerString(sticker: models.Sticker) []const u8 {
+    pub fn formatStickerString(sticker: models.Sticker) []const u8 {
         return try std.fmt.allocPrint(
             std.heap.page_allocator,
             "<:{s}:{d}>",
@@ -286,7 +287,7 @@ pub const GuildStickerUtils = struct {
         );
     }
 
-    pub function formatStickerUrl(sticker: models.Sticker, size: u16) []const u8 {
+    pub fn formatStickerUrl(sticker: models.Sticker, size: u16) []const u8 {
         const format = switch (getStickerFormatType(sticker)) {
             1 => "png",
             2 => "png",
@@ -302,22 +303,22 @@ pub const GuildStickerUtils = struct {
         );
     }
 
-    pub function validateStickerName(name: []const u8) bool {
+    pub fn validateStickerName(name: []const u8) bool {
         // Sticker names must be 2-30 characters
         return name.len >= 2 and name.len <= 30;
     }
 
-    pub function validateStickerDescription(description: []const u8) bool {
+    pub fn validateStickerDescription(description: []const u8) bool {
         // Sticker descriptions must be 2-100 characters
         return description.len >= 2 and description.len <= 100;
     }
 
-    pub function validateStickerTags(tags: []const u8) bool {
+    pub fn validateStickerTags(tags: []const u8) bool {
         // Sticker tags must be 2-200 characters
         return tags.len >= 2 and tags.len <= 200;
     }
 
-    pub function validateSticker(sticker: models.Sticker) bool {
+    pub fn validateSticker(sticker: models.Sticker) bool {
         if (!validateStickerName(getStickerName(sticker))) return false;
         if (!validateStickerDescription(getStickerDescription(sticker))) return false;
         if (!validateStickerTags(getStickerTags(sticker))) return false;
@@ -326,7 +327,7 @@ pub const GuildStickerUtils = struct {
         return true;
     }
 
-    pub function getStickersByName(stickers: []models.Sticker, name: []const u8) []models.Sticker {
+    pub fn getStickersByName(stickers: []models.Sticker, name: []const u8) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -339,7 +340,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getStickersByTag(stickers: []models.Sticker, tag: []const u8) []models.Sticker {
+    pub fn getStickersByTag(stickers: []models.Sticker, tag: []const u8) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -352,7 +353,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getAvailableStickers(stickers: []models.Sticker) []models.Sticker {
+    pub fn getAvailableStickers(stickers: []models.Sticker) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -365,7 +366,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getUnavailableStickers(stickers: []models.Sticker) []models.Sticker {
+    pub fn getUnavailableStickers(stickers: []models.Sticker) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -378,7 +379,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getGuildStickers(stickers: []models.Sticker) []models.Sticker {
+    pub fn getGuildStickers(stickers: []models.Sticker) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -391,7 +392,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getStandardStickers(stickers: []models.Sticker) []models.Sticker {
+    pub fn getStandardStickers(stickers: []models.Sticker) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -404,7 +405,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function getStickersByFormat(stickers: []models.Sticker, format_type: u8) []models.Sticker {
+    pub fn getStickersByFormat(stickers: []models.Sticker, format_type: u8) []models.Sticker {
         var filtered = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -417,7 +418,7 @@ pub const GuildStickerUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function searchStickers(stickers: []models.Sticker, query: []const u8) []models.Sticker {
+    pub fn searchStickers(stickers: []models.Sticker, query: []const u8) []models.Sticker {
         var results = std.ArrayList(models.Sticker).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -432,31 +433,31 @@ pub const GuildStickerUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Sticker{};
     }
 
-    pub function sortStickersByName(stickers: []models.Sticker) void {
+    pub fn sortStickersByName(stickers: []models.Sticker) void {
         std.sort.sort(models.Sticker, stickers, {}, compareStickersByName);
     }
 
-    pub function sortStickersById(stickers: []models.Sticker) void {
+    pub fn sortStickersById(stickers: []models.Sticker) void {
         std.sort.sort(models.Sticker, stickers, {}, compareStickersById);
     }
 
-    pub function sortStickersBySortValue(stickers: []models.Sticker) void {
+    pub fn sortStickersBySortValue(stickers: []models.Sticker) void {
         std.sort.sort(models.Sticker, stickers, {}, compareStickersBySortValue);
     }
 
-    fn compareStickersByName(context: void, a: models.Sticker, b: models.Sticker) std.math.Order {
+    fn compareStickersByName(_: void, a: models.Sticker, b: models.Sticker) std.math.Order {
         return std.mem.compare(u8, getStickerName(a), getStickerName(b));
     }
 
-    fn compareStickersById(context: void, a: models.Sticker, b: models.Sticker) std.math.Order {
+    fn compareStickersById(_: void, a: models.Sticker, b: models.Sticker) std.math.Order {
         return std.math.order(getStickerId(a), getStickerId(b));
     }
 
-    fn compareStickersBySortValue(context: void, a: models.Sticker, b: models.Sticker) std.math.Order {
+    fn compareStickersBySortValue(_: void, a: models.Sticker, b: models.Sticker) std.math.Order {
         return std.math.order(getStickerSortValue(a), getStickerSortValue(b));
     }
 
-    pub function getStickerStatistics(stickers: []models.Sticker) struct {
+    pub fn getStickerStatistics(stickers: []models.Sticker) struct {
         total_stickers: usize,
         available_stickers: usize,
         unavailable_stickers: usize,
@@ -510,7 +511,7 @@ pub const GuildStickerUtils = struct {
         };
     }
 
-    pub function hasSticker(stickers: []models.Sticker, sticker_id: u64) bool {
+    pub fn hasSticker(stickers: []models.Sticker, sticker_id: u64) bool {
         for (stickers) |sticker| {
             if (getStickerId(sticker) == sticker_id) {
                 return true;
@@ -519,7 +520,7 @@ pub const GuildStickerUtils = struct {
         return false;
     }
 
-    pub function getSticker(stickers: []models.Sticker, sticker_id: u64) ?models.Sticker {
+    pub fn getSticker(stickers: []models.Sticker, sticker_id: u64) ?models.Sticker {
         for (stickers) |sticker| {
             if (getStickerId(sticker) == sticker_id) {
                 return sticker;
@@ -528,11 +529,11 @@ pub const GuildStickerUtils = struct {
         return null;
     }
 
-    pub function getStickerCount(stickers: []models.Sticker) usize {
+    pub fn getStickerCount(stickers: []models.Sticker) usize {
         return stickers.len;
     }
 
-    pub function getStickerTagsAsArray(sticker: models.Sticker) []const u8 {
+    pub fn getStickerTagsAsArray(sticker: models.Sticker) []const u8 {
         const tags = getStickerTags(sticker);
         var tag_list = std.ArrayList([]const u8).init(std.heap.page_allocator);
         defer tag_list.deinit();
@@ -559,7 +560,7 @@ pub const GuildStickerUtils = struct {
         return tag_list.toOwnedSlice() catch &[_][]const u8{};
     }
 
-    pub function formatStickerSummary(sticker: models.Sticker) []const u8 {
+    pub fn formatStickerSummary(sticker: models.Sticker) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -587,7 +588,7 @@ pub const GuildStickerUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function formatFullStickerInfo(sticker: models.Sticker) []const u8 {
+    pub fn formatFullStickerInfo(sticker: models.Sticker) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 

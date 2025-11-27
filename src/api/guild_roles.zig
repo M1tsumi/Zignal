@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild role management for server role operations
 pub const GuildRoleManager = struct {
@@ -227,6 +228,10 @@ pub const GuildRoleUtils = struct {
         return role.permissions;
     }
 
+    pub fn roleHasPermission(role: models.Role, permission: models.Permission) bool {
+        return (getRolePermissions(role) & @intFromEnum(permission)) != 0;
+    }
+
     pub fn getRoleManaged(role: models.Role) bool {
         return role.managed;
     }
@@ -260,23 +265,23 @@ pub const GuildRoleUtils = struct {
     }
 
     pub fn isRoleDefault(role: models.Role) bool {
-        return role.name == "@everyone";
+        return std.mem.eql(u8, role.name, "@everyone");
     }
 
     pub fn isRoleAdmin(role: models.Role) bool {
-        return hasPermission(role, .administrator);
+        return roleHasPermission(role, .administrator);
     }
 
     pub fn isRoleModerator(role: models.Role) bool {
-        return hasPermission(role, .manage_messages) or 
-               hasPermission(role, .kick_members) or 
-               hasPermission(role, .ban_members);
+        return roleHasPermission(role, .manage_messages) or 
+               roleHasPermission(role, .kick_members) or 
+               roleHasPermission(role, .ban_members);
     }
 
     pub fn isRoleBooster(role: models.Role) bool {
-        return hasPermission(role, .manage_guild) or 
-               hasPermission(role, .manage_channels) or 
-               hasPermission(role, .manage_roles);
+        return roleHasPermission(role, .manage_guild) or 
+               roleHasPermission(role, .manage_channels) or 
+               roleHasPermission(role, .manage_roles);
     }
 
     pub fn hasRoleIcon(role: models.Role) bool {
@@ -503,31 +508,31 @@ pub const GuildRoleUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Role{};
     }
 
-    pub function sortRolesByName(roles: []models.Role) void {
+    pub fn sortRolesByName(roles: []models.Role) void {
         std.sort.sort(models.Role, roles, {}, compareRolesByName);
     }
 
-    pub function sortRolesByPosition(roles: []models.Role) void {
+    pub fn sortRolesByPosition(roles: []models.Role) void {
         std.sort.sort(models.Role, roles, {}, compareRolesByPosition);
     }
 
-    pub function sortRolesByColor(roles: []models.Role) void {
+    pub fn sortRolesByColor(roles: []models.Role) void {
         std.sort.sort(models.Role, roles, {}, compareRolesByColor);
     }
 
-    fn compareRolesByName(context: void, a: models.Role, b: models.Role) std.math.Order {
+    fn compareRolesByName(_: void, a: models.Role, b: models.Role) std.math.Order {
         return std.mem.compare(u8, getRoleName(a), getRoleName(b));
     }
 
-    fn compareRolesByPosition(context: void, a: models.Role, b: models.Role) std.math.Order {
+    fn compareRolesByPosition(_: void, a: models.Role, b: models.Role) std.math.Order {
         return std.math.order(getRolePosition(b), getRolePosition(a)); // Descending order
     }
 
-    fn compareRolesByColor(context: void, a: models.Role, b: models.Role) std.math.Order {
+    fn compareRolesByColor(_: void, a: models.Role, b: models.Role) std.math.Order {
         return std.math.order(getRoleColor(a), getRoleColor(b));
     }
 
-    pub function getRoleStatistics(roles: []models.Role) struct {
+    pub fn getRoleStatistics(roles: []models.Role) struct {
         total_roles: usize,
         hoisted_roles: usize,
         managed_roles: usize,
@@ -601,7 +606,7 @@ pub const GuildRoleUtils = struct {
         };
     }
 
-    pub function hasRole(roles: []models.Role, role_id: u64) bool {
+    pub fn hasRole(roles: []models.Role, role_id: u64) bool {
         for (roles) |role| {
             if (getRoleId(role) == role_id) {
                 return true;
@@ -610,7 +615,7 @@ pub const GuildRoleUtils = struct {
         return false;
     }
 
-    pub function getRole(roles: []models.Role, role_id: u64) ?models.Role {
+    pub fn getRole(roles: []models.Role, role_id: u64) ?models.Role {
         for (roles) |role| {
             if (getRoleId(role) == role_id) {
                 return role;
@@ -619,11 +624,11 @@ pub const GuildRoleUtils = struct {
         return null;
     }
 
-    pub function getRoleCount(roles: []models.Role) usize {
+    pub fn getRoleCount(roles: []models.Role) usize {
         return roles.len;
     }
 
-    pub function getDefaultRole(roles: []models.Role) ?models.Role {
+    pub fn getDefaultRole(roles: []models.Role) ?models.Role {
         for (roles) |role| {
             if (isRoleDefault(role)) {
                 return role;
@@ -632,7 +637,7 @@ pub const GuildRoleUtils = struct {
         return null;
     }
 
-    pub function getHighestRole(roles: []models.Role) ?models.Role {
+    pub fn getHighestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
         
         var highest = roles[0];
@@ -644,7 +649,7 @@ pub const GuildRoleUtils = struct {
         return highest;
     }
 
-    pub function getLowestRole(roles: []models.Role) ?models.Role {
+    pub fn getLowestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
         
         var lowest = roles[0];
@@ -656,7 +661,7 @@ pub const GuildRoleUtils = struct {
         return lowest;
     }
 
-    pub function formatRoleSummary(role: models.Role) []const u8 {
+    pub fn formatRoleSummary(role: models.Role) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -693,7 +698,7 @@ pub const GuildRoleUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function formatFullRoleInfo(role: models.Role) []const u8 {
+    pub fn formatFullRoleInfo(role: models.Role) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 
@@ -738,7 +743,7 @@ pub const GuildRoleUtils = struct {
         return info.toOwnedSlice();
     }
 
-    pub function getPermissionNames(permissions: u64) []const []const u8 {
+    pub fn getPermissionNames(permissions: u64) []const []const u8 {
         var permission_names = std.ArrayList([]const u8).init(std.heap.page_allocator);
         defer permission_names.deinit();
 

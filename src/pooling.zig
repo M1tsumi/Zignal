@@ -3,6 +3,13 @@ const models = @import("models.zig");
 const errors = @import("errors.zig");
 const logging = @import("logging.zig");
 
+const PoolError = error{
+    OutOfMemory,
+    ConnectionFailed,
+    RequestFailed,
+    InvalidResponse,
+};
+
 /// HTTP connection pool for efficient connection reuse
 pub const ConnectionPool = struct {
     allocator: std.mem.Allocator,
@@ -244,7 +251,7 @@ pub const RequestBatcher = struct {
 
     pub const BatchHandler = struct {
         endpoint_pattern: []const u8,
-        batch_processor: *const fn (requests: []PendingRequest, allocator: std.mem.Allocator) !BatchResult,
+        batch_processor: *const fn (requests: []PendingRequest, allocator: std.mem.Allocator) PoolError!BatchResult,
         max_batch_size: usize,
         priority: u8,
 
@@ -367,7 +374,7 @@ pub const RequestBatcher = struct {
     pub fn addBatchHandler(
         self: *RequestBatcher,
         endpoint_pattern: []const u8,
-        batch_processor: *const fn (requests: []PendingRequest, allocator: std.mem.Allocator) !BatchResult,
+        batch_processor: *const fn (requests: []PendingRequest, allocator: std.mem.Allocator) PoolError!BatchResult,
         max_batch_size: usize,
         priority: u8,
     ) !void {
@@ -454,9 +461,9 @@ pub const RequestBatcher = struct {
 
             // Remove processed requests from pending list
             for (batch_requests) |request| {
-                for (self.pending_requests.items) |pending_request, i| {
+                for (self.pending_requests.items, 0..) |pending_request, idx| {
                     if (pending_request.id == request.id) {
-                        _ = self.pending_requests.orderedRemove(i);
+                        _ = self.pending_requests.orderedRemove(idx);
                         break;
                     }
                 }
@@ -749,7 +756,7 @@ pub const PerformanceMonitor = struct {
 
     pub fn updateMetrics(self: *PerformanceMonitor) void {
         // Update connection pool metrics
-        const pool_stats = self.connection_pool.getStats();
+        _ = self.connection_pool.getStats();
         const pool_metrics = self.connection_pool.getMetrics();
         
         if (pool_metrics.total_connections_created > 0) {

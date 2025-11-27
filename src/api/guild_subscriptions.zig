@@ -1,11 +1,12 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild subscription management for Discord server subscriptions
 pub const GuildSubscriptionManager = struct {
     client: *Client,
-    allocator: std.mem.Allocator;
+    allocator: std.mem.Allocator,
 
     pub fn init(client: *Client, allocator: std.mem.Allocator) GuildSubscriptionManager {
         return GuildSubscriptionManager{

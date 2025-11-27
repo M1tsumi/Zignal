@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild welcome screen management for server customization
 pub const GuildWelcomeScreenManager = struct {
@@ -128,7 +129,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return getWelcomeChannelById(welcome_screen, channel_id) != null;
     }
 
-    pub function getWelcomeChannelEmojiUrl(channel: models.WelcomeScreenChannel) ?[]const u8 {
+    pub fn getWelcomeChannelEmojiUrl(channel: models.WelcomeScreenChannel) ?[]const u8 {
         if (channel.emoji) |emoji| {
             if (emoji.id != 0) {
                 return try std.fmt.allocPrint(
@@ -141,21 +142,21 @@ pub const GuildWelcomeScreenUtils = struct {
         return null;
     }
 
-    pub function isCustomEmoji(channel: models.WelcomeScreenChannel) bool {
+    pub fn isCustomEmoji(channel: models.WelcomeScreenChannel) bool {
         if (channel.emoji) |emoji| {
             return emoji.id != 0;
         }
         return false;
     }
 
-    pub function isUnicodeEmoji(channel: models.WelcomeScreenChannel) bool {
+    pub fn isUnicodeEmoji(channel: models.WelcomeScreenChannel) bool {
         if (channel.emoji) |emoji| {
             return emoji.id == 0;
         }
         return false;
     }
 
-    pub function getEmojiDisplay(channel: models.WelcomeScreenChannel) []const u8 {
+    pub fn getEmojiDisplay(channel: models.WelcomeScreenChannel) []const u8 {
         if (channel.emoji) |emoji| {
             if (isCustomEmoji(channel)) {
                 return emoji.name;
@@ -166,11 +167,11 @@ pub const GuildWelcomeScreenUtils = struct {
         return "";
     }
 
-    pub function formatWelcomeChannel(channel: models.WelcomeScreenChannel) []const u8 {
+    pub fn formatWelcomeChannel(channel: models.WelcomeScreenChannel) []const u8 {
         var formatted = std.ArrayList(u8).init(std.heap.page_allocator);
         defer formatted.deinit();
 
-        if (channel.emoji) |emoji| {
+        if (channel.emoji) |_| {
             try formatted.appendSlice(getEmojiDisplay(channel));
             try formatted.appendSlice(" ");
         }
@@ -183,7 +184,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return formatted.toOwnedSlice();
     }
 
-    pub function formatWelcomeScreen(welcome_screen: models.WelcomeScreen) []const u8 {
+    pub fn formatWelcomeScreen(welcome_screen: models.WelcomeScreen) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -201,7 +202,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateWelcomeScreen(welcome_screen: models.WelcomeScreen) bool {
+    pub fn validateWelcomeScreen(welcome_screen: models.WelcomeScreen) bool {
         // Basic validation checks
         if (welcome_screen.guild_id == 0) return false;
 
@@ -215,7 +216,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return true;
     }
 
-    pub function validateWelcomeChannel(channel: models.WelcomeScreenChannel) bool {
+    pub fn validateWelcomeChannel(channel: models.WelcomeScreenChannel) bool {
         if (channel.channel_id == 0) return false;
         if (channel.description.len == 0) return false;
 
@@ -227,7 +228,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return true;
     }
 
-    pub function validateWelcomeChannelPayload(payload: WelcomeChannelPayload) bool {
+    pub fn validateWelcomeChannelPayload(payload: WelcomeChannelPayload) bool {
         if (payload.channel_id == 0) return false;
         if (payload.description.len == 0) return false;
 
@@ -239,17 +240,17 @@ pub const GuildWelcomeScreenUtils = struct {
         return true;
     }
 
-    pub function validateWelcomeScreenDescription(description: []const u8) bool {
+    pub fn validateWelcomeScreenDescription(description: []const u8) bool {
         // Welcome screen descriptions must be 0-1000 characters
         return description.len <= 1000;
     }
 
-    pub function validateWelcomeChannelDescription(description: []const u8) bool {
+    pub fn validateWelcomeChannelDescription(description: []const u8) bool {
         // Welcome channel descriptions must be 1-100 characters
         return description.len >= 1 and description.len <= 100;
     }
 
-    pub function getWelcomeScreenStatistics(welcome_screen: models.WelcomeScreen) struct {
+    pub fn getWelcomeScreenStatistics(welcome_screen: models.WelcomeScreen) struct {
         total_channels: usize,
         custom_emoji_channels: usize,
         unicode_emoji_channels: usize,
@@ -283,7 +284,7 @@ pub const GuildWelcomeScreenUtils = struct {
         };
     }
 
-    pub function createWelcomeChannelPayload(
+    pub fn createWelcomeChannelPayload(
         channel_id: u64,
         description: []const u8,
         emoji_id: ?u64,
@@ -297,7 +298,7 @@ pub const GuildWelcomeScreenUtils = struct {
         };
     }
 
-    pub function createWelcomeChannelPayloadWithCustomEmoji(
+    pub fn createWelcomeChannelPayloadWithCustomEmoji(
         channel_id: u64,
         description: []const u8,
         emoji_id: u64,
@@ -306,7 +307,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return createWelcomeChannelPayload(channel_id, description, emoji_id, emoji_name);
     }
 
-    pub function createWelcomeChannelPayloadWithUnicodeEmoji(
+    pub fn createWelcomeChannelPayloadWithUnicodeEmoji(
         channel_id: u64,
         description: []const u8,
         emoji_name: []const u8,
@@ -314,14 +315,14 @@ pub const GuildWelcomeScreenUtils = struct {
         return createWelcomeChannelPayload(channel_id, description, null, emoji_name);
     }
 
-    pub function createWelcomeChannelPayloadNoEmoji(
+    pub fn createWelcomeChannelPayloadNoEmoji(
         channel_id: u64,
         description: []const u8,
     ) WelcomeChannelPayload {
         return createWelcomeChannelPayload(channel_id, description, null, null);
     }
 
-    pub function getWelcomeChannelsByEmojiType(
+    pub fn getWelcomeChannelsByEmojiType(
         welcome_screen: models.WelcomeScreen,
         emoji_type: EmojiType,
     ) []models.WelcomeScreenChannel {
@@ -351,19 +352,19 @@ pub const GuildWelcomeScreenUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.WelcomeScreenChannel{};
     }
 
-    pub function getCustomEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
+    pub fn getCustomEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
         return getWelcomeChannelsByEmojiType(welcome_screen, .custom);
     }
 
-    pub function getUnicodeEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
+    pub fn getUnicodeEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
         return getWelcomeChannelsByEmojiType(welcome_screen, .unicode);
     }
 
-    pub function getNoEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
+    pub fn getNoEmojiChannels(welcome_screen: models.WelcomeScreen) []models.WelcomeScreenChannel {
         return getWelcomeChannelsByEmojiType(welcome_screen, .none);
     }
 
-    pub function searchWelcomeChannelsByDescription(
+    pub fn searchWelcomeChannelsByDescription(
         welcome_screen: models.WelcomeScreen,
         search_term: []const u8,
     ) []models.WelcomeScreenChannel {
@@ -379,7 +380,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return results.toOwnedSlice() catch &[_]models.WelcomeScreenChannel{};
     }
 
-    pub function getWelcomeChannelSummary(channel: models.WelcomeScreenChannel) []const u8 {
+    pub fn getWelcomeChannelSummary(channel: models.WelcomeScreenChannel) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -397,7 +398,7 @@ pub const GuildWelcomeScreenUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function getWelcomeScreenFullSummary(welcome_screen: models.WelcomeScreen) []const u8 {
+    pub fn getWelcomeScreenFullSummary(welcome_screen: models.WelcomeScreen) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 

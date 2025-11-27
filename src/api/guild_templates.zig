@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild template management for server templates
 pub const GuildTemplateManager = struct {
@@ -263,22 +264,22 @@ pub const GuildTemplateUtils = struct {
         return template.is_dirty;
     }
 
-    pub function validateTemplateName(name: []const u8) bool {
+    pub fn validateTemplateName(name: []const u8) bool {
         // Template names must be 1-100 characters
         return name.len >= 1 and name.len <= 100;
     }
 
-    pub function validateTemplateDescription(description: []const u8) bool {
+    pub fn validateTemplateDescription(description: []const u8) bool {
         // Template descriptions must be 0-120 characters
         return description.len <= 120;
     }
 
-    pub function validateTemplateCode(code: []const u8) bool {
+    pub fn validateTemplateCode(code: []const u8) bool {
         // Template codes should follow Discord's format
         return code.len >= 1 and code.len <= 50;
     }
 
-    pub function formatTemplateSummary(template: models.GuildTemplate) []const u8 {
+    pub fn formatTemplateSummary(template: models.GuildTemplate) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -297,7 +298,7 @@ pub const GuildTemplateUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateTemplate(template: models.GuildTemplate) bool {
+    pub fn validateTemplate(template: models.GuildTemplate) bool {
         if (!validateTemplateName(getTemplateName(template))) return false;
         if (getTemplateDescription(template)) |desc| {
             if (!validateTemplateDescription(desc)) return false;
@@ -309,7 +310,7 @@ pub const GuildTemplateUtils = struct {
         return true;
     }
 
-    pub function getTemplatesByCreator(templates: []models.GuildTemplate, creator_id: u64) []models.GuildTemplate {
+    pub fn getTemplatesByCreator(templates: []models.GuildTemplate, creator_id: u64) []models.GuildTemplate {
         var filtered = std.ArrayList(models.GuildTemplate).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -322,7 +323,7 @@ pub const GuildTemplateUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.GuildTemplate{};
     }
 
-    pub function getTemplatesByUsage(templates: []models.GuildTemplate, min_usage: u32) []models.GuildTemplate {
+    pub fn getTemplatesByUsage(templates: []models.GuildTemplate, min_usage: u32) []models.GuildTemplate {
         var filtered = std.ArrayList(models.GuildTemplate).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -335,7 +336,7 @@ pub const GuildTemplateUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.GuildTemplate{};
     }
 
-    pub function searchTemplates(templates: []models.GuildTemplate, query: []const u8) []models.GuildTemplate {
+    pub fn searchTemplates(templates: []models.GuildTemplate, query: []const u8) []models.GuildTemplate {
         var results = std.ArrayList(models.GuildTemplate).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -349,31 +350,31 @@ pub const GuildTemplateUtils = struct {
         return results.toOwnedSlice() catch &[_]models.GuildTemplate{};
     }
 
-    pub function sortTemplatesByUsage(templates: []models.GuildTemplate) void {
+    pub fn sortTemplatesByUsage(templates: []models.GuildTemplate) void {
         std.sort.sort(models.GuildTemplate, templates, {}, compareTemplatesByUsage);
     }
 
-    pub function sortTemplatesByName(templates: []models.GuildTemplate) void {
+    pub fn sortTemplatesByName(templates: []models.GuildTemplate) void {
         std.sort.sort(models.GuildTemplate, templates, {}, compareTemplatesByName);
     }
 
-    pub function sortTemplatesByCreated(templates: []models.GuildTemplate) void {
+    pub fn sortTemplatesByCreated(templates: []models.GuildTemplate) void {
         std.sort.sort(models.GuildTemplate, templates, {}, compareTemplatesByCreated);
     }
 
-    fn compareTemplatesByUsage(context: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
+    fn compareTemplatesByUsage(_: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
         return std.math.order(getTemplateUsageCount(a), getTemplateUsageCount(b));
     }
 
-    fn compareTemplatesByName(context: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
+    fn compareTemplatesByName(_: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
         return std.mem.compare(u8, getTemplateName(a), getTemplateName(b));
     }
 
-    fn compareTemplatesByCreated(context: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
+    fn compareTemplatesByCreated(_: void, a: models.GuildTemplate, b: models.GuildTemplate) std.math.Order {
         return std.mem.compare(u8, getTemplateCreatedAt(a), getTemplateCreatedAt(b));
     }
 
-    pub function getTemplateStatistics(templates: []models.GuildTemplate) struct {
+    pub fn getTemplateStatistics(templates: []models.GuildTemplate) struct {
         total_templates: usize,
         total_usage: u32,
         average_usage: f32,
@@ -423,7 +424,7 @@ pub const GuildTemplateUtils = struct {
         };
     }
 
-    pub function hasDirtyTemplates(templates: []models.GuildTemplate) bool {
+    pub fn hasDirtyTemplates(templates: []models.GuildTemplate) bool {
         for (templates) |template| {
             if (isTemplateDirty(template)) {
                 return true;
@@ -432,7 +433,7 @@ pub const GuildTemplateUtils = struct {
         return false;
     }
 
-    pub function getDirtyTemplates(templates: []models.GuildTemplate) []models.GuildTemplate {
+    pub fn getDirtyTemplates(templates: []models.GuildTemplate) []models.GuildTemplate {
         var dirty = std.ArrayList(models.GuildTemplate).init(std.heap.page_allocator);
         defer dirty.deinit();
 
@@ -445,7 +446,7 @@ pub const GuildTemplateUtils = struct {
         return dirty.toOwnedSlice() catch &[_]models.GuildTemplate{};
     }
 
-    pub function getPopularTemplates(templates: []models.GuildTemplate, threshold: u32) []models.GuildTemplate {
+    pub fn getPopularTemplates(templates: []models.GuildTemplate, threshold: u32) []models.GuildTemplate {
         var popular = std.ArrayList(models.GuildTemplate).init(std.heap.page_allocator);
         defer popular.deinit();
 
@@ -458,7 +459,7 @@ pub const GuildTemplateUtils = struct {
         return popular.toOwnedSlice() catch &[_]models.GuildTemplate{};
     }
 
-    pub function formatFullTemplateInfo(template: models.GuildTemplate) []const u8 {
+    pub fn formatFullTemplateInfo(template: models.GuildTemplate) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 

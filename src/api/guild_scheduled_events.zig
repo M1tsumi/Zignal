@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild scheduled event management for server events
 pub const GuildScheduledEventManager = struct {
@@ -312,13 +313,13 @@ pub const GuildScheduledEventUtils = struct {
     }
 
     pub fn isEventInFuture(event: models.GuildScheduledEvent) bool {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intCast(std.time.timestamp())) * 1000;
         return event.scheduled_start_time > current_time;
     }
 
     pub fn isEventInPast(event: models.GuildScheduledEvent) bool {
         if (event.scheduled_end_time) |end_time| {
-            const current_time = @intCast(u64, std.time.timestamp() * 1000);
+            const current_time = @as(u64, @intCast(std.time.timestamp())) * 1000;
             return end_time < current_time;
         }
         return false;
@@ -349,7 +350,7 @@ pub const GuildScheduledEventUtils = struct {
     }
 
     pub fn getTimeUntilEvent(event: models.GuildScheduledEvent) []const u8 {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intCast(std.time.timestamp())) * 1000;
         const time_until = event.scheduled_start_time - current_time;
         return formatEventDuration(time_until);
     }
@@ -418,7 +419,7 @@ pub const GuildScheduledEventUtils = struct {
         return null;
     }
 
-    pub fn isEventRecurring(event: models.GuildScheduledEvent) bool {
+    pub fn isEventRecurring(_: models.GuildScheduledEvent) bool {
         // Discord doesn't natively support recurring events
         // This would be implemented at the application level
         return false;
@@ -428,13 +429,13 @@ pub const GuildScheduledEventUtils = struct {
         return event.user_count;
     }
 
-    pub fn isEventFull(event: models.GuildScheduledEvent) bool {
+    pub fn isEventFull(_: models.GuildScheduledEvent) bool {
         // Discord doesn't have a concept of "full" events
         // This would be implemented at the application level
         return false;
     }
 
-    pub fn canUserJoinEvent(event: models.GuildScheduledEvent, user_id: u64) bool {
+    pub fn canUserJoinEvent(_: models.GuildScheduledEvent, _: u64) bool {
         // Check if user is already interested
         // This would require checking the event's user list
         // For now, assume all users can join
@@ -464,29 +465,29 @@ pub const GuildScheduledEventUtils = struct {
         return null;
     }
 
-    pub function createEventMetadata(location: ?[]const u8) models.GuildScheduledEventEntityMetadata {
+    pub fn createEventMetadata(location: ?[]const u8) models.GuildScheduledEventEntityMetadata {
         return models.GuildScheduledEventEntityMetadata{
             .location = location,
         };
     }
 
-    pub function validateEventName(name: []const u8) bool {
+    pub fn validateEventName(name: []const u8) bool {
         // Event names must be 1-100 characters
         return name.len >= 1 and name.len <= 100;
     }
 
-    pub function validateEventDescription(description: []const u8) bool {
+    pub fn validateEventDescription(description: []const u8) bool {
         // Event descriptions must be 1-1000 characters
         return description.len >= 1 and description.len <= 1000;
     }
 
-    pub function validateEventLocation(location: []const u8) bool {
+    pub fn validateEventLocation(location: []const u8) bool {
         // Event locations must be 1-100 characters
         return location.len >= 1 and location.len <= 100;
     }
 
-    pub function validateEventTime(start_time: u64, end_time: ?u64) bool {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+    pub fn validateEventTime(start_time: u64, end_time: ?u64) bool {
+        const current_time = @as(u64, @intCast(std.time.timestamp())) * 1000;
         
         // Start time must be in the future
         if (start_time <= current_time) return false;
@@ -499,7 +500,7 @@ pub const GuildScheduledEventUtils = struct {
         return true;
     }
 
-    pub function getEventStatistics(events: []models.GuildScheduledEvent) struct {
+    pub fn getEventStatistics(events: []models.GuildScheduledEvent) struct {
         total: usize,
         scheduled: usize,
         active: usize,

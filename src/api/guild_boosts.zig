@@ -182,94 +182,94 @@ pub const GuildBoostUtils = struct {
         };
     }
 
-    pub function getBoostSubscriptionTier(subscription: models.BoostSubscription) models.PremiumTier {
+    pub fn getBoostSubscriptionTier(subscription: models.BoostSubscription) models.PremiumTier {
         return subscription.plan.tier;
     }
 
-    pub function getBoostSubscriptionUserId(subscription: models.BoostSubscription) u64 {
+    pub fn getBoostSubscriptionUserId(subscription: models.BoostSubscription) u64 {
         return subscription.user_id;
     }
 
-    pub function getBoostSubscriptionGuildId(subscription: models.BoostSubscription) u64 {
+    pub fn getBoostSubscriptionGuildId(subscription: models.BoostSubscription) u64 {
         return subscription.guild_id;
     }
 
-    pub function getBoostSubscriptionEndsAt(subscription: models.BoostSubscription) ?[]const u8 {
+    pub fn getBoostSubscriptionEndsAt(subscription: models.BoostSubscription) ?[]const u8 {
         return subscription.ends_at;
     }
 
-    pub function getBoostSubscriptionStartedAt(subscription: models.BoostSubscription) ?[]const u8 {
+    pub fn getBoostSubscriptionStartedAt(subscription: models.BoostSubscription) ?[]const u8 {
         return subscription.started_at;
     }
 
-    pub function isBoostSubscriptionRecurring(subscription: models.BoostSubscription) bool {
+    pub fn isBoostSubscriptionRecurring(subscription: models.BoostSubscription) bool {
         return subscription.recurring;
     }
 
-    pub function getBoostSubscriptionCooldownEndsAt(subscription: models.BoostSubscription) ?[]const u8 {
+    pub fn getBoostSubscriptionCooldownEndsAt(subscription: models.BoostSubscription) ?[]const u8 {
         return subscription.cooldown_ends_at;
     }
 
-    pub function isBoostSubscriptionInCooldown(subscription: models.BoostSubscription) bool {
+    pub fn isBoostSubscriptionInCooldown(subscription: models.BoostSubscription) bool {
         return subscription.cooldown_ends_at != null;
     }
 
-    pub function getBoostSlotTier(slot: models.BoostSlot) models.PremiumTier {
+    pub fn getBoostSlotTier(slot: models.BoostSlot) models.PremiumTier {
         return slot.plan.tier;
     }
 
-    pub function getBoostSlotGuildId(slot: models.BoostSlot) u64 {
+    pub fn getBoostSlotGuildId(slot: models.BoostSlot) u64 {
         return slot.guild_id;
     }
 
-    pub function getBoostSlotUserId(slot: models.BoostSlot) ?u64 {
+    pub fn getBoostSlotUserId(slot: models.BoostSlot) ?u64 {
         return slot.user_id;
     }
 
-    pub function isBoostSlotUsed(slot: models.BoostSlot) bool {
+    pub fn isBoostSlotUsed(slot: models.BoostSlot) bool {
         return slot.user_id != null;
     }
 
-    pub function getBoostSlotUsedSince(slot: models.BoostSlot) ?[]const u8 {
+    pub fn getBoostSlotUsedSince(slot: models.BoostSlot) ?[]const u8 {
         return slot.used_since;
     }
 
-    pub function getBoostSlotPremiumUsage(slot: models.BoostSlot) ?[]const u8 {
+    pub fn getBoostSlotPremiumUsage(slot: models.BoostSlot) ?[]const u8 {
         return slot.premium_guild_subscription;
     }
 
-    pub function getPremiumSubscriptionTier(subscription: models.PremiumSubscription) models.PremiumTier {
+    pub fn getPremiumSubscriptionTier(subscription: models.PremiumSubscription) models.PremiumTier {
         return subscription.plan.tier;
     }
 
-    pub function getPremiumSubscriptionUserId(subscription: models.PremiumSubscription) u64 {
+    pub fn getPremiumSubscriptionUserId(subscription: models.PremiumSubscription) u64 {
         return subscription.user_id;
     }
 
-    pub function isPremiumSubscriptionActive(subscription: models.PremiumSubscription) bool {
+    pub fn isPremiumSubscriptionActive(subscription: models.PremiumSubscription) bool {
         return subscription.status == .active;
     }
 
-    pub function getPremiumSubscriptionStatus(status: models.PremiumSubscriptionStatus) []const u8 {
+    pub fn getPremiumSubscriptionStatus(status: models.PremiumSubscriptionStatus) []const u8 {
         return switch (status) {
             .active => "Active",
             .inactive => "Inactive",
         };
     }
 
-    pub function getPremiumSubscriptionEndsAt(subscription: models.PremiumSubscription) ?[]const u8 {
+    pub fn getPremiumSubscriptionEndsAt(subscription: models.PremiumSubscription) ?[]const u8 {
         return subscription.ends_at;
     }
 
-    pub function getPremiumSubscriptionStartedAt(subscription: models.PremiumSubscription) ?[]const u8 {
+    pub fn getPremiumSubscriptionStartedAt(subscription: models.PremiumSubscription) ?[]const u8 {
         return subscription.started_at;
     }
 
-    pub function isPremiumSubscriptionRecurring(subscription: models.PremiumSubscription) bool {
+    pub fn isPremiumSubscriptionRecurring(subscription: models.PremiumSubscription) bool {
         return subscription.recurring;
     }
 
-    pub function formatBoostSummary(subscription: models.BoostSubscription) []const u8 {
+    pub fn formatBoostSummary(subscription: models.BoostSubscription) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -293,7 +293,7 @@ pub const GuildBoostUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function formatBoostSlotSummary(slot: models.BoostSlot) []const u8 {
+    pub fn formatBoostSlotSummary(slot: models.BoostSlot) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -314,7 +314,7 @@ pub const GuildBoostUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function formatPremiumSubscriptionSummary(subscription: models.PremiumSubscription) []const u8 {
+    pub fn formatPremiumSubscriptionSummary(subscription: models.PremiumSubscription) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -332,7 +332,7 @@ pub const GuildBoostUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateBoostSubscription(subscription: models.BoostSubscription) bool {
+    pub fn validateBoostSubscription(subscription: models.BoostSubscription) bool {
         if (subscription.user_id == 0) return false;
         if (subscription.guild_id == 0) return false;
         if (subscription.plan.tier == .none) return false;
@@ -340,21 +340,21 @@ pub const GuildBoostUtils = struct {
         return true;
     }
 
-    pub function validateBoostSlot(slot: models.BoostSlot) bool {
+    pub fn validateBoostSlot(slot: models.BoostSlot) bool {
         if (slot.guild_id == 0) return false;
         if (slot.plan.tier == .none) return false;
 
         return true;
     }
 
-    pub function validatePremiumSubscription(subscription: models.PremiumSubscription) bool {
+    pub fn validatePremiumSubscription(subscription: models.PremiumSubscription) bool {
         if (subscription.user_id == 0) return false;
         if (subscription.plan.tier == .none) return false;
 
         return true;
     }
 
-    pub function getActiveBoostSubscriptions(subscriptions: []models.BoostSubscription) []models.BoostSubscription {
+    pub fn getActiveBoostSubscriptions(subscriptions: []models.BoostSubscription) []models.BoostSubscription {
         var active = std.ArrayList(models.BoostSubscription).init(std.heap.page_allocator);
         defer active.deinit();
 

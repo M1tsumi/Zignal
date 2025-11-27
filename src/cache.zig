@@ -184,13 +184,13 @@ pub const Cache = struct {
         try self.ensureCapacity();
         
         // Remove old entry if exists
-        if (self.guilds.fetchRemove(guild_id)) |old_entry| {
+        if (self.guilds.fetchRemove(guild.id)) |old_entry| {
             self.deinitGuild(old_entry.value);
             self.current_size -= 1;
         }
 
         const cloned = try self.cloneGuild(guild);
-        try self.guilds.put(guild_id, cloned);
+        try self.guilds.put(guild.id, cloned);
         self.current_size += 1;
     }
 
@@ -214,13 +214,13 @@ pub const Cache = struct {
     pub fn setChannel(self: *Cache, channel: models.Channel) !void {
         try self.ensureCapacity();
         
-        if (self.channels.fetchRemove(channel_id)) |old_entry| {
+        if (self.channels.fetchRemove(channel.id)) |old_entry| {
             self.deinitChannel(old_entry.value);
             self.current_size -= 1;
         }
 
         const cloned = try self.cloneChannel(channel);
-        try self.channels.put(channel_id, cloned);
+        try self.channels.put(channel.id, cloned);
         self.current_size += 1;
     }
 
@@ -244,13 +244,13 @@ pub const Cache = struct {
     pub fn setUser(self: *Cache, user: models.User) !void {
         try self.ensureCapacity();
         
-        if (self.users.fetchRemove(user_id)) |old_entry| {
+        if (self.users.fetchRemove(user.id)) |old_entry| {
             self.deinitUser(old_entry.value);
             self.current_size -= 1;
         }
 
         const cloned = try self.cloneUser(user);
-        try self.users.put(user_id, cloned);
+        try self.users.put(user.id, cloned);
         self.current_size += 1;
     }
 
@@ -354,13 +354,13 @@ pub const Cache = struct {
     pub fn setMessage(self: *Cache, message: models.Message) !void {
         try self.ensureCapacity();
         
-        if (self.messages.fetchRemove(message_id)) |old_entry| {
+        if (self.messages.fetchRemove(message.id)) |old_entry| {
             self.deinitMessage(old_entry.value);
             self.current_size -= 1;
         }
 
         const cloned = try self.cloneMessage(message);
-        try self.messages.put(message_id, cloned);
+        try self.messages.put(message.id, cloned);
         self.current_size += 1;
     }
 

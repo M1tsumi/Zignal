@@ -8,11 +8,11 @@ pub const ShardManager = struct {
     token: []const u8,
     shards: std.ArrayList(*Shard),
     total_shards: u32,
-    event_handler: anytype,
+    event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void,
     intents: u32,
     compression: bool,
 
-    pub fn init(allocator: std.mem.Allocator, token: []const u8, total_shards: u32, event_handler: anytype, intents: u32, compression: bool) !*ShardManager {
+    pub fn init(allocator: std.mem.Allocator, token: []const u8, total_shards: u32, event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void, intents: u32, compression: bool) !*ShardManager {
         const manager = try allocator.create(ShardManager);
         manager.* = .{
             .allocator = allocator,
@@ -44,7 +44,7 @@ pub const ShardManager = struct {
         return @intCast((guild_id >> 22) % total_shards);
     }
 
-    pub async fn connectAll(self: *ShardManager) !void {
+    pub fn connectAll(self: *ShardManager) !void {
         for (0..self.total_shards) |shard_id| {
             const shard = try Shard.init(
                 self.allocator,
@@ -112,7 +112,7 @@ pub const Shard = struct {
     shard_id: u32,
     total_shards: u32,
     gateway: ?*Gateway,
-    event_handler: anytype,
+    event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void,
     intents: u32,
     compression: bool,
     connected: bool = false,
@@ -199,7 +199,7 @@ pub const Shard = struct {
         _ = json_string; // In a real implementation, this would be sent
     }
 
-    pub fn resume(self: *Shard) !void {
+    pub fn shardResume(self: *Shard) !void {
         if (self.gateway == null or self.session_id == null or self.sequence == null) return error.CannotResume;
 
         const resume_data = std.json.ObjectMap.init(self.allocator);
@@ -222,7 +222,7 @@ pub const Shard = struct {
         _ = json_string; // In a real implementation, this would be sent
     }
 
-    pub async fn eventLoop(self: *Shard) !void {
+    pub fn eventLoop(self: *Shard) !void {
         while (self.connected) {
             if (self.gateway) |gw| {
                 // Handle gateway events

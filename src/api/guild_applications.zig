@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild application management for Discord server applications
 pub const GuildApplicationManager = struct {
@@ -235,7 +236,7 @@ pub const GuildApplicationManager = struct {
         self: *GuildApplicationManager,
         application_id: u64,
         name: []const u8,
-        type: models.ApplicationAssetType,
+        _: models.ApplicationAssetType,
         data: []const u8,
     ) !models.ApplicationAsset {
         const url = try std.fmt.allocPrint(

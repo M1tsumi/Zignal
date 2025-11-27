@@ -28,15 +28,15 @@ pub const MessageBuilder = struct {
     }
 
     pub fn deinit(self: *MessageBuilder) void {
-        if (self.content) |content| self.allocator.free(content);
-        if (self.allowed_mentions) |*mentions| {
+        if (self.content) |content_val| self.allocator.free(content_val);
+        if (self.allowed_mentions) |_| {
             // AllowedMentions deinit would be handled by models
         }
-        for (self.embeds.items) |*embed| {
+        for (self.embeds.items) |_| {
             // Embed deinit would be handled by models
         }
-        for (self.components.items) |*component| {
-            component.deinit(self.allocator);
+        for (self.components.items) |*component_obj| {
+            component_obj.deinit(self.allocator);
         }
         for (self.attachments.items) |*attachment| {
             // Attachment deinit would be handled by models
@@ -59,14 +59,14 @@ pub const MessageBuilder = struct {
         return self;
     }
 
-    pub fn addEmbed(self: *MessageBuilder, embed: models.Embed) !*MessageBuilder {
-        try self.embeds.append(embed);
+    pub fn addEmbed(self: *MessageBuilder, embed_obj: models.Embed) !*MessageBuilder {
+        try self.embeds.append(embed_obj);
         return self;
     }
 
     pub fn embed(self: *MessageBuilder, builder: *EmbedBuilder) !*MessageBuilder {
-        const embed = try builder.build(self.allocator);
-        try self.embeds.append(embed);
+        const embed_obj = try builder.build(self.allocator);
+        try self.embeds.append(embed_obj);
         return self;
     }
 
@@ -124,8 +124,8 @@ pub const MessageBuilder = struct {
         return self;
     }
 
-    pub fn poll(self: *MessageBuilder, poll: models.Poll) *MessageBuilder {
-        self.poll = poll;
+    pub fn poll(self: *MessageBuilder, poll_obj: models.Poll) *MessageBuilder {
+        self.poll = poll_obj;
         return self;
     }
 
@@ -134,7 +134,7 @@ pub const MessageBuilder = struct {
             .id = 0, // Would be assigned by Discord
             .channel_id = 0, // Would be assigned by Discord
             .author = undefined, // Would be assigned by Discord
-            .content = if (self.content) |content| try self.allocator.dupe(u8, content) else try self.allocator.dupe(u8, ""),
+            .content = if (self.content) |content_val| try self.allocator.dupe(u8, content_val) else try self.allocator.dupe(u8, ""),
             .timestamp = "", // Would be assigned by Discord
             .edited_timestamp = null,
             .tts = false,
@@ -170,8 +170,8 @@ pub const MessageBuilder = struct {
 
     pub fn validate(self: *MessageBuilder) !void {
         // Validate content length
-        if (self.content) |content| {
-            if (content.len > 2000) {
+        if (self.content) |content_val| {
+            if (content_val.len > 2000) {
                 return error.ContentTooLong;
             }
         }
@@ -254,7 +254,7 @@ pub const EmbedBuilder = struct {
     const Field = struct {
         name: []const u8,
         value: []const u8,
-        inline: bool = false,
+        is_inline: bool = false,
     };
 
     pub fn init(allocator: std.mem.Allocator) EmbedBuilder {
@@ -265,10 +265,10 @@ pub const EmbedBuilder = struct {
     }
 
     pub fn deinit(self: *EmbedBuilder) void {
-        if (self.title) |title| self.allocator.free(title);
-        if (self.description) |description| self.allocator.free(description);
-        if (self.url) |url| self.allocator.free(url);
-        if (self.timestamp) |timestamp| self.allocator.free(timestamp);
+        if (self.title) |title_val| self.allocator.free(title_val);
+        if (self.description) |description_val| self.allocator.free(description_val);
+        if (self.url) |url_val| self.allocator.free(url_val);
+        if (self.timestamp) |timestamp_val| self.allocator.free(timestamp_val);
         if (self.footer) |*footer| {
             self.allocator.free(footer.text);
             if (footer.icon_url) |icon_url| self.allocator.free(icon_url);
@@ -327,8 +327,8 @@ pub const EmbedBuilder = struct {
         return self;
     }
 
-    pub fn color(self: *EmbedBuilder, color: u32) *EmbedBuilder {
-        self.color = color;
+    pub fn color(self: *EmbedBuilder, color_val: u32) *EmbedBuilder {
+        self.color = color_val;
         return self;
     }
 
@@ -338,8 +338,8 @@ pub const EmbedBuilder = struct {
     }
 
     pub fn colorHex(self: *EmbedBuilder, hex: []const u8) !*EmbedBuilder {
-        const color = try utils.Color.parseHex(hex);
-        self.color = color.toRgb();
+        const color_val = try utils.Color.parseHex(hex);
+        self.color = color_val.toRgb();
         return self;
     }
 
@@ -351,41 +351,41 @@ pub const EmbedBuilder = struct {
         }
         self.footer = Footer{
             .text = try self.allocator.dupe(u8, text),
-            .icon_url = if (icon_url) |url| try self.allocator.dupe(u8, url) else null,
+            .icon_url = if (icon_url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             .proxy_icon_url = null,
         };
         return self;
     }
 
-    pub fn image(self: *EmbedBuilder, url: []const u8, proxy_url: ?[]const u8, height: ?u32, width: ?u32) !*EmbedBuilder {
+    pub fn image(self: *EmbedBuilder, image_url: []const u8, proxy_url: ?[]const u8, height: ?u32, width: ?u32) !*EmbedBuilder {
         if (self.image) |*old_image| {
             self.allocator.free(old_image.url);
             if (old_image.proxy_url) |old_proxy_url| self.allocator.free(old_proxy_url);
         }
         self.image = Image{
-            .url = try self.allocator.dupe(u8, url),
-            .proxy_url = if (proxy_url) |url| try self.allocator.dupe(u8, url) else null,
+            .url = try self.allocator.dupe(u8, image_url),
+            .proxy_url = if (proxy_url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             .height = height,
             .width = width,
         };
         return self;
     }
 
-    pub fn thumbnail(self: *EmbedBuilder, url: []const u8, proxy_url: ?[]const u8, height: ?u32, width: ?u32) !*EmbedBuilder {
+    pub fn thumbnail(self: *EmbedBuilder, thumbnail_url: []const u8, proxy_url: ?[]const u8, height: ?u32, width: ?u32) !*EmbedBuilder {
         if (self.thumbnail) |*old_thumbnail| {
             self.allocator.free(old_thumbnail.url);
             if (old_thumbnail.proxy_url) |old_proxy_url| self.allocator.free(old_proxy_url);
         }
         self.thumbnail = Image{
-            .url = try self.allocator.dupe(u8, url),
-            .proxy_url = if (proxy_url) |url| try self.allocator.dupe(u8, url) else null,
+            .url = try self.allocator.dupe(u8, thumbnail_url),
+            .proxy_url = if (proxy_url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             .height = height,
             .width = width,
         };
         return self;
     }
 
-    pub fn author(self: *EmbedBuilder, name: []const u8, url: ?[]const u8, icon_url: ?[]const u8) !*EmbedBuilder {
+    pub fn author(self: *EmbedBuilder, name: []const u8, author_url: ?[]const u8, icon_url: ?[]const u8) !*EmbedBuilder {
         if (self.author) |*old_author| {
             self.allocator.free(old_author.name);
             if (old_author.url) |old_url| self.allocator.free(old_url);
@@ -394,18 +394,18 @@ pub const EmbedBuilder = struct {
         }
         self.author = Author{
             .name = try self.allocator.dupe(u8, name),
-            .url = if (url) |u| try self.allocator.dupe(u8, u) else null,
-            .icon_url = if (icon_url) |url| try self.allocator.dupe(u8, url) else null,
+            .url = if (author_url) |u| try self.allocator.dupe(u8, u) else null,
+            .icon_url = if (icon_url) |url_val| try self.allocator.dupe(u8, url_val) else null,
             .proxy_icon_url = null,
         };
         return self;
     }
 
-    pub fn field(self: *EmbedBuilder, name: []const u8, value: []const u8, inline: bool) !*EmbedBuilder {
+    pub fn field(self: *EmbedBuilder, name: []const u8, value: []const u8, is_inline: bool) !*EmbedBuilder {
         try self.fields.append(Field{
             .name = try self.allocator.dupe(u8, name),
             .value = try self.allocator.dupe(u8, value),
-            .inline = inline,
+            .is_inline = is_inline,
         });
         return self;
     }
@@ -416,11 +416,11 @@ pub const EmbedBuilder = struct {
 
     pub fn build(self: *EmbedBuilder) !models.Embed {
         return models.Embed{
-            .title = if (self.title) |title| try self.allocator.dupe(u8, title) else null,
+            .title = if (self.title) |title_val| try self.allocator.dupe(u8, title_val) else null,
             .type = "rich",
-            .description = if (self.description) |description| try self.allocator.dupe(u8, description) else null,
-            .url = if (self.url) |url| try self.allocator.dupe(u8, url) else null,
-            .timestamp = if (self.timestamp) |timestamp| try self.allocator.dupe(u8, timestamp) else null,
+            .description = if (self.description) |description_val| try self.allocator.dupe(u8, description_val) else null,
+            .url = if (self.url) |url_val| try self.allocator.dupe(u8, url_val) else null,
+            .timestamp = if (self.timestamp) |timestamp_val| try self.allocator.dupe(u8, timestamp_val) else null,
             .color = self.color,
             .footer = if (self.footer) |footer| models.Embed.Footer{
                 .text = try self.allocator.dupe(u8, footer.text),
@@ -456,15 +456,15 @@ pub const EmbedBuilder = struct {
 
     pub fn validate(self: *EmbedBuilder) !void {
         // Validate title length
-        if (self.title) |title| {
-            if (title.len > 256) {
+        if (self.title) |title_val| {
+            if (title_val.len > 256) {
                 return error.TitleTooLong;
             }
         }
 
         // Validate description length
-        if (self.description) |description| {
-            if (description.len > 4096) {
+        if (self.description) |description_val| {
+            if (description_val.len > 4096) {
                 return error.DescriptionTooLong;
             }
         }
@@ -475,18 +475,18 @@ pub const EmbedBuilder = struct {
         }
 
         // Validate field name and value lengths
-        for (self.fields.items) |field| {
-            if (field.name.len > 256) {
+        for (self.fields.items) |field_obj| {
+            if (field_obj.name.len > 256) {
                 return error.FieldNameTooLong;
             }
-            if (field.value.len > 1024) {
+            if (field_obj.value.len > 1024) {
                 return error.FieldValueTooLong;
             }
         }
 
         // Validate footer text length
-        if (self.footer) |footer| {
-            if (footer.text.len > 2048) {
+        if (self.footer) |footer_obj| {
+            if (footer_obj.text.len > 2048) {
                 return error.FooterTextTooLong;
             }
         }
@@ -540,8 +540,8 @@ pub const ChannelBuilder = struct {
 
     pub fn deinit(self: *ChannelBuilder) void {
         self.allocator.free(self.name);
-        if (self.topic) |topic| self.allocator.free(topic);
-        for (self.permission_overwrites.items) |*overwrite| {
+        if (self.topic) |topic_val| self.allocator.free(topic_val);
+        for (self.permission_overwrites.items) |_| {
             // PermissionOverwrite deinit would be handled by models
         }
         self.permission_overwrites.deinit();
@@ -601,7 +601,7 @@ pub const ChannelBuilder = struct {
             .position = self.position,
             .permission_overwrites = try self.allocator.dupe(models.PermissionOverwrite, self.permission_overwrites.items),
             .name = try self.allocator.dupe(u8, self.name),
-            .topic = if (self.topic) |topic| try self.allocator.dupe(u8, topic) else null,
+            .topic = if (self.topic) |topic_val| try self.allocator.dupe(u8, topic_val) else null,
             .nsfw = self.nsfw,
             .last_message_id = null,
             .bitrate = self.bitrate,
@@ -630,16 +630,16 @@ pub const ChannelBuilder = struct {
         }
 
         // Validate topic length for text channels
-        if (self.type == 0 and self.topic) |topic| { // GUILD_TEXT
-            if (topic.len > 1024) {
+        if (self.type == 0 and self.topic) |topic_val| { // GUILD_TEXT
+            if (topic_val.len > 1024) {
                 return error.TopicTooLong;
             }
         }
 
         // Validate bitrate for voice channels
         if (self.type == 2) { // GUILD_VOICE
-            if (self.bitrate) |bitrate| {
-                if (bitrate < 8000 or bitrate > 128000) {
+            if (self.bitrate) |bitrate_val| {
+                if (bitrate_val < 8000 or bitrate_val > 128000) {
                     return error.InvalidBitrate;
                 }
             }
@@ -685,12 +685,12 @@ pub const RoleBuilder = struct {
 
     pub fn deinit(self: *RoleBuilder) void {
         self.allocator.free(self.name);
-        if (self.icon) |icon| self.allocator.free(icon);
+        if (self.icon) |icon_val| self.allocator.free(icon_val);
         if (self.unicode_emoji) |emoji| self.allocator.free(emoji);
     }
 
-    pub fn color(self: *RoleBuilder, color: u32) *RoleBuilder {
-        self.color = color;
+    pub fn color(self: *RoleBuilder, color_val: u32) *RoleBuilder {
+        self.color = color_val;
         return self;
     }
 
@@ -700,8 +700,8 @@ pub const RoleBuilder = struct {
     }
 
     pub fn colorHex(self: *RoleBuilder, hex: []const u8) !*RoleBuilder {
-        const color = try utils.Color.parseHex(hex);
-        self.color = color.toRgb();
+        const color_val = try utils.Color.parseHex(hex);
+        self.color = color_val.toRgb();
         return self;
     }
 
@@ -760,7 +760,7 @@ pub const RoleBuilder = struct {
             .permissions = permissions_str,
             .managed = false,
             .mentionable = self.mentionable,
-            .icon = if (self.icon) |icon| try self.allocator.dupe(u8, icon) else null,
+            .icon = if (self.icon) |icon_val| try self.allocator.dupe(u8, icon_val) else null,
             .unicode_emoji = if (self.unicode_emoji) |emoji| try self.allocator.dupe(u8, emoji) else null,
         };
     }

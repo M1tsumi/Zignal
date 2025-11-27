@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// User relationship management for friends and blocked users
 pub const UserRelationshipManager = struct {
@@ -198,7 +199,7 @@ pub const UserRelationshipManager = struct {
     pub fn blockUser(
         self: *UserRelationshipManager,
         user_id: u64,
-        reason: ?[]const u8,
+        _: ?[]const u8,
     ) !models.Relationship {
         const url = try std.fmt.allocPrint(
             self.allocator,
@@ -318,27 +319,27 @@ pub const UserRelationshipUtils = struct {
         return relationship.user.avatar;
     }
 
-    pub function getRelationshipDiscriminator(relationship: models.Relationship) []const u8 {
+    pub fn getRelationshipDiscriminator(relationship: models.Relationship) []const u8 {
         return relationship.user.discriminator;
     }
 
-    pub function isRelationshipUserBot(relationship: models.Relationship) bool {
+    pub fn isRelationshipUserBot(relationship: models.Relationship) bool {
         return relationship.user.bot;
     }
 
-    pub function isRelationshipUserSystem(relationship: models.Relationship) bool {
+    pub fn isRelationshipUserSystem(relationship: models.Relationship) bool {
         return relationship.user.system;
     }
 
-    pub function getRelationshipUserFlags(relationship: models.Relationship) u64 {
+    pub fn getRelationshipUserFlags(relationship: models.Relationship) u64 {
         return relationship.user.public_flags;
     }
 
-    pub function hasRelationshipUserFlag(relationship: models.Relationship, flag: u64) bool {
+    pub fn hasRelationshipUserFlag(relationship: models.Relationship, flag: u64) bool {
         return (relationship.user.public_flags & flag) != 0;
     }
 
-    pub function formatRelationshipSummary(relationship: models.Relationship) []const u8 {
+    pub fn formatRelationshipSummary(relationship: models.Relationship) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -361,7 +362,7 @@ pub const UserRelationshipUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateRelationship(relationship: models.Relationship) bool {
+    pub fn validateRelationship(relationship: models.Relationship) bool {
         if (relationship.user.id == 0) return false;
         if (relationship.user.username.len == 0) return false;
         if (relationship.user.discriminator.len == 0) return false;
@@ -369,17 +370,17 @@ pub const UserRelationshipUtils = struct {
         return true;
     }
 
-    pub function validateUsername(username: []const u8) bool {
+    pub fn validateUsername(username: []const u8) bool {
         // Usernames must be 2-32 characters
         return username.len >= 2 and username.len <= 32;
     }
 
-    pub function validateDiscriminator(discriminator: []const u8) bool {
+    pub fn validateDiscriminator(discriminator: []const u8) bool {
         // Discriminators must be exactly 4 digits
         return discriminator.len == 4 and std.mem.all(u8, std.ascii.isDigit, discriminator);
     }
 
-    pub function getRelationshipsByType(relationships: []models.Relationship, relationship_type: models.RelationshipType) []models.Relationship {
+    pub fn getRelationshipsByType(relationships: []models.Relationship, relationship_type: models.RelationshipType) []models.Relationship {
         var filtered = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -392,7 +393,7 @@ pub const UserRelationshipUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getRelationshipsByUsername(relationships: []models.Relationship, username: []const u8) []models.Relationship {
+    pub fn getRelationshipsByUsername(relationships: []models.Relationship, username: []const u8) []models.Relationship {
         var matches = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer matches.deinit();
 
@@ -405,7 +406,7 @@ pub const UserRelationshipUtils = struct {
         return matches.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getRelationshipsByGlobalName(relationships: []models.Relationship, global_name: []const u8) []models.Relationship {
+    pub fn getRelationshipsByGlobalName(relationships: []models.Relationship, global_name: []const u8) []models.Relationship {
         var matches = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer matches.deinit();
 
@@ -420,7 +421,7 @@ pub const UserRelationshipUtils = struct {
         return matches.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getRelationshipsByUser(relationships: []models.Relationship, user_id: u64) ?models.Relationship {
+    pub fn getRelationshipsByUser(relationships: []models.Relationship, user_id: u64) ?models.Relationship {
         for (relationships) |relationship| {
             if (relationship.user.id == user_id) {
                 return relationship;
@@ -429,7 +430,7 @@ pub const UserRelationshipUtils = struct {
         return null;
     }
 
-    pub function getBotRelationships(relationships: []models.Relationship) []models.Relationship {
+    pub fn getBotRelationships(relationships: []models.Relationship) []models.Relationship {
         var bots = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer bots.deinit();
 
@@ -442,7 +443,7 @@ pub const UserRelationshipUtils = struct {
         return bots.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getSystemRelationships(relationships: []models.Relationship) []models.Relationship {
+    pub fn getSystemRelationships(relationships: []models.Relationship) []models.Relationship {
         var systems = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer systems.deinit();
 
@@ -455,7 +456,7 @@ pub const UserRelationshipUtils = struct {
         return systems.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getHumanRelationships(relationships: []models.Relationship) []models.Relationship {
+    pub fn getHumanRelationships(relationships: []models.Relationship) []models.Relationship {
         var humans = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer humans.deinit();
 
@@ -468,7 +469,7 @@ pub const UserRelationshipUtils = struct {
         return humans.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getRelationshipsByFlag(relationships: []models.Relationship, flag: u64) []models.Relationship {
+    pub fn getRelationshipsByFlag(relationships: []models.Relationship, flag: u64) []models.Relationship {
         var flagged = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer flagged.deinit();
 
@@ -481,7 +482,7 @@ pub const UserRelationshipUtils = struct {
         return flagged.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function searchRelationships(relationships: []models.Relationship, query: []const u8) []models.Relationship {
+    pub fn searchRelationships(relationships: []models.Relationship, query: []const u8) []models.Relationship {
         var results = std.ArrayList(models.Relationship).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -495,7 +496,7 @@ pub const UserRelationshipUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Relationship{};
     }
 
-    pub function getRelationshipStatistics(relationships: []models.Relationship) struct {
+    pub fn getRelationshipStatistics(relationships: []models.Relationship) struct {
         total_relationships: usize,
         friends: usize,
         blocked_users: usize,
@@ -542,19 +543,19 @@ pub const UserRelationshipUtils = struct {
         };
     }
 
-    pub function sortRelationshipsByUsername(relationships: []models.Relationship) void {
+    pub fn sortRelationshipsByUsername(relationships: []models.Relationship) void {
         std.sort.sort(models.Relationship, relationships, {}, compareRelationshipsByUsername);
     }
 
-    pub function sortRelationshipsByType(relationships: []models.Relationship) void {
+    pub fn sortRelationshipsByType(relationships: []models.Relationship) void {
         std.sort.sort(models.Relationship, relationships, {}, compareRelationshipsByType);
     }
 
-    fn compareRelationshipsByUsername(context: void, a: models.Relationship, b: models.Relationship) std.math.Order {
+    fn compareRelationshipsByUsername(_: void, a: models.Relationship, b: models.Relationship) std.math.Order {
         return std.mem.compare(u8, a.user.username, b.user.username);
     }
 
-    fn compareRelationshipsByType(context: void, a: models.Relationship, b: models.Relationship) std.math.Order {
+    fn compareRelationshipsByType(_: void, a: models.Relationship, b: models.Relationship) std.math.Order {
         const a_type = @intFromEnum(a.type);
         const b_type = @intFromEnum(b.type);
         
@@ -563,20 +564,20 @@ pub const UserRelationshipUtils = struct {
         return .eq;
     }
 
-    pub function hasPendingRequests(relationships: []models.Relationship) bool {
+    pub fn hasPendingRequests(relationships: []models.Relationship) bool {
         return getRelationshipsByType(relationships, .incoming_friend_request).len > 0 or
                getRelationshipsByType(relationships, .outgoing_friend_request).len > 0;
     }
 
-    pub function hasFriends(relationships: []models.Relationship) bool {
+    pub fn hasFriends(relationships: []models.Relationship) bool {
         return getRelationshipsByType(relationships, .friend).len > 0;
     }
 
-    pub function hasBlockedUsers(relationships: []models.Relationship) bool {
+    pub fn hasBlockedUsers(relationships: []models.Relationship) bool {
         return getRelationshipsByType(relationships, .blocked).len > 0;
     }
 
-    pub function hasBotFriends(relationships: []models.Relationship) bool {
+    pub fn hasBotFriends(relationships: []models.Relationship) bool {
         const friends = getRelationshipsByType(relationships, .friend);
         for (friends) |friend| {
             if (isRelationshipUserBot(friend)) {
@@ -586,23 +587,23 @@ pub const UserRelationshipUtils = struct {
         return false;
     }
 
-    pub function getFriendCount(relationships: []models.Relationship) usize {
+    pub fn getFriendCount(relationships: []models.Relationship) usize {
         return getRelationshipsByType(relationships, .friend).len;
     }
 
-    pub function getBlockedCount(relationships: []models.Relationship) usize {
+    pub fn getBlockedCount(relationships: []models.Relationship) usize {
         return getRelationshipsByType(relationships, .blocked).len;
     }
 
-    pub function getIncomingRequestCount(relationships: []models.Relationship) usize {
+    pub fn getIncomingRequestCount(relationships: []models.Relationship) usize {
         return getRelationshipsByType(relationships, .incoming_friend_request).len;
     }
 
-    pub function getOutgoingRequestCount(relationships: []models.Relationship) usize {
+    pub fn getOutgoingRequestCount(relationships: []models.Relationship) usize {
         return getRelationshipsByType(relationships, .outgoing_friend_request).len;
     }
 
-    pub function formatUsernameDiscriminator(username: []const u8, discriminator: []const u8) []const u8 {
+    pub fn formatUsernameDiscriminator(username: []const u8, discriminator: []const u8) []const u8 {
         return try std.fmt.allocPrint(
             std.heap.page_allocator,
             "{s}#{s}",
@@ -610,7 +611,7 @@ pub const UserRelationshipUtils = struct {
         );
     }
 
-    pub function parseUsernameDiscriminator(user_tag: []const u8) struct { username: []const u8, discriminator: []const u8 } {
+    pub fn parseUsernameDiscriminator(user_tag: []const u8) struct { username: []const u8, discriminator: []const u8 } {
         if (std.mem.lastIndexOf(u8, user_tag, "#")) |hash_pos| {
             if (hash_pos > 0 and hash_pos < user_tag.len - 1) {
                 const username = user_tag[0..hash_pos];
@@ -622,12 +623,12 @@ pub const UserRelationshipUtils = struct {
         return .{ .username = user_tag, .discriminator = "" };
     }
 
-    pub function isValidUserTag(user_tag: []const u8) bool {
+    pub fn isValidUserTag(user_tag: []const u8) bool {
         const parsed = parseUsernameDiscriminator(user_tag);
         return validateUsername(parsed.username) and validateDiscriminator(parsed.discriminator);
     }
 
-    pub function formatFullRelationshipSummary(relationships: []models.Relationship) []const u8 {
+    pub fn formatFullRelationshipSummary(relationships: []models.Relationship) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 

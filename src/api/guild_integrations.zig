@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild integration management for server integrations and third-party services
 pub const GuildIntegrationManager = struct {
@@ -214,74 +215,74 @@ pub const GuildIntegrationUtils = struct {
         return integration.account.name;
     }
 
-    pub function isIntegrationEnabled(integration: models.Integration) bool {
+    pub fn isIntegrationEnabled(integration: models.Integration) bool {
         return integration.enabled;
     }
 
-    pub function isIntegrationSyncing(integration: models.Integration) bool {
+    pub fn isIntegrationSyncing(integration: models.Integration) bool {
         return integration.syncing;
     }
 
-    pub function isIntegrationBot(integration: models.Integration) bool {
+    pub fn isIntegrationBot(integration: models.Integration) bool {
         return getIntegrationUserId(integration) != null;
     }
 
-    pub function isIntegrationTwitch(integration: models.Integration) bool {
+    pub fn isIntegrationTwitch(integration: models.Integration) bool {
         return std.mem.eql(u8, getIntegrationType(integration), "twitch");
     }
 
-    pub function isIntegrationYouTube(integration: models.Integration) bool {
+    pub fn isIntegrationYouTube(integration: models.Integration) bool {
         return std.mem.eql(u8, getIntegrationType(integration), "youtube");
     }
 
-    pub function isIntegrationReddit(integration: models.Integration) bool {
+    pub fn isIntegrationReddit(integration: models.Integration) bool {
         return std.mem.eql(u8, getIntegrationType(integration), "reddit");
     }
 
-    pub function isIntegrationDiscord(integration: models.Integration) bool {
+    pub fn isIntegrationDiscord(integration: models.Integration) bool {
         return std.mem.eql(u8, getIntegrationType(integration), "discord");
     }
 
-    pub function hasIntegrationUser(integration: models.Integration) bool {
+    pub fn hasIntegrationUser(integration: models.Integration) bool {
         return integration.user != null;
     }
 
-    pub function hasIntegrationRoles(integration: models.Integration) bool {
+    pub fn hasIntegrationRoles(integration: models.Integration) bool {
         return integration.role_count != null;
     }
 
-    pub function getIntegrationExpireBehavior(integration: models.Integration) ?u8 {
+    pub fn getIntegrationExpireBehavior(integration: models.Integration) ?u8 {
         return integration.expire_behavior;
     }
 
-    pub function getIntegrationExpireGracePeriod(integration: models.Integration) ?u32 {
+    pub fn getIntegrationExpireGracePeriod(integration: models.Integration) ?u32 {
         return integration.expire_grace_period;
     }
 
-    pub function getIntegrationEnableEmoticons(integration: models.Integration) ?bool {
+    pub fn getIntegrationEnableEmoticons(integration: models.Integration) ?bool {
         return integration.enable_emoticons;
     }
 
-    pub function getIntegrationSubscriberCount(integration: models.Integration) ?u32 {
+    pub fn getIntegrationSubscriberCount(integration: models.Integration) ?u32 {
         return integration.subscriber_count;
     }
 
-    pub function getIntegrationRevoked(integration: models.Integration) ?bool {
+    pub fn getIntegrationRevoked(integration: models.Integration) ?bool {
         return integration.revoked;
     }
 
-    pub function getIntegrationApplication(integration: models.Integration) ?models.Application {
+    pub fn getIntegrationApplication(integration: models.Integration) ?models.Application {
         return integration.application;
     }
 
-    pub function getIntegrationApplicationId(integration: models.Integration) ?u64 {
+    pub fn getIntegrationApplicationId(integration: models.Integration) ?u64 {
         if (integration.application) |app| {
             return app.id;
         }
         return null;
     }
 
-    pub function formatIntegrationSummary(integration: models.Integration) []const u8 {
+    pub fn formatIntegrationSummary(integration: models.Integration) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -307,7 +308,7 @@ pub const GuildIntegrationUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateIntegration(integration: models.Integration) bool {
+    pub fn validateIntegration(integration: models.Integration) bool {
         if (getIntegrationId(integration) == 0) return false;
         if (getIntegrationName(integration).len == 0) return false;
         if (getIntegrationType(integration).len == 0) return false;
@@ -316,7 +317,7 @@ pub const GuildIntegrationUtils = struct {
         return true;
     }
 
-    pub function getIntegrationsByType(integrations: []models.Integration, integration_type: []const u8) []models.Integration {
+    pub fn getIntegrationsByType(integrations: []models.Integration, integration_type: []const u8) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -329,7 +330,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getEnabledIntegrations(integrations: []models.Integration) []models.Integration {
+    pub fn getEnabledIntegrations(integrations: []models.Integration) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -342,7 +343,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getDisabledIntegrations(integrations: []models.Integration) []models.Integration {
+    pub fn getDisabledIntegrations(integrations: []models.Integration) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -355,7 +356,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getSyncingIntegrations(integrations: []models.Integration) []models.Integration {
+    pub fn getSyncingIntegrations(integrations: []models.Integration) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -368,7 +369,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getBotIntegrations(integrations: []models.Integration) []models.Integration {
+    pub fn getBotIntegrations(integrations: []models.Integration) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -381,7 +382,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getIntegrationsWithRoles(integrations: []models.Integration) []models.Integration {
+    pub fn getIntegrationsWithRoles(integrations: []models.Integration) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -394,7 +395,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function searchIntegrations(integrations: []models.Integration, query: []const u8) []models.Integration {
+    pub fn searchIntegrations(integrations: []models.Integration, query: []const u8) []models.Integration {
         var results = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -409,33 +410,33 @@ pub const GuildIntegrationUtils = struct {
         return results.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function sortIntegrationsByName(integrations: []models.Integration) void {
+    pub fn sortIntegrationsByName(integrations: []models.Integration) void {
         std.sort.sort(models.Integration, integrations, {}, compareIntegrationsByName);
     }
 
-    pub function sortIntegrationsByType(integrations: []models.Integration) void {
+    pub fn sortIntegrationsByType(integrations: []models.Integration) void {
         std.sort.sort(models.Integration, integrations, {}, compareIntegrationsByType);
     }
 
-    pub function sortIntegrationsByRoleCount(integrations: []models.Integration) void {
+    pub fn sortIntegrationsByRoleCount(integrations: []models.Integration) void {
         std.sort.sort(models.Integration, integrations, {}, compareIntegrationsByRoleCount);
     }
 
-    fn compareIntegrationsByName(context: void, a: models.Integration, b: models.Integration) std.math.Order {
+    fn compareIntegrationsByName(_: void, a: models.Integration, b: models.Integration) std.math.Order {
         return std.mem.compare(u8, getIntegrationName(a), getIntegrationName(b));
     }
 
-    fn compareIntegrationsByType(context: void, a: models.Integration, b: models.Integration) std.math.Order {
+    fn compareIntegrationsByType(_: void, a: models.Integration, b: models.Integration) std.math.Order {
         return std.mem.compare(u8, getIntegrationType(a), getIntegrationType(b));
     }
 
-    fn compareIntegrationsByRoleCount(context: void, a: models.Integration, b: models.Integration) std.math.Order {
+    fn compareIntegrationsByRoleCount(_: void, a: models.Integration, b: models.Integration) std.math.Order {
         const a_count = getIntegrationRoleCount(a) orelse 0;
         const b_count = getIntegrationRoleCount(b) orelse 0;
         return std.math.order(b_count, a_count); // Descending order
     }
 
-    pub function getIntegrationStatistics(integrations: []models.Integration) struct {
+    pub fn getIntegrationStatistics(integrations: []models.Integration) struct {
         total_integrations: usize,
         enabled_integrations: usize,
         disabled_integrations: usize,
@@ -504,7 +505,7 @@ pub const GuildIntegrationUtils = struct {
         };
     }
 
-    pub function hasIntegration(integrations: []models.Integration, integration_id: u64) bool {
+    pub fn hasIntegration(integrations: []models.Integration, integration_id: u64) bool {
         for (integrations) |integration| {
             if (getIntegrationId(integration) == integration_id) {
                 return true;
@@ -513,7 +514,7 @@ pub const GuildIntegrationUtils = struct {
         return false;
     }
 
-    pub function getIntegration(integrations: []models.Integration, integration_id: u64) ?models.Integration {
+    pub fn getIntegration(integrations: []models.Integration, integration_id: u64) ?models.Integration {
         for (integrations) |integration| {
             if (getIntegrationId(integration) == integration_id) {
                 return integration;
@@ -522,11 +523,11 @@ pub const GuildIntegrationUtils = struct {
         return null;
     }
 
-    pub function getIntegrationCount(integrations: []models.Integration) usize {
+    pub fn getIntegrationCount(integrations: []models.Integration) usize {
         return integrations.len;
     }
 
-    pub function getIntegrationsByAccount(integrations: []models.Integration, account_id: []const u8) []models.Integration {
+    pub fn getIntegrationsByAccount(integrations: []models.Integration, account_id: []const u8) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -539,7 +540,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function getIntegrationsByUser(integrations: []models.Integration, user_id: u64) []models.Integration {
+    pub fn getIntegrationsByUser(integrations: []models.Integration, user_id: u64) []models.Integration {
         var filtered = std.ArrayList(models.Integration).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -554,7 +555,7 @@ pub const GuildIntegrationUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.Integration{};
     }
 
-    pub function formatFullIntegrationInfo(integration: models.Integration) []const u8 {
+    pub fn formatFullIntegrationInfo(integration: models.Integration) []const u8 {
         var info = std.ArrayList(u8).init(std.heap.page_allocator);
         defer info.deinit();
 

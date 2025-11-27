@@ -226,7 +226,7 @@ pub const EmbedAuthor = struct {
 pub const EmbedField = struct {
     name: []const u8,
     value: []const u8,
-    inline: bool = false,
+    is_inline: bool = false,
 };
 
 pub const Reaction = struct {

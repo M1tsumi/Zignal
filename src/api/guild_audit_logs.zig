@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Guild audit log management for server moderation tracking
 pub const GuildAuditLogManager = struct {
@@ -414,17 +415,17 @@ pub const GuildAuditLogUtils = struct {
         std.sort.sort(models.AuditLogEntry, entries, {}, compareAuditLogEntriesByActionType);
     }
 
-    fn compareAuditLogEntriesByDate(context: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
+    fn compareAuditLogEntriesByDate(_: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
         return std.mem.compare(u8, getAuditLogEntryCreatedAt(a), getAuditLogEntryCreatedAt(b));
     }
 
-    fn compareAuditLogEntriesByUser(context: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
+    fn compareAuditLogEntriesByUser(_: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
         const a_user = getAuditLogEntryUser(a).username;
         const b_user = getAuditLogEntryUser(b).username;
         return std.mem.compare(u8, a_user, b_user);
     }
 
-    fn compareAuditLogEntriesByActionType(context: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
+    fn compareAuditLogEntriesByActionType(_: void, a: models.AuditLogEntry, b: models.AuditLogEntry) std.math.Order {
         return std.math.order(getAuditLogEntryActionType(a), getAuditLogEntryActionType(b));
     }
 
@@ -579,7 +580,7 @@ pub const GuildAuditLogUtils = struct {
         return stats;
     }
 
-    fn compareUserActionCounts(context: void, a: struct { user: models.User, action_count: usize }, b: struct { user: models.User, action_count: usize }) std.math.Order {
+    fn compareUserActionCounts(_: void, a: struct { user: models.User, action_count: usize }, b: struct { user: models.User, action_count: usize }) std.math.Order {
         return std.math.order(b.action_count, a.action_count); // Descending order
     }
 
@@ -610,7 +611,7 @@ pub const GuildAuditLogUtils = struct {
         return reasons;
     }
 
-    fn compareReasonCounts(context: void, a: struct { reason: []const u8, count: usize }, b: struct { reason: []const u8, count: usize }) std.math.Order {
+    fn compareReasonCounts(_: void, a: struct { reason: []const u8, count: usize }, b: struct { reason: []const u8, count: usize }) std.math.Order {
         return std.math.order(b.count, a.count); // Descending order
     }
 

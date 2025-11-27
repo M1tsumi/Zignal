@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Message management for Discord messages
 pub const MessageManager = struct {
@@ -375,7 +376,7 @@ pub const MessageManager = struct {
         self: *MessageManager,
         channel_id: u64,
         name: []const u8,
-        type: models.ChannelType,
+        channel_type: models.ChannelType,
         auto_archive_duration: ?i64,
         invitable: ?bool,
         rate_limit_per_user: ?i64,
@@ -390,7 +391,7 @@ pub const MessageManager = struct {
 
         const payload = StartThreadWithoutMessagePayload{
             .name = name,
-            .type = type,
+            .type = channel_type,
             .auto_archive_duration = auto_archive_duration,
             .invitable = invitable,
             .rate_limit_per_user = rate_limit_per_user,

@@ -1,6 +1,7 @@
 const std = @import("std");
 const models = @import("../models.zig");
 const utils = @import("../utils.zig");
+const Client = @import("../Client.zig");
 
 /// Advanced guild member management operations
 pub const GuildMemberManager = struct {
@@ -571,7 +572,7 @@ pub const GuildMemberUtils = struct {
         return isMemberOwner(member, guild_id) or hasMemberPermission(member, .administrator);
     }
 
-    pub fn hasMemberPermission(member: models.GuildMember, permission: models.Permission) bool {
+    pub fn hasMemberPermission(_: models.GuildMember, _: models.Permission) bool {
         // This would parse the member's permissions and check if the permission is set
         // For now, return a placeholder
         return true;
@@ -590,7 +591,7 @@ pub const GuildMemberUtils = struct {
         return false;
     }
 
-    pub fn isMemberOnline(member: models.GuildMember) bool {
+    pub fn isMemberOnline(_: models.GuildMember) bool {
         // This would check the member's presence status
         // For now, assume all members are online
         return true;
@@ -612,19 +613,19 @@ pub const GuildMemberUtils = struct {
         return member.communication_disabled_until != null;
     }
 
-    pub function getMemberJoinDate(member: models.GuildMember) ?[]const u8 {
+    pub fn getMemberJoinDate(member: models.GuildMember) ?[]const u8 {
         return member.joined_at;
     }
 
-    pub function getMemberPremiumSince(member: models.GuildMember) ?[]const u8 {
+    pub fn getMemberPremiumSince(member: models.GuildMember) ?[]const u8 {
         return member.premium_since;
     }
 
-    pub function isMemberBoosting(member: models.GuildMember) bool {
+    pub fn isMemberBoosting(member: models.GuildMember) bool {
         return member.premium_since != null;
     }
 
-    pub function getMemberAvatarUrl(member: models.GuildMember) ?[]const u8 {
+    pub fn getMemberAvatarUrl(member: models.GuildMember) ?[]const u8 {
         if (member.avatar) |avatar_hash| {
             return try std.fmt.allocPrint(
                 std.heap.page_allocator,
@@ -635,7 +636,7 @@ pub const GuildMemberUtils = struct {
         return member.user.avatar;
     }
 
-    pub function formatMemberSummary(member: models.GuildMember) []const u8 {
+    pub fn formatMemberSummary(member: models.GuildMember) []const u8 {
         var summary = std.ArrayList(u8).init(std.heap.page_allocator);
         defer summary.deinit();
 
@@ -661,7 +662,7 @@ pub const GuildMemberUtils = struct {
         return summary.toOwnedSlice();
     }
 
-    pub function validateMember(member: models.GuildMember) bool {
+    pub fn validateMember(member: models.GuildMember) bool {
         if (member.user.id == 0) return false;
         if (member.guild_id == 0) return false;
         if (member.joined_at == null) return false;
@@ -669,7 +670,7 @@ pub const GuildMemberUtils = struct {
         return true;
     }
 
-    pub function getMembersByRole(members: []models.GuildMember, role_id: u64) []models.GuildMember {
+    pub fn getMembersByRole(members: []models.GuildMember, role_id: u64) []models.GuildMember {
         var role_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer role_members.deinit();
 
@@ -682,7 +683,7 @@ pub const GuildMemberUtils = struct {
         return role_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getOnlineMembers(members: []models.GuildMember) []models.GuildMember {
+    pub fn getOnlineMembers(members: []models.GuildMember) []models.GuildMember {
         var online_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer online_members.deinit();
 
@@ -695,7 +696,7 @@ pub const GuildMemberUtils = struct {
         return online_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getMutedMembers(members: []models.GuildMember) []models.GuildMember {
+    pub fn getMutedMembers(members: []models.GuildMember) []models.GuildMember {
         var muted_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer muted_members.deinit();
 
@@ -708,7 +709,7 @@ pub const GuildMemberUtils = struct {
         return muted_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getDeafenedMembers(members: []models.GuildMember) []models.GuildMember {
+    pub fn getDeafenedMembers(members: []models.GuildMember) []models.GuildMember {
         var deafened_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer deafened_members.deinit();
 
@@ -721,7 +722,7 @@ pub const GuildMemberUtils = struct {
         return deafened_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getPendingMembers(members: []models.GuildMember) []models.GuildMember {
+    pub fn getPendingMembers(members: []models.GuildMember) []models.GuildMember {
         var pending_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer pending_members.deinit();
 
@@ -734,7 +735,7 @@ pub const GuildMemberUtils = struct {
         return pending_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getBoostingMembers(members: []models.GuildMember) []models.GuildMember {
+    pub fn getBoostingMembers(members: []models.GuildMember) []models.GuildMember {
         var boosting_members = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer boosting_members.deinit();
 
@@ -747,7 +748,7 @@ pub const GuildMemberUtils = struct {
         return boosting_members.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getMemberStatistics(members: []models.GuildMember) struct {
+    pub fn getMemberStatistics(members: []models.GuildMember) struct {
         total: usize,
         online: usize,
         offline: usize,
@@ -787,7 +788,7 @@ pub const GuildMemberUtils = struct {
         return stats;
     }
 
-    pub function searchMembers(members: []models.GuildMember, query: []const u8) []models.GuildMember {
+    pub fn searchMembers(members: []models.GuildMember, query: []const u8) []models.GuildMember {
         var results = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer results.deinit();
 
@@ -802,12 +803,12 @@ pub const GuildMemberUtils = struct {
         return results.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getMembersJoinedSince(members: []models.GuildMember, since_timestamp: u64) []models.GuildMember {
+    pub fn getMembersJoinedSince(members: []models.GuildMember, _: u64) []models.GuildMember {
         var filtered = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer filtered.deinit();
 
         for (members) |member| {
-            if (member.joined_at) |joined_at| {
+            if (member.joined_at) |_| {
                 // Parse ISO 8601 timestamp and compare
                 // For now, assume all members joined after the timestamp
                 filtered.append(member) catch {};
@@ -817,7 +818,7 @@ pub const GuildMemberUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function getMembersWithRoleCount(members: []models.GuildMember, min_roles: usize, max_roles: usize) []models.GuildMember {
+    pub fn getMembersWithRoleCount(members: []models.GuildMember, min_roles: usize, max_roles: usize) []models.GuildMember {
         var filtered = std.ArrayList(models.GuildMember).init(std.heap.page_allocator);
         defer filtered.deinit();
 
@@ -831,19 +832,19 @@ pub const GuildMemberUtils = struct {
         return filtered.toOwnedSlice() catch &[_]models.GuildMember{};
     }
 
-    pub function sortMembersByUsername(members: []models.GuildMember) void {
+    pub fn sortMembersByUsername(members: []models.GuildMember) void {
         std.sort.sort(models.GuildMember, members, {}, compareMembersByUsername);
     }
 
-    pub function sortMembersByJoinDate(members: []models.GuildMember) void {
+    pub fn sortMembersByJoinDate(members: []models.GuildMember) void {
         std.sort.sort(models.GuildMember, members, {}, compareMembersByJoinDate);
     }
 
-    fn compareMembersByUsername(context: void, a: models.GuildMember, b: models.GuildMember) std.math.Order {
+    fn compareMembersByUsername(_: void, a: models.GuildMember, b: models.GuildMember) std.math.Order {
         return std.mem.compare(u8, a.user.username, b.user.username);
     }
 
-    fn compareMembersByJoinDate(context: void, a: models.GuildMember, b: models.GuildMember) std.math.Order {
+    fn compareMembersByJoinDate(_: void, a: models.GuildMember, b: models.GuildMember) std.math.Order {
         // This would compare join dates
         // For now, compare by username as fallback
         return std.mem.compare(u8, a.user.username, b.user.username);

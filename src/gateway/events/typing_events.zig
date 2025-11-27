@@ -25,13 +25,13 @@ pub const TypingManager = struct {
     pub const TYPING_TIMEOUT_SECONDS = 10;
 
     pub fn isTypingExpired(timestamp: u64) bool {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intFromFloat(std.time.timestamp() * 1000));
         const typing_duration = current_time - timestamp;
         return typing_duration > (TYPING_TIMEOUT_SECONDS * 1000);
     }
 
     pub fn getTypingDuration(timestamp: u64) u64 {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intFromFloat(std.time.timestamp() * 1000));
         return current_time - timestamp;
     }
 

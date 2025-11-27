@@ -14,7 +14,7 @@ pub const Logger = struct {
         debug = 1,
         info = 2,
         warning = 3,
-        error = 4,
+        err = 4,
         critical = 5,
         fatal = 6,
         off = 7,
@@ -24,7 +24,7 @@ pub const Logger = struct {
             if (std.mem.eql(u8, str, "debug")) return .debug;
             if (std.mem.eql(u8, str, "info")) return .info;
             if (std.mem.eql(u8, str, "warning")) return .warning;
-            if (std.mem.eql(u8, str, "error")) return .error;
+            if (std.mem.eql(u8, str, "error")) return .err;
             if (std.mem.eql(u8, str, "critical")) return .critical;
             if (std.mem.eql(u8, str, "fatal")) return .fatal;
             if (std.mem.eql(u8, str, "off")) return .off;
@@ -37,7 +37,7 @@ pub const Logger = struct {
                 .debug => "DEBUG",
                 .info => "INFO",
                 .warning => "WARNING",
-                .error => "ERROR",
+                .err => "ERROR",
                 .critical => "CRITICAL",
                 .fatal => "FATAL",
                 .off => "OFF",
@@ -112,7 +112,7 @@ pub const Logger = struct {
     pub const LogHandler = struct {
         level: LogLevel,
         formatter: *const fn (entry: LogEntry, allocator: std.mem.Allocator) ![]const u8,
-        output: *const fn (formatted: []const u8) anyerror!void,
+        output: *const fn (formatted: []const u8) void,
 
         pub fn consoleFormatter(entry: LogEntry, allocator: std.mem.Allocator) ![]const u8 {
             const timestamp_str = try std.fmt.allocPrint(allocator, "{d}", .{entry.timestamp});
@@ -443,8 +443,8 @@ pub const Logger = struct {
         self.log(.warning, message, file, line, function, null);
     }
 
-    pub fn error(self: *Logger, message: []const u8, file: []const u8, line: u32, function: []const u8) void {
-        self.log(.error, message, file, line, function, null);
+    pub fn logError(self: *Logger, message: []const u8, file: []const u8, line: u32, function: []const u8) void {
+        self.log(.err, message, file, line, function, null);
     }
 
     pub fn critical(self: *Logger, message: []const u8, file: []const u8, line: u32, function: []const u8) void {
@@ -455,7 +455,7 @@ pub const Logger = struct {
         self.log(.fatal, message, file, line, function, null);
     }
 
-    pub fn logError(self: *Logger, error_ctx: errors.ErrorContext, file: []const u8, line: u32, function: []const u8) void {
+    pub fn logErrorContext(self: *Logger, error_ctx: errors.ErrorContext, file: []const u8, line: u32, function: []const u8) void {
         self.log(error_ctx.severity, error_ctx.message, file, line, function, error_ctx);
     }
 
@@ -610,7 +610,7 @@ pub const Monitor = struct {
 
                     // Create alert for failed health check
                     self.createAlert(
-                        .error,
+                        .err,
                         try std.fmt.allocPrint(self.allocator, "Health Check Failed: {s}", .{health_check.name}),
                         try std.fmt.allocPrint(self.allocator, "Health check '{s}' failed: {s}", .{ health_check.name, status.message }),
                         health_check.name,
@@ -800,7 +800,7 @@ pub fn warning(comptime message: []const u8, args: anytype) void {
 }
 
 pub fn err(comptime message: []const u8, args: anytype) void {
-    log(.error, message, args);
+    log(.err, message, args);
 }
 
 pub fn critical(comptime message: []const u8, args: anytype) void {

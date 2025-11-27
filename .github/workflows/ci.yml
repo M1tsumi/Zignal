@@ -46,7 +46,7 @@ jobs:
       run: zig version
 
     - name: Run tests
-      run: zig test --test-coverage
+      run: zig test
 
     - name: Build library
       run: zig build-lib src/root.zig --name zignal
