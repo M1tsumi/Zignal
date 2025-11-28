@@ -42,12 +42,12 @@ jobs:
         echo "Package hash: $HASH"
 
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        name: Zignal ${{ github.ref_name }}
         tag_name: ${{ github.ref_name }}
-        release_name: Zignal ${{ github.ref_name }}
         body: |
           ## Zignal ${{ github.ref_name }}
           
@@ -91,13 +91,5 @@ jobs:
           See the [README](https://github.com/M1tsumi/Zignal/blob/main/README.md) for full documentation.
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./zignal-${{ github.ref_name }}.tar.gz
-        asset_name: zignal-${{ github.ref_name }}.tar.gz
-        asset_content_type: application/gzip
+        files: |
+          zignal-${{ github.ref_name }}.tar.gz
