@@ -108,7 +108,7 @@ pub const UserRelationshipManager = struct {
         username: []const u8,
         discriminator: ?[]const u8,
     ) !models.User {
-        var url = try std.fmt.allocPrint(
+        const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/relationships",
             .{self.client.base_url},

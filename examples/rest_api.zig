@@ -1,5 +1,5 @@
 const std = @import("std");
-const zignal = @import("src/root.zig");
+const zignal = @import("zignal");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -12,7 +12,7 @@ pub fn main() !void {
     defer client.deinit();
 
     std.log.info("Getting current user information...");
-    var user = try client.getCurrentUser();
+    const user = try client.getCurrentUser();
     defer {
         allocator.free(user.username);
         allocator.free(user.discriminator);
@@ -26,7 +26,7 @@ pub fn main() !void {
     std.log.info("Bot user: {s}#{s} (ID: {d})", .{ user.username, user.discriminator, user.id });
 
     std.log.info("Getting guilds...");
-    var guilds = try client.getGuilds();
+    const guilds = try client.getGuilds();
     defer {
         for (guilds) |guild| {
             allocator.free(guild.name);
@@ -127,7 +127,7 @@ pub fn main() !void {
                 .user_limit = channel_data.user_limit,
                 .rate_limit_per_user = channel_data.rate_limit_per_user,
                 .recipients = allocator.dupe(zignal.models.User, channel_data.recipients) catch return,
-                .icon = if (channel_data.icon) |i| allocator.dupe(u8, i) catch return else null,
+                .icon = if (channel_data.icon) |icon| allocator.dupe(u8, icon) catch return else null,
                 .owner_id = channel_data.owner_id,
                 .application_id = channel_data.application_id,
                 .parent_id = channel_data.parent_id,
@@ -185,19 +185,19 @@ pub fn main() !void {
                 embed.fields[0] = zignal.models.EmbedField{
                     .name = allocator.dupe(u8, "Features") catch return,
                     .value = allocator.dupe(u8, "• Zero dependencies\n• Pure Zig implementation\n• Full Discord API coverage") catch return,
-                    .inline = false,
+                    .is_inline = false,
                 };
                 
                 embed.fields[1] = zignal.models.EmbedField{
                     .name = allocator.dupe(u8, "Performance") catch return,
                     .value = allocator.dupe(u8, "Lightning fast with minimal memory usage") catch return,
-                    .inline = false,
+                    .is_inline = false,
                 };
                 
                 var embeds = allocator.alloc(zignal.models.Embed, 1) catch return;
                 embeds[0] = embed;
                 
-                var message = try client.createMessage(channel.id, "", embeds);
+                const message = try client.createMessage(channel.id, "", embeds);
                 defer {
                     allocator.free(message.content);
                     allocator.free(message.timestamp);

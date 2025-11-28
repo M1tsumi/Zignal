@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) void {
     // Library
     const lib = b.addStaticLibrary(.{
         .name = "zignal",
-        .root_source_file = .{ .path = "src/root.zig" },
+        .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -15,12 +15,12 @@ pub fn build(b: *std.Build) void {
 
     // Module for users to import
     const zignal_module = b.addModule("zignal", .{
-        .source_file = .{ .path = "src/root.zig" },
+        .root_source_file = b.path("src/root.zig"),
     });
 
     // Tests
     const tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/root.zig" },
+        .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -31,7 +31,7 @@ pub fn build(b: *std.Build) void {
 
     // Advanced tests (optional, can fail without blocking)
     const advanced_tests = b.addTest(.{
-        .root_source_file = .{ .path = "tests/test_advanced.zig" },
+        .root_source_file = b.path("tests/test_advanced.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -53,13 +53,13 @@ pub fn build(b: *std.Build) void {
     inline for (examples) |example| {
         const exe = b.addExecutable(.{
             .name = example.name,
-            .root_source_file = .{ .path = example.path },
+            .root_source_file = b.path(example.path),
             .target = target,
             .optimize = optimize,
         });
         
         // Link zignal module
-        exe.addModule("zignal", zignal_module);
+        exe.root_module.addImport("zignal", zignal_module);
         
         const install_exe = b.addInstallArtifact(exe, .{});
         examples_step.dependOn(&install_exe.step);

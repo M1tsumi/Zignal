@@ -489,10 +489,10 @@ pub const GuildMemberManager = struct {
         include_roles: ?[]u64,
         reason: ?[]const u8,
     ) !struct { pruned: ?u32 } {
-        var url = try std.fmt.allocPrint(
+        const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/guilds/{d}/prune",
-            .{ self.client.base_url, guild_id },
+            .{self.client.base_url, guild_id},
         );
         defer self.allocator.free(url);
 

@@ -186,7 +186,7 @@ pub const Shard = struct {
         try identify_data.put("op", std.json.Value{ .integer = 2 });
         try identify_data.put("d", std.json.Value{ .object = d_data });
 
-        var json_string: []const u8 = try std.json.stringifyAlloc(self.allocator, identify_data, .{});
+        const json_string: []const u8 = try std.json.stringifyAlloc(self.allocator, identify_data, .{});
         defer self.allocator.free(json_string);
 
         // Send identify through gateway

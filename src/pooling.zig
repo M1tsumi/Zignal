@@ -140,7 +140,7 @@ pub const ConnectionPool = struct {
         const connection_id = self.connection_counter;
         self.connection_counter += 1;
 
-        var client = std.http.Client{ .allocator = self.allocator };
+        const client = std.http.Client{ .allocator = self.allocator };
 
         const pooled_connection = PooledConnection{
             .id = connection_id,

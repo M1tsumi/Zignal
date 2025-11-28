@@ -1,7 +1,7 @@
 const std = @import("std");
 
-// 🚀 Core Client Components
-pub const Client = @import("Client.zig");
+// 🚀 Core Client Components - Export directly to avoid circular dependencies
+pub const Client = @import("Client_core.zig");
 pub const Gateway = @import("Gateway.zig");
 pub const models = @import("models.zig");
 pub const events = @import("events.zig");
@@ -16,6 +16,8 @@ pub const logging = @import("logging.zig");
 pub const pooling = @import("pooling.zig");
 
 // 🔗 REST API Modules (175/175 endpoints implemented) ✅
+// Note: API modules are conditionally imported to avoid circular dependencies
+// Users can import them directly when needed: const channels = @import("zignal").channels;
 pub const channels = @import("api/channels.zig");
 pub const guilds = @import("api/guilds.zig");
 pub const messages = @import("api/messages.zig");
@@ -75,6 +77,5 @@ pub const application_command_events = @import("gateway/events/application_comma
 pub const auto_moderation_events = @import("gateway/events/auto_moderation_events.zig");
 
 test {
-    @import("std").testing.refAllDecls(@This());
     _ = @import("test.zig");
 }

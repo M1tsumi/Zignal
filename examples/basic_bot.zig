@@ -1,5 +1,8 @@
 const std = @import("std");
-const zignal = @import("zignal");
+const Client = @import("../src/Client.zig").Client;
+const Gateway = @import("../src/Gateway.zig").Gateway;
+const EventHandler = @import("../src/events.zig").EventHandler;
+const models = @import("../src/models.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -8,13 +11,13 @@ pub fn main() !void {
 
     const token = "YOUR_BOT_TOKEN_HERE";
     
-    var client = zignal.Client.init(allocator, token);
+    var client = Client.init(allocator, token);
     defer client.deinit();
 
-    var gateway = try zignal.Gateway.init(allocator, token);
+    var gateway = try Gateway.init(allocator, token);
     defer gateway.deinit();
 
-    var event_handler = zignal.EventHandler.init(allocator);
+    var event_handler = EventHandler.init(allocator);
     defer event_handler.deinit();
 
     try event_handler.onReady(struct {
@@ -24,12 +27,12 @@ pub fn main() !void {
     }.handler);
 
     try event_handler.onMessageCreate(struct {
-        fn handler(message: *const zignal.models.Message, client_ptr: *zignal.Client, alloc: std.mem.Allocator) void {
+        fn handler(message: *const models.Message, client_ptr: *Client, alloc: std.mem.Allocator) void {
             if (std.mem.startsWith(u8, message.content, "!ping")) {
                 std.log.info("Received ping command from {s}", .{message.author.username});
                 
                 const response_content = "Pong!";
-                var response = client_ptr.createMessage(message.channel_id, response_content, null) catch |err| {
+                const response = client_ptr.createMessage(message.channel_id, response_content, null) catch |err| {
                     std.log.err("Failed to send response: {}", .{err});
                     return;
                 };
@@ -45,16 +48,16 @@ pub fn main() !void {
             if (std.mem.startsWith(u8, message.content, "!info")) {
                 std.log.info("Received info command from {s}", .{message.author.username});
                 
-                var embed = zignal.models.Embed{
+                var embed = models.Embed{
                     .title = alloc.dupe(u8, "Bot Information") catch return,
                     .description = alloc.dupe(u8, "This is a basic Discord bot built with Zignal - a zero-dependency Discord API wrapper for Zig!") catch return,
                     .color = 0x00ff00,
-                    .footer = zignal.models.EmbedFooter{
+                    .footer = models.EmbedFooter{
                         .text = alloc.dupe(u8, "Powered by Zignal") catch return,
                         .icon_url = null,
                         .proxy_icon_url = null,
                     },
-                    .fields = alloc.alloc(zignal.models.EmbedField, 2) catch return,
+                    .fields = alloc.alloc(models.EmbedField, 2) catch return,
                     .image = null,
                     .thumbnail = null,
                     .video = null,
@@ -65,22 +68,22 @@ pub fn main() !void {
                     .type = null,
                 };
                 
-                embed.fields[0] = zignal.models.EmbedField{
+                embed.fields[0] = models.EmbedField{
                     .name = alloc.dupe(u8, "Language") catch return,
                     .value = alloc.dupe(u8, "Zig") catch return,
                     .is_inline = false,
                 };
                 
-                embed.fields[1] = zignal.models.EmbedField{
+                embed.fields[1] = models.EmbedField{
                     .name = alloc.dupe(u8, "Dependencies") catch return,
                     .value = alloc.dupe(u8, "Zero! 🚀") catch return,
                     .is_inline = false,
                 };
                 
-                var embeds = alloc.alloc(zignal.models.Embed, 1) catch return;
+                var embeds = alloc.alloc(models.Embed, 1) catch return;
                 embeds[0] = embed;
                 
-                var response = client_ptr.createMessage(message.channel_id, "", embeds) catch |err| {
+                const response = client_ptr.createMessage(message.channel_id, "", embeds) catch |err| {
                     std.log.err("Failed to send embed response: {}", .{err});
                     return;
                 };

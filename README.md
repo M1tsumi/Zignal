@@ -6,7 +6,7 @@
 
 **High-performance Discord API wrapper for Zig with zero dependencies**
 
-[![Zig Version](https://img.shields.io/badge/Zig-0.11.0+-orange.svg)](https://ziglang.org/)
+[![Zig Version](https://img.shields.io/badge/Zig-0.13.0+-orange.svg)](https://ziglang.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Discord API](https://img.shields.io/badge/Discord%20API-v10-7289da.svg)](https://discord.com/developers/docs)
 
@@ -70,7 +70,7 @@ const zignal = @import("zignal");
 const zignal = @import("path/to/zignal/src/root.zig");
 ```
 
-Requirements: Zig 0.11.0+ and a Discord bot token.
+Requirements: Zig 0.13.0+ and a Discord bot token.
 
 ---
 
