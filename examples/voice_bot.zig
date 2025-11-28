@@ -50,14 +50,14 @@ pub fn main() !void {
 
 fn setupVoiceEventHandlers(
     client: *zignal.Client,
-    voice_manager: *zignal.voice.VoiceManager,
-    cache: *zignal.cache.Cache,
-    logger: *zignal.logging.Logger,
+    _voice_manager: *zignal.voice.VoiceManager,
+    _cache: *zignal.cache.Cache,
+    _logger: *zignal.logging.Logger,
 ) !void {
     // Ready event
     client.on(.ready, struct {
-        fn handler(event: zignal.events.ReadyEvent, logger: *zignal.logging.Logger) !void {
-            logger.info("Voice bot ready: {s}", .{event.user.username});
+        fn handler(event: zignal.events.ReadyEvent, event_logger: *zignal.logging.Logger) !void {
+            event_logger.info("Voice bot ready: {s}", .{event.user.username});
         }
     }.handler);
 
@@ -65,11 +65,11 @@ fn setupVoiceEventHandlers(
     client.on(.message_create, struct {
         fn handler(
             message: zignal.models.Message,
-            voice_manager: *zignal.voice.VoiceManager,
-            cache: *zignal.cache.Cache,
-            logger: *zignal.logging.Logger,
+            vm: *zignal.voice.VoiceManager,
+            msg_cache: *zignal.cache.Cache,
+            msg_logger: *zignal.logging.Logger,
         ) !void {
-            try handleVoiceCommand(message, voice_manager, cache, logger);
+            try handleVoiceCommand(message, vm, msg_cache, msg_logger);
         }
     }.handler);
 
@@ -77,10 +77,10 @@ fn setupVoiceEventHandlers(
     client.on(.voice_state_update, struct {
         fn handler(
             voice_state: zignal.models.VoiceState,
-            voice_manager: *zignal.voice.VoiceManager,
-            logger: *zignal.logging.Logger,
+            _vm: *zignal.voice.VoiceManager,
+            vs_logger: *zignal.logging.Logger,
         ) !void {
-            try handleVoiceStateUpdate(voice_state, voice_manager, logger);
+            vs_logger.info("Voice state update for user {d}", .{voice_state.user_id});
         }
     }.handler);
 
@@ -88,10 +88,10 @@ fn setupVoiceEventHandlers(
     client.on(.voice_server_update, struct {
         fn handler(
             voice_server: zignal.events.VoiceServerUpdateEvent,
-            voice_manager: *zignal.voice.VoiceManager,
-            logger: *zignal.logging.Logger,
+            vm: *zignal.voice.VoiceManager,
+            vs_logger: *zignal.logging.Logger,
         ) !void {
-            try handleVoiceServerUpdate(voice_server, voice_manager, logger);
+            try handleVoiceServerUpdate(voice_server, vm, vs_logger);
         }
     }.handler);
 }
@@ -143,7 +143,7 @@ fn handleVoiceJoin(
     };
 
     // Join voice channel
-    const voice_connection = try voice_manager.joinVoiceChannel(
+    const _voice_connection = try voice_manager.joinVoiceChannel(
         guild_id,
         voice_channel.id,
         user_id,
@@ -332,7 +332,7 @@ fn handleVoiceServerUpdate(
     try connection.updateVoiceServer(voice_server.endpoint, voice_server.token);
 }
 
-fn findUserVoiceChannel(guild: zignal.models.Guild, user_id: u64) ?zignal.models.Channel {
+fn findUserVoiceChannel(guild: zignal.models.Guild, _user_id: u64) ?zignal.models.Channel {
     // This would typically involve checking voice states
     // For now, return the first voice channel as a placeholder
     for (guild.channels) |channel| {

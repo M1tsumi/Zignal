@@ -195,13 +195,13 @@ fn registerAutocompleteHandlers(handler: *zignal.interactions.InteractionHandler
 
 fn setupInteractionEventHandlers(
     client: *zignal.Client,
-    interaction_handler: *zignal.interactions.InteractionHandler,
-    logger: *zignal.logging.Logger,
+    _interaction_handler: *zignal.interactions.InteractionHandler,
+    _logger: *zignal.logging.Logger,
 ) !void {
     // Ready event
     client.on(.ready, struct {
-        fn handler(event: zignal.events.ReadyEvent, logger: *zignal.logging.Logger) !void {
-            logger.info("Interactions demo ready: {s}", .{event.user.username});
+        fn handler(event: zignal.events.ReadyEvent, event_logger: *zignal.logging.Logger) !void {
+            event_logger.info("Interactions demo ready: {s}", .{event.user.username});
         }
     }.handler);
 
@@ -209,17 +209,33 @@ fn setupInteractionEventHandlers(
     client.on(.interaction_create, struct {
         fn handler(
             interaction: zignal.interactions.Interaction,
-            interaction_handler: *zignal.interactions.InteractionHandler,
-            logger: *zignal.logging.Logger,
+            ih: *zignal.interactions.InteractionHandler,
+            ih_logger: *zignal.logging.Logger,
         ) !void {
-            logger.info(
-                "Interaction received: {s} from user {d}",
-                .{ @tagName(interaction.type), interaction.user.?.id }
-            );
-
-            interaction_handler.handleInteraction(interaction) catch |err| {
-                logger.err("Failed to handle interaction: {}", .{err});
-            };
+            // Handle interaction directly
+            switch (interaction.type) {
+                .application_command => {
+                    // Handle slash commands
+                    const handler = ih.getSlashCommandHandler(interaction.data.name) orelse return;
+                    try handler.execute(interaction);
+                },
+                .message_component => {
+                    // Handle button/selection interactions
+                    const handler = ih.getComponentHandler(interaction.data.custom_id) orelse return;
+                    try handler.execute(interaction);
+                },
+                .modal_submit => {
+                    // Handle modal submissions
+                    const handler = ih.getModalHandler(interaction.data.custom_id) orelse return;
+                    try handler.execute(interaction);
+                },
+                .application_command_autocomplete => {
+                    // Handle autocomplete
+                    const handler = ih.getAutocompleteHandler(interaction.data.name, interaction.data.options[0].name) orelse return;
+                    try handler.execute(interaction);
+                },
+                else => return,
+            }
         }
     }.handler);
 }
@@ -570,7 +586,7 @@ fn handleSearchAutocomplete(ctx: *zignal.interactions.InteractionHandler.Autocom
         },
     };
 
-    const response = zignal.interactions.InteractionResponse{
+    ctx.respond(&ctx, zignal.interactions.InteractionResponse{
         .type = .application_command_autocomplete_result,
         .data = zignal.interactions.InteractionResponse.InteractionResponseData{
             .tts = false,
@@ -583,7 +599,5 @@ fn handleSearchAutocomplete(ctx: *zignal.interactions.InteractionHandler.Autocom
             .custom_id = null,
             .title = null,
         },
-    };
-
-    ctx.respond(&ctx, suggestions);
+    });
 }

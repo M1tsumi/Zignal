@@ -165,9 +165,9 @@ fn registerSlashCommands(handler: *zignal.interactions.InteractionHandler, alloc
 
 fn setupEventHandlers(
     client: *zignal.Client,
-    cache: *zignal.cache.Cache,
-    voice_manager: *zignal.voice.VoiceManager,
-    interaction_handler: *zignal.interactions.InteractionHandler,
+    _cache: *zignal.cache.Cache,
+    _voice_manager: *zignal.voice.VoiceManager,
+    _interaction_handler: *zignal.interactions.InteractionHandler,
     logger: *zignal.logging.Logger,
 ) !void {
     // Ready event
@@ -182,22 +182,22 @@ fn setupEventHandlers(
 
     // Message create event
     client.on(.message_create, struct {
-        fn handler(message: zignal.models.Message, cache: *zignal.cache.Cache, logger: *zignal.logging.Logger) !void {
+        fn handler(message: zignal.models.Message, msg_cache: *zignal.cache.Cache, msg_logger: *zignal.logging.Logger) !void {
             // Cache the message
-            try cache.addMessage(message);
+            try msg_cache.addMessage(message);
 
             // Handle commands
             if (std.mem.startsWith(u8, message.content, "!")) {
-                try handleTextCommand(message, cache, logger);
+                try handleTextCommand(message, msg_cache, msg_logger);
             }
         }
     }.handler);
 
     // Guild create event
     client.on(.guild_create, struct {
-        fn handler(guild: zignal.models.Guild, cache: *zignal.cache.Cache, logger: *zignal.logging.Logger) !void {
-            logger.info("Joined guild: {s} ({d})", .{ guild.name, guild.id });
-            try cache.addGuild(guild);
+        fn handler(guild: zignal.models.Guild, guild_cache: *zignal.cache.Cache, guild_logger: *zignal.logging.Logger) !void {
+            guild_logger.info("Joined guild: {s} ({d})", .{ guild.name, guild.id });
+            try guild_cache.addGuild(guild);
         }
     }.handler);
 
@@ -205,10 +205,10 @@ fn setupEventHandlers(
     client.on(.voice_state_update, struct {
         fn handler(
             voice_state: zignal.models.VoiceState,
-            voice_manager: *zignal.voice.VoiceManager,
-            logger: *zignal.logging.Logger,
+            _vm: *zignal.voice.VoiceManager,
+            vm_logger: *zignal.logging.Logger,
         ) !void {
-            logger.info(
+            vm_logger.info(
                 "Voice state update: {d} in channel {d}",
                 .{ voice_state.user_id, voice_state.channel_id orelse 0 }
             );
@@ -275,8 +275,8 @@ fn handleEcho(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.S
 
 fn handleVoiceJoin(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
     // Get user's voice channel
-    const guild_id = ctx.interaction.guild_id orelse return;
-    const user_id = ctx.interaction.user.?.id;
+    const _guild_id = ctx.interaction.guild_id orelse return;
+    const _user_id = ctx.interaction.user.?.id;
 
     // This would typically involve:
     // 1. Finding the user's current voice channel

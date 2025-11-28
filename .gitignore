@@ -24,12 +24,21 @@ zig-macos-*/
 *.exe
 *.a
 
+# Package files
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
 # IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
 
 # OS files
 .DS_Store
@@ -67,11 +76,6 @@ config.json
 tmp/
 temp/
 
-# Editor and tool files
-.vscode/settings.json
-.vscode/launch.json
-.vscode/extensions.json
-
 # Documentation build
 docs/_build/
 docs/site/
@@ -86,3 +90,75 @@ docs/site/
 *.crt
 private/
 secrets/
+
+# Coverage reports
+coverage/
+*.lcov
+*.gcov
+*.gcda
+*.gcno
+
+# Editor backup and swap files
+.#*
+\#*#
+.*.swp
+.*.swo
+
+# Zig specific
+*.d
+*.pdb
+*.ilk
+*.exp
+
+# Code analysis and linting
+.codeium/
+.clang-format
+.clangd/
+
+# Local development
+local/
+dev/
+debug/
+
+# Build system specific
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.make
+
+# Platform specific
+*.command
+*.sh
+*.bat
+*.cmd
+
+# AI Assistant files
+*.ai-summary
+*.chat-history
+
+# Ignore any files that look like hexadecimal cache files
+[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*
+**/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]*
+
+# Additional temporary and cache patterns
+**/*.tmp
+**/*.bak
+**/*.old
+**/*.orig
+**/*.rej
+**/*.swp
+**/*.swo
+*~
+
+# Zig specific temporary files
+*.zig.zon
+*.zig.pdb
+*.zig.obj
+*.zig.o
+*.zig.lib
+*.zig.dll
+*.zig.exe
+*.zig.a
+*.zig.so
+*.zig.dylib

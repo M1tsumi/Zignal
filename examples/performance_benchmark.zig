@@ -328,9 +328,9 @@ fn runVoiceBenchmark(allocator: std.mem.Allocator, logger: *zignal.logging.Logge
 
     // Simulate voice connections
     for (0..100) |i| {
-        const guild_id = @intCast(i + 1);
-        const channel_id = @intCast(i + 1001);
-        const user_id = @intCast(i + 2001);
+        const guild_id = @as(u64, @intCast(i + 1));
+        const channel_id = @as(u64, @intCast(i + 1001));
+        const user_id = @as(u64, @intCast(i + 2001));
 
         const connection = try voice_manager.joinVoiceChannel(guild_id, channel_id, user_id);
         

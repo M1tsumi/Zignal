@@ -7,22 +7,18 @@ pub fn build(b: *std.Build) void {
     // Main library
     const lib = b.addStaticLibrary(.{
         .name = "zignal",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/root.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
+        .root_source_file = .{ .path = "src/root.zig" },
+        .target = target,
+        .optimize = optimize,
     });
 
-    lib.install();
+    b.installArtifact(lib);
 
     // Tests
     const tests = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/root.zig"),
-            .target = target,
-            .optimize = optimize,
-        }),
+        .root_source_file = .{ .path = "src/root.zig" },
+        .target = target,
+        .optimize = optimize,
     });
 
     const run_tests = b.addRunArtifact(tests);
@@ -33,7 +29,7 @@ pub fn build(b: *std.Build) void {
 
     // Advanced tests
     const advanced_tests = b.addTest(.{
-        .root_source_file = b.path("tests/test_advanced.zig"),
+        .root_source_file = .{ .path = "tests/test_advanced.zig" },
         .target = target,
         .optimize = optimize,
     });
@@ -59,12 +55,12 @@ pub fn build(b: *std.Build) void {
     for (examples) |example| {
         const exe = b.addExecutable(.{
             .name = example.name,
-            .root_source_file = b.path(example.path),
+            .root_source_file = .{ .path = example.path },
             .target = target,
             .optimize = optimize,
         });
 
-        exe.root_module.addImport("zignal", lib.root_module);
+        exe.addIncludePath(.{ .path = "src" });
         b.installArtifact(exe);
 
         const run_example = b.addRunArtifact(exe);
@@ -77,12 +73,12 @@ pub fn build(b: *std.Build) void {
     // Benchmarks
     const benchmark = b.addExecutable(.{
         .name = "benchmark",
-        .root_source_file = b.path("examples/performance_benchmark.zig"),
+        .root_source_file = .{ .path = "examples/performance_benchmark.zig" },
         .target = target,
         .optimize = .ReleaseFast,
     });
 
-    benchmark.root_module.addImport("zignal", lib.root_module);
+    benchmark.addIncludePath(.{ .path = "src" });
     b.installArtifact(benchmark);
 
     const run_benchmark = b.addRunArtifact(benchmark);
@@ -138,30 +134,28 @@ pub fn build(b: *std.Build) void {
 
     // CI pipeline
     const ci = b.step("ci", "Run full CI pipeline");
-    ci.dependOn(&lint_step);
-    ci.dependOn(&test_step);
-    ci.dependOn(&advanced_test_step);
-    ci.dependOn(&benchmark_step);
-    ci.dependOn(&docs_step);
-    ci.dependOn(&security_step);
+    ci.dependOn(lint_step);
+    ci.dependOn(test_step);
+    ci.dependOn(advanced_test_step);
+    ci.dependOn(benchmark_step);
+    ci.dependOn(docs_step);
+    ci.dependOn(security_step);
 
     // Development setup
     const dev = b.step("dev", "Setup development environment");
-    dev.dependOn(&lint_step);
-    dev.dependOn(&test_step);
-    dev.dependOn(&advanced_test_step);
+    dev.dependOn(lint_step);
+    dev.dependOn(test_step);
+    dev.dependOn(advanced_test_step);
 
     // Release build
     const release = b.step("release", "Build release version");
     const release_lib = b.addStaticLibrary(.{
         .name = "zignal",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/root.zig"),
-            .target = target,
-            .optimize = .ReleaseFast,
-        }),
+        .root_source_file = .{ .path = "src/root.zig" },
+        .target = target,
+        .optimize = .ReleaseFast,
     });
-    release_lib.install();
+    b.installArtifact(release_lib);
     release.dependOn(&release_lib.step);
 
     // Package creation
