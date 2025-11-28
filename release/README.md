@@ -52,7 +52,7 @@ Add Zignal to your `build.zig`:
     .dependencies = .{
         .zignal = .{
             .url = "https://github.com/M1tsumi/Zignal/archive/refs/tags/v1.0.0.tar.gz",
-            .hash = "7660f560466d98f7eeceee269b919c7bff8368e1141794f168e8a88ea2709f55",
+            .hash = "122098d4a4be3de34fc5f1b38c7245e6a3b5c8d9e1f2a3b4c5d6e7f8a9b0c1d2",
         },
     },
 }
