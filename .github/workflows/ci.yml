@@ -214,53 +214,10 @@ jobs:
         # fi
         echo "API completeness verified!"
 
-  release:
-    name: Release Build
-    runs-on: ${{ matrix.os }}
-    needs: [build-and-test, lint, security, performance, integration]
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-
-    - name: Setup Zig
-      uses: goto-bus-stop/setup-zig@v2
-      with:
-        version: ${{ env.ZIG_VERSION }}
-
-    - name: Build release binaries
-      run: |
-        echo "Example building temporarily disabled - focusing on core functionality"
-        # TODO: Fix example imports and re-enable
-        # if [ "${{ matrix.os }}" = "windows-latest" ]; then
-        #   zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-windows
-        #   zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-windows
-        # elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-        #   zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-macos
-        #   zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-macos
-        # else
-        #   zig build-lib src/root.zig --name zignal -O ReleaseFast -target x86_64-linux
-        #   zig build-exe examples/basic_bot.zig --name basic_bot -O ReleaseFast -target x86_64-linux
-        # fi
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: zignal-${{ matrix.os }}
-        path: |
-          libzignal.*
-          basic_bot*
-          basic_bot.exe
-        retention-days: 30
-
   final-check:
     name: Final Validation
     runs-on: ubuntu-latest
-    needs: [build-and-test, lint, security, performance, integration, release]
+    needs: [build-and-test, lint, security, performance, integration]
     if: always()
     steps:
     - name: Checkout

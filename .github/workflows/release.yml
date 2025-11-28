@@ -19,9 +19,15 @@ jobs:
       with:
         version: '0.11.0'
 
+    - name: Test Compilation
+      run: |
+        # Verify the library compiles correctly
+        zig build-lib src/root.zig --name zignal -O ReleaseSafe
+        echo "✅ Library compilation verified"
+
     - name: Create Release Archive
       run: |
-        # Create a clean archive for release
+        # Create a clean source archive for release
         mkdir -p release
         cp -r src release/
         cp build.zig release/
