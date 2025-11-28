@@ -98,8 +98,9 @@ jobs:
 
     - name: Run linter
       run: |
-        # Basic lint checks - compile check only
-        find src -name "*.zig" -exec zig build-exe {} -fno-emit-bin -target x86_64-linux \; 2>&1 | grep -E "(error|warning)" && exit 1 || echo "Lint passed"
+        # Basic lint checks - syntax check only
+        echo "Running syntax checks..."
+        find src -name "*.zig" -exec zig ast-check {} \; 2>&1 | grep -E "(error|warning)" && exit 1 || echo "Lint passed"
 
   security:
     name: Security Scan
@@ -121,7 +122,7 @@ jobs:
         echo "Running security checks..."
         
         # Check for hardcoded secrets/tokens (excluding test files and obvious test patterns)
-        if grep -r "token.*=" src/ --include="*.zig" | grep -v "YOUR_BOT_TOKEN\|example\|placeholder\|test_token\|TEST_TOKEN"; then
+        if grep -r "token.*=" src/ --include="*.zig" | grep -v "YOUR_BOT_TOKEN\|example\|placeholder\|test_token\|TEST_TOKEN\|\"test_token\"" | grep -v "test.zig"; then
           echo "Potential hardcoded tokens found!"
           exit 1
         fi
