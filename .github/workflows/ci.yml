@@ -48,7 +48,7 @@ jobs:
     - name: Run tests with debugging
       run: |
         echo "Starting tests..."
-        zig test src/root.zig --summary all || echo "Tests failed with exit code $?"
+        zig test src/root.zig || echo "Tests failed with exit code $?"
         echo "Tests completed or failed"
       timeout-minutes: 15
 
@@ -71,7 +71,9 @@ jobs:
         version: '0.11.0'
 
     - name: Compile check only
-      run: zig build-lib src/root.zig -femit-bin=zig-out/lib/libzignal.a
+      run: |
+        mkdir -p zig-out/lib
+        zig build-lib src/root.zig -femit-bin=zig-out/lib/libzignal.a
       timeout-minutes: 5
 
   lint:
@@ -118,8 +120,8 @@ jobs:
         # Check for common security issues
         echo "Running security checks..."
         
-        # Check for hardcoded secrets/tokens
-        if grep -r "token.*=" src/ --include="*.zig" | grep -v "YOUR_BOT_TOKEN\|example\|placeholder"; then
+        # Check for hardcoded secrets/tokens (excluding test files and obvious test patterns)
+        if grep -r "token.*=" src/ --include="*.zig" | grep -v "YOUR_BOT_TOKEN\|example\|placeholder\|test_token\|TEST_TOKEN"; then
           echo "Potential hardcoded tokens found!"
           exit 1
         fi
@@ -148,7 +150,8 @@ jobs:
 
     - name: Build release
       run: |
-        zig build-lib src/root.zig --name zignal -O ReleaseFast
+        mkdir -p zig-out/lib
+        zig build-lib src/root.zig --name zignal -O ReleaseSafe
 
     - name: Performance benchmark
       run: |
@@ -227,7 +230,8 @@ jobs:
 
     - name: Generate documentation
       run: |
-        zig build-lib src/root.zig --name zignal -femit-docs -O ReleaseFast
+        mkdir -p zig-out/docs
+        zig build-lib src/root.zig --name zignal -femit-docs -O ReleaseSafe
 
     - name: Check README links
       run: |
@@ -329,7 +333,8 @@ jobs:
         fi
         
         # Final build test
-        zig build-lib src/root.zig --name zignal
+        mkdir -p zig-out/lib
+        zig build-lib src/root.zig --name zignal -O ReleaseSafe
         
         # Final test run
         zig test src/root.zig
