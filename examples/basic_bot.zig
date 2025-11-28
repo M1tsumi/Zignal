@@ -1,5 +1,5 @@
 const std = @import("std");
-const zignal = @import("src/root.zig");
+const zignal = @import("zignal");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -24,46 +24,37 @@ pub fn main() !void {
     }.handler);
 
     try event_handler.onMessageCreate(struct {
-        fn handler(message: *const zignal.models.Message) void {
+        fn handler(message: *const zignal.models.Message, client_ptr: *zignal.Client, alloc: std.mem.Allocator) void {
             if (std.mem.startsWith(u8, message.content, "!ping")) {
                 std.log.info("Received ping command from {s}", .{message.author.username});
                 
                 const response_content = "Pong!";
-                var response = client.createMessage(message.channel_id, response_content, null) catch |err| {
+                var response = client_ptr.createMessage(message.channel_id, response_content, null) catch |err| {
                     std.log.err("Failed to send response: {}", .{err});
                     return;
                 };
                 defer {
-                    allocator.free(response.content);
-                    allocator.free(response.timestamp);
-                    if (response.edited_timestamp) |et| allocator.free(et);
-                    allocator.free(response.mentions);
-                    allocator.free(response.mention_roles);
-                    allocator.free(response.mention_channels);
-                    allocator.free(response.attachments);
-                    allocator.free(response.embeds);
-                    allocator.free(response.reactions);
-                    if (response.nonce) |n| allocator.free(n);
-                    allocator.free(response.components);
-                    allocator.free(response.sticker_items);
+                    alloc.free(response.content);
+                    alloc.free(response.timestamp);
+                    if (response.edited_timestamp) |et| alloc.free(et);
                 }
                 
-                std.log.info("Sent pong response");
+                std.log.info("Sent pong response to channel {d}", .{message.channel_id});
             }
             
             if (std.mem.startsWith(u8, message.content, "!info")) {
                 std.log.info("Received info command from {s}", .{message.author.username});
                 
-                const embed = zignal.models.Embed{
-                    .title = allocator.dupe(u8, "Bot Information") catch return,
-                    .description = allocator.dupe(u8, "This is a basic Discord bot built with Zignal - a zero-dependency Discord API wrapper for Zig!") catch return,
+                var embed = zignal.models.Embed{
+                    .title = alloc.dupe(u8, "Bot Information") catch return,
+                    .description = alloc.dupe(u8, "This is a basic Discord bot built with Zignal - a zero-dependency Discord API wrapper for Zig!") catch return,
                     .color = 0x00ff00,
                     .footer = zignal.models.EmbedFooter{
-                        .text = allocator.dupe(u8, "Powered by Zignal") catch return,
+                        .text = alloc.dupe(u8, "Powered by Zignal") catch return,
                         .icon_url = null,
                         .proxy_icon_url = null,
                     },
-                    .fields = allocator.alloc(zignal.models.EmbedField, 2) catch return,
+                    .fields = alloc.alloc(zignal.models.EmbedField, 2) catch return,
                     .image = null,
                     .thumbnail = null,
                     .video = null,
@@ -75,37 +66,29 @@ pub fn main() !void {
                 };
                 
                 embed.fields[0] = zignal.models.EmbedField{
-                    .name = allocator.dupe(u8, "Language") catch return,
-                    .value = allocator.dupe(u8, "Zig") catch return,
-                    .inline = false,
+                    .name = alloc.dupe(u8, "Language") catch return,
+                    .value = alloc.dupe(u8, "Zig") catch return,
+                    .is_inline = false,
                 };
                 
                 embed.fields[1] = zignal.models.EmbedField{
-                    .name = allocator.dupe(u8, "Dependencies") catch return,
-                    .value = allocator.dupe(u8, "Zero! 🚀") catch return,
-                    .inline = false,
+                    .name = alloc.dupe(u8, "Dependencies") catch return,
+                    .value = alloc.dupe(u8, "Zero! 🚀") catch return,
+                    .is_inline = false,
                 };
                 
-                var embeds = allocator.alloc(zignal.models.Embed, 1) catch return;
+                var embeds = alloc.alloc(zignal.models.Embed, 1) catch return;
                 embeds[0] = embed;
                 
-                var response = client.createMessage(message.channel_id, "", embeds) catch |err| {
+                var response = client_ptr.createMessage(message.channel_id, "", embeds) catch |err| {
                     std.log.err("Failed to send embed response: {}", .{err});
                     return;
                 };
                 defer {
-                    allocator.free(response.content);
-                    allocator.free(response.timestamp);
-                    if (response.edited_timestamp) |et| allocator.free(et);
-                    allocator.free(response.mentions);
-                    allocator.free(response.mention_roles);
-                    allocator.free(response.mention_channels);
-                    allocator.free(response.attachments);
-                    allocator.free(response.embeds);
-                    allocator.free(response.reactions);
-                    if (response.nonce) |n| allocator.free(n);
-                    allocator.free(response.components);
-                    allocator.free(response.sticker_items);
+                    alloc.free(response.content);
+                    alloc.free(response.timestamp);
+                    if (response.edited_timestamp) |et| alloc.free(et);
+                    if (response.sticker_items) |items| alloc.free(items);
                 }
                 
                 std.log.info("Sent info embed response");
