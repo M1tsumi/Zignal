@@ -152,7 +152,6 @@ Makefile
 *~
 
 # Zig specific temporary files
-*.zig.zon
 *.zig.pdb
 *.zig.obj
 *.zig.o
@@ -162,3 +161,6 @@ Makefile
 *.zig.a
 *.zig.so
 *.zig.dylib
+
+# Allow build.zig.zon (package manifest)
+!build.zig.zon

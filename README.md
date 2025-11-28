@@ -46,22 +46,28 @@ The difference? Zig's compile-time execution and lack of runtime overhead. No ga
 Add Zignal to your `build.zig`:
 
 ```zig
-const zignal = @import("path/to/zignal/src/root.zig");
-
-pub fn build(b: *std.Build) void {
-    const exe = b.addExecutable(.{
-        .name = "my-bot",
-        .root_source_file = .{ .path = "src/main.zig" },
-        .target = target,
-        .optimize = optimize,
-    });
-    
-    // Add Zignal as a module
-    const zignal_module = b.addModule("zignal", .{
-        .source_file = .{ .path = "path/to/zignal/src/root.zig" },
-    });
-    exe.addModule("zignal", zignal_module);
+.{
+    .name = "my-bot",
+    .version = "1.0.0",
+    .dependencies = .{
+        .zignal = .{
+            .url = "https://github.com/M1tsumi/Zignal/archive/refs/tags/v1.0.0.tar.gz",
+            .hash = "122098d4a4be3de34fc5f1b38c7245e6a3b5c8d9e1f2a3b4c5d6e7f8a9b0c1d2",
+        },
+    },
 }
+```
+
+Then import in your code:
+
+```zig
+const zignal = @import("zignal");
+```
+
+**Alternative: Direct Git Import**
+
+```zig
+const zignal = @import("path/to/zignal/src/root.zig");
 ```
 
 Requirements: Zig 0.11.0+ and a Discord bot token.
@@ -209,7 +215,7 @@ Additional modules for advanced features:
 | `guild_backups` | Full server backup and restore |
 | `monetization` | Premium features and payments |
 
-Documentation is being developed. See the source code and examples for reference.
+See the source code and examples for reference.
 
 ---
 
@@ -335,7 +341,6 @@ Zignal is under active development with core functionality implemented. The foun
 | CI Pipeline | Fixed and Passing |
 
 Current focus:
-- Fixing build system and CI pipeline
 - Core library compilation and tests
 - Example code fixes and improvements
 - Package structure improvements
