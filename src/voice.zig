@@ -139,7 +139,7 @@ pub const VoiceConnection = struct {
             pub fn read(self: *AudioBuffer, buffer: []i16) !usize {
                 const available = self.write_position - self.read_position;
                 const to_read = @min(buffer.len, available);
-                std.mem.copy(i16, buffer, self.data.items[self.read_position..self.read_position + to_read]);
+                std.mem.copy(i16, buffer, self.data.items[self.read_position .. self.read_position + to_read]);
                 self.read_position += to_read;
                 return to_read;
             }
@@ -299,10 +299,10 @@ pub const VoiceConnection = struct {
         defer auth_payload.deinit();
 
         try auth_payload.put("op", std.json.Value{ .integer = 0 });
-        
+
         const d_data = std.json.ObjectMap.init(self.allocator);
         defer d_data.deinit();
-        
+
         try d_data.put("server_id", std.json.Value{ .integer = @intCast(self.guild_id) });
         try d_data.put("user_id", std.json.Value{ .integer = @intCast(self.user_id) });
         try d_data.put("session_id", std.json.Value{ .string = self.session_id });
@@ -357,15 +357,15 @@ pub const VoiceConnection = struct {
         // RTP header (12 bytes)
         try packet.append(0x80); // Version (2) + Padding (0) + Extension (0) + CSRC count (0)
         try packet.append(0x78); // Marker (0) + Payload type (120 = Opus)
-        
+
         var seq_buf: [2]u8 = undefined;
         std.mem.writeIntBig(u16, &seq_buf, @intCast(sequence % 65536));
         try packet.appendSlice(&seq_buf);
-        
+
         var ts_buf: [4]u8 = undefined;
         std.mem.writeIntBig(u32, &ts_buf, timestamp);
         try packet.appendSlice(&ts_buf);
-        
+
         var ssrc_buf: [4]u8 = undefined;
         std.mem.writeIntBig(u32, &ssrc_buf, 0); // Would be actual SSRC
         try packet.appendSlice(&ssrc_buf);

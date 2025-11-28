@@ -16,29 +16,29 @@ const models = @import("models.zig");
 test "Client initialization" {
     const allocator = testing.allocator;
     const token = "test_token";
-    
+
     var client = Client.init(allocator, token);
     defer client.deinit();
-    
+
     try testing.expect(std.mem.eql(u8, client.token, token));
 }
 
 test "Gateway initialization" {
     const allocator = testing.allocator;
     const token = "test_token";
-    
+
     var gateway = try Gateway.init(allocator, token);
     defer gateway.deinit();
-    
+
     try testing.expect(std.mem.eql(u8, gateway.token, token));
 }
 
 test "EventHandler initialization" {
     const allocator = testing.allocator;
-    
+
     var event_handler = EventHandler.init(allocator);
     defer event_handler.deinit();
-    
+
     try testing.expect(event_handler.handlers.count() == 0);
 }
 
@@ -60,7 +60,7 @@ test "Model creation" {
         .public_flags = null,
         .avatar_decoration = null,
     };
-    
+
     try testing.expect(user.id == 12345);
     try testing.expect(std.mem.eql(u8, user.username, "testuser"));
     try testing.expect(user.bot == true);
@@ -82,7 +82,7 @@ test "Embed creation" {
         .author = null,
         .fields = &[_]models.EmbedField{},
     };
-    
+
     try testing.expect(embed.color == 0xFF0000);
     try testing.expect(embed.fields.len == 0);
 }

@@ -217,7 +217,7 @@ pub const Color = struct {
 
     pub fn parseHex(hex_str: []const u8) !Color {
         if (hex_str.len < 1 or hex_str[0] != '#') return error.InvalidHexFormat;
-        
+
         const hex = hex_str[1..];
         if (hex.len != 6) return error.InvalidHexFormat;
 
@@ -273,7 +273,7 @@ pub const Timestamp = struct {
     pub fn toIsoString(self: Timestamp, allocator: std.mem.Allocator) ![]const u8 {
         const seconds = @divFloor(self.timestamp, 1000);
         const epoch = std.time.epoch.EpochSeconds{ .secs = seconds };
-        
+
         const year_day = epoch.getEpochDay();
         const year = year_day.calculateYear();
         const day = year_day.day();
@@ -287,9 +287,7 @@ pub const Timestamp = struct {
         const second = hour_day.getSecondsIntoMinute();
         const millis = @mod(self.timestamp, 1000);
 
-        return std.fmt.allocPrint(allocator, "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>3}Z", .{ 
-            year, @intFromEnum(month) + 1, day_of_month, hour, minute, second, millis 
-        });
+        return std.fmt.allocPrint(allocator, "{d:0>4}-{d:0>2}-{d:0>2}T{d:0>2}:{d:0>2}:{d:0>2}.{d:0>3}Z", .{ year, @intFromEnum(month) + 1, day_of_month, hour, minute, second, millis });
     }
 
     pub fn add(self: Timestamp, milliseconds: i64) Timestamp {

@@ -75,7 +75,7 @@ pub const GuildManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/guilds",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

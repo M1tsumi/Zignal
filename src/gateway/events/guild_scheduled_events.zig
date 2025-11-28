@@ -98,13 +98,13 @@ pub const GuildScheduledEventUtils = struct {
     }
 
     pub fn isEventInFuture(event: models.GuildScheduledEvent) bool {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intCast(std.time.timestamp() * 1000));
         return event.scheduled_start_time > current_time;
     }
 
     pub fn isEventInPast(event: models.GuildScheduledEvent) bool {
         if (event.scheduled_end_time) |end_time| {
-            const current_time = @intCast(u64, std.time.timestamp() * 1000);
+            const current_time = @as(u64, @intCast(std.time.timestamp() * 1000));
             return end_time < current_time;
         }
         return false;
@@ -135,7 +135,7 @@ pub const GuildScheduledEventUtils = struct {
     }
 
     pub fn getTimeUntilEvent(event: models.GuildScheduledEvent) []const u8 {
-        const current_time = @intCast(u64, std.time.timestamp() * 1000);
+        const current_time = @as(u64, @intCast(std.time.timestamp() * 1000));
         const time_until = event.scheduled_start_time - current_time;
         return formatEventDuration(time_until);
     }
@@ -369,8 +369,9 @@ pub const GuildScheduledEventTracker = struct {
 
         var iterator = self.events.iterator();
         while (iterator.next()) |entry| {
-            if (GuildScheduledEventUtils.isEventInFuture(entry.value_ptr.*) and 
-                GuildScheduledEventUtils.isEventScheduled(entry.value_ptr.status)) {
+            if (GuildScheduledEventUtils.isEventInFuture(entry.value_ptr.*) and
+                GuildScheduledEventUtils.isEventScheduled(entry.value_ptr.status))
+            {
                 try upcoming_events.append(entry.key_ptr.*);
             }
         }
@@ -394,14 +395,15 @@ pub const GuildScheduledEventTracker = struct {
 
     pub fn cleanupCompletedEvents(self: *GuildScheduledEventTracker) !usize {
         var removed_count: usize = 0;
-        
+
         var events_to_remove = std.ArrayList(u64).init(self.allocator);
         defer events_to_remove.deinit();
 
         var iterator = self.events.iterator();
         while (iterator.next()) |entry| {
             if (GuildScheduledEventUtils.isEventCompleted(entry.value_ptr.status) or
-                GuildScheduledEventUtils.isEventCanceled(entry.value_ptr.status)) {
+                GuildScheduledEventUtils.isEventCanceled(entry.value_ptr.status))
+            {
                 try events_to_remove.append(entry.key_ptr.*);
             }
         }

@@ -20,7 +20,7 @@ pub const UserRelationshipManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/relationships",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -111,7 +111,7 @@ pub const UserRelationshipManager = struct {
         var url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/relationships",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -488,7 +488,8 @@ pub const UserRelationshipUtils = struct {
 
         for (relationships) |relationship| {
             if (std.mem.indexOf(u8, relationship.user.username, query) != null or
-                (relationship.user.global_name != null and std.mem.indexOf(u8, relationship.user.global_name.?, query) != null)) {
+                (relationship.user.global_name != null and std.mem.indexOf(u8, relationship.user.global_name.?, query) != null))
+            {
                 results.append(relationship) catch {};
             }
         }
@@ -558,7 +559,7 @@ pub const UserRelationshipUtils = struct {
     fn compareRelationshipsByType(_: void, a: models.Relationship, b: models.Relationship) std.math.Order {
         const a_type = @intFromEnum(a.type);
         const b_type = @intFromEnum(b.type);
-        
+
         if (a_type < b_type) return .lt;
         if (a_type > b_type) return .gt;
         return .eq;
@@ -566,7 +567,7 @@ pub const UserRelationshipUtils = struct {
 
     pub fn hasPendingRequests(relationships: []models.Relationship) bool {
         return getRelationshipsByType(relationships, .incoming_friend_request).len > 0 or
-               getRelationshipsByType(relationships, .outgoing_friend_request).len > 0;
+            getRelationshipsByType(relationships, .outgoing_friend_request).len > 0;
     }
 
     pub fn hasFriends(relationships: []models.Relationship) bool {
@@ -615,11 +616,11 @@ pub const UserRelationshipUtils = struct {
         if (std.mem.lastIndexOf(u8, user_tag, "#")) |hash_pos| {
             if (hash_pos > 0 and hash_pos < user_tag.len - 1) {
                 const username = user_tag[0..hash_pos];
-                const discriminator = user_tag[hash_pos + 1..];
+                const discriminator = user_tag[hash_pos + 1 ..];
                 return .{ .username = username, .discriminator = discriminator };
             }
         }
-        
+
         return .{ .username = user_tag, .discriminator = "" };
     }
 

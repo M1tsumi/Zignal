@@ -20,7 +20,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -63,7 +63,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -101,7 +101,7 @@ pub const UserManager = struct {
         var url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/guilds",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -189,7 +189,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/channels",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -223,7 +223,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/channels",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -254,7 +254,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/users/@me/connections",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -333,7 +333,7 @@ pub const UserManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/voice/regions",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

@@ -17,7 +17,7 @@ pub const ZignalError = error{
     HttpBadGateway,
     HttpServiceUnavailable,
     HttpGatewayTimeout,
-    
+
     // WebSocket Errors
     WebSocketConnectionFailed,
     WebSocketHandshakeFailed,
@@ -26,7 +26,7 @@ pub const ZignalError = error{
     WebSocketInvalidFrame,
     WebSocketProtocolError,
     WebSocketAuthenticationFailed,
-    
+
     // Voice Errors
     VoiceConnectionFailed,
     VoiceAuthenticationFailed,
@@ -37,7 +37,7 @@ pub const ZignalError = error{
     VoiceOpusDecodingFailed,
     VoiceInvalidState,
     VoicePermissionDenied,
-    
+
     // JSON Errors
     JsonParseError,
     JsonSerializeError,
@@ -45,28 +45,28 @@ pub const ZignalError = error{
     JsonMissingField,
     JsonInvalidType,
     JsonOutOfRange,
-    
+
     // Cache Errors
     CacheNotFound,
     CacheFull,
     CacheCorrupted,
     CacheInvalidKey,
     CacheSerializationFailed,
-    
+
     // Shard Errors
     ShardConnectionFailed,
     ShardInvalidId,
     ShardAlreadyConnected,
     ShardNotConnected,
     ShardMaxReconnectAttempts,
-    
+
     // Interaction Errors
     InteractionTimeout,
     InteractionInvalidType,
     InteractionInvalidData,
     InteractionAlreadyResponded,
     InteractionPermissionDenied,
-    
+
     // Validation Errors
     InvalidToken,
     InvalidPermissions,
@@ -76,26 +76,26 @@ pub const ZignalError = error{
     InvalidUserId,
     InvalidMessageId,
     InvalidRoleId,
-    
+
     // State Errors
     InvalidState,
     NotConnected,
     AlreadyConnected,
     NotAuthenticated,
     NotReady,
-    
+
     // Resource Errors
     OutOfMemory,
     ResourceExhausted,
     BufferOverflow,
     FileNotFound,
     PermissionDenied,
-    
+
     // Configuration Errors
     InvalidConfiguration,
     MissingConfiguration,
     ConfigurationConflict,
-    
+
     // System Errors
     SystemError,
     UnknownError,
@@ -252,8 +252,8 @@ pub const CircuitBreaker = struct {
     config: RecoveryConfig,
 
     const CircuitState = enum {
-        closed,    // Normal operation
-        open,      // Failing, reject requests
+        closed, // Normal operation
+        open, // Failing, reject requests
         half_open, // Testing if service recovered
     };
 
@@ -342,13 +342,13 @@ pub const ErrorHandler = struct {
 
     pub fn handleError(self: *ErrorHandler, error_code: ZignalError, severity: ErrorSeverity, message: []const u8, file: []const u8, line: u32, function: []const u8) !ErrorContext {
         var ctx = ErrorContext.init(self.allocator, error_code, severity, message, file, line, function);
-        
+
         // Log the error
         try self.logError(ctx);
 
         // Attempt recovery
         const recovered = try self.attemptRecovery(&ctx);
-        
+
         if (!recovered) {
             // Escalate if recovery failed
             if (severity == .critical or severity == .fatal) {
@@ -383,7 +383,7 @@ pub const ErrorHandler = struct {
 
     fn attemptRecovery(self: *ErrorHandler, ctx: *ErrorContext) !bool {
         const strategy = self.getRecoveryStrategy(ctx.error_code);
-        
+
         switch (strategy) {
             .none => return false,
             .retry, .exponential_backoff => {
@@ -414,68 +414,37 @@ pub const ErrorHandler = struct {
         _ = self;
         return switch (error_code) {
             // Network errors - retry with exponential backoff
-            .HttpRequestFailed,
-            .HttpTimeout,
-            .HttpConnectionRefused,
-            .HttpDnsResolutionFailed,
-            .HttpTlsHandshakeFailed,
-            .WebSocketConnectionFailed,
-            .WebSocketDisconnected,
-            .WebSocketTimeout,
-            .VoiceConnectionFailed,
-            .VoiceUdpConnectionFailed => .exponential_backoff,
+            .HttpRequestFailed, .HttpTimeout, .HttpConnectionRefused, .HttpDnsResolutionFailed, .HttpTlsHandshakeFailed, .WebSocketConnectionFailed, .WebSocketDisconnected, .WebSocketTimeout, .VoiceConnectionFailed, .VoiceUdpConnectionFailed => .exponential_backoff,
 
             // Rate limiting - retry with exponential backoff
             .HttpRateLimited => .exponential_backoff,
 
             // Authentication errors - reconnect
-            .HttpUnauthorized,
-            .WebSocketAuthenticationFailed,
-            .VoiceAuthenticationFailed => .reconnect,
+            .HttpUnauthorized, .WebSocketAuthenticationFailed, .VoiceAuthenticationFailed => .reconnect,
 
             // Server errors - retry with circuit breaker
-            .HttpInternalServerError,
-            .HttpBadGateway,
-            .HttpServiceUnavailable,
-            .HttpGatewayTimeout => .circuit_breaker,
+            .HttpInternalServerError, .HttpBadGateway, .HttpServiceUnavailable, .HttpGatewayTimeout => .circuit_breaker,
 
             // State errors - reset
-            .InvalidState,
-            .NotConnected,
-            .AlreadyConnected,
-            .NotAuthenticated,
-            .NotReady,
-            .VoiceInvalidState => .reset,
+            .InvalidState, .NotConnected, .AlreadyConnected, .NotAuthenticated, .NotReady, .VoiceInvalidState => .reset,
 
             // Critical errors - escalate
-            .OutOfMemory,
-            .ResourceExhausted,
-            .SystemError,
-            .UnknownError => .escalate,
+            .OutOfMemory, .ResourceExhausted, .SystemError, .UnknownError => .escalate,
 
             // Other errors - simple retry
-            .JsonParseError,
-            .JsonSerializeError,
-            .CacheNotFound,
-            .InteractionTimeout => .retry,
+            .JsonParseError, .JsonSerializeError, .CacheNotFound, .InteractionTimeout => .retry,
 
             // Permission and validation errors - no recovery
-            .HttpForbidden,
-            .HttpNotFound,
-            .InvalidToken,
-            .InvalidPermissions,
-            .InvalidIntent,
-            .InteractionPermissionDenied,
-            .VoicePermissionDenied => .none,
+            .HttpForbidden, .HttpNotFound, .InvalidToken, .InvalidPermissions, .InvalidIntent, .InteractionPermissionDenied, .VoicePermissionDenied => .none,
         };
     }
 
     fn executeRetry(self: *ErrorHandler, ctx: *ErrorContext, exponential: bool) !bool {
         const delay = if (exponential) self.calculateExponentialBackoff(ctx.retry_count) else self.config.base_delay_ms;
-        
+
         // In a real implementation, this would schedule a retry
         _ = delay;
-        
+
         ctx.retry_count += 1;
         return true;
     }
@@ -531,17 +500,17 @@ pub const ErrorHandler = struct {
         const base_delay = self.config.base_delay_ms;
         const multiplier = self.config.backoff_multiplier;
         const delay = @as(u32, @intFromFloat(@as(f64, base_delay) * std.math.pow(f64, multiplier, @as(f64, @floatFromInt(retry_count)))));
-        
+
         const max_delay = self.config.max_delay_ms;
         const capped_delay = @min(delay, max_delay);
-        
+
         if (self.config.jitter) {
             // Add jitter to prevent thundering herd
             const jitter_range = @as(f64, @floatFromInt(capped_delay)) * 0.1;
             const jitter = std.crypto.random.floatNorm(f64) * jitter_range;
             return @intFromFloat(@as(f64, @floatFromInt(capped_delay)) + jitter);
         }
-        
+
         return capped_delay;
     }
 
@@ -560,7 +529,7 @@ pub const ErrorHandler = struct {
     } {
         var errors_by_type = std.json.ObjectMap.init(self.allocator);
         defer errors_by_type.deinit();
-        
+
         var errors_by_severity = std.json.ObjectMap.init(self.allocator);
         defer errors_by_severity.deinit();
 
@@ -578,7 +547,7 @@ pub const ErrorHandler = struct {
         // Get recent errors (last 10)
         const recent_count = @min(10, self.error_log.items.len);
         const recent_errors = self.allocator.alloc(ErrorContext, recent_count) catch unreachable;
-        std.mem.copy(ErrorContext, recent_errors, self.error_log.items[self.error_log.items.len - recent_count..]);
+        std.mem.copy(ErrorContext, recent_errors, self.error_log.items[self.error_log.items.len - recent_count ..]);
 
         return .{
             .total_errors = self.error_log.items.len,

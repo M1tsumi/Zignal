@@ -380,7 +380,8 @@ pub const GuildAuditLogUtils = struct {
                 isAuditLogEntryStageAction(entry)
             else if (std.mem.eql(u8, category, "sticker"))
                 isAuditLogEntryStickerAction(entry)
-            else false;
+            else
+                false;
 
             if (is_category) {
                 filtered.append(entry) catch {};

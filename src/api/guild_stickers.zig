@@ -41,7 +41,7 @@ pub const GuildStickerManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/sticker-packs",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -425,7 +425,8 @@ pub const GuildStickerUtils = struct {
         for (stickers) |sticker| {
             if (std.mem.indexOf(u8, getStickerName(sticker), query) != null or
                 std.mem.indexOf(u8, getStickerDescription(sticker), query) != null or
-                std.mem.indexOf(u8, getStickerTags(sticker), query) != null) {
+                std.mem.indexOf(u8, getStickerTags(sticker), query) != null)
+            {
                 results.append(sticker) catch {};
             }
         }

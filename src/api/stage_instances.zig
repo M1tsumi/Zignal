@@ -26,7 +26,7 @@ pub const StageInstanceManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/stage-instances",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

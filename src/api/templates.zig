@@ -267,7 +267,7 @@ pub const TemplateValidator = struct {
         // Extract template code from various URL formats
         // https://discord.new/abc123-def456
         // https://discord.com/template/abc123-def456
-        
+
         const patterns = [_][]const u8{
             "discord.new/",
             "discord.com/template/",
@@ -276,13 +276,13 @@ pub const TemplateValidator = struct {
         for (patterns) |pattern| {
             if (std.mem.indexOf(u8, url, pattern)) |index| {
                 const start = index + pattern.len;
-                
+
                 // Find the end of the template code
                 var end = start;
                 while (end < url.len and (std.ascii.isAlphanumeric(url[end]) or url[end] == '-')) {
                     end += 1;
                 }
-                
+
                 const code = url[start..end];
                 if (validateTemplateCode(code)) {
                     return code;

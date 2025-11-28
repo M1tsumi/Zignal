@@ -193,7 +193,7 @@ pub const VoiceChannelTracker = struct {
 
     pub fn updateVoiceState(self: *VoiceChannelTracker, event: VoiceEvents.VoiceStateUpdateEvent) !void {
         const user_id = event.user_id;
-        
+
         // Remove user from previous channel if they were in one
         if (self.voice_states.get(user_id)) |old_state| {
             if (old_state.channel_id) |old_channel_id| {

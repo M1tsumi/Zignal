@@ -142,11 +142,11 @@ pub const GuildRoleEventUtils = struct {
     pub fn compareRolePosition(a: models.Role, b: models.Role) std.math.Order {
         if (a.position < b.position) return .lt;
         if (a.position > b.position) return .gt;
-        
+
         // If positions are equal, compare by ID (lower ID = higher priority)
         if (a.id < b.id) return .gt;
         if (a.id > b.id) return .lt;
-        
+
         return .eq;
     }
 
@@ -156,27 +156,27 @@ pub const GuildRoleEventUtils = struct {
 
     pub fn getHighestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
-        
+
         var highest = roles[0];
         for (roles[1..]) |role| {
             if (compareRolePosition(role, highest) == .gt) {
                 highest = role;
             }
         }
-        
+
         return highest;
     }
 
     pub fn getLowestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
-        
+
         var lowest = roles[0];
         for (roles[1..]) |role| {
             if (compareRolePosition(role, lowest) == .lt) {
                 lowest = role;
             }
         }
-        
+
         return lowest;
     }
 

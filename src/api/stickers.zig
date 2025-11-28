@@ -42,7 +42,7 @@ pub const StickerManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/sticker-packs",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

@@ -72,7 +72,7 @@ pub const Logger = struct {
 
         pub fn toJson(self: LogEntry, allocator: std.mem.Allocator) !std.json.Value {
             var obj = std.json.ObjectMap.init(allocator);
-            
+
             try obj.put("timestamp", std.json.Value{ .integer = self.timestamp });
             try obj.put("level", std.json.Value{ .string = try allocator.dupe(u8, self.level.toString()) });
             try obj.put("message", std.json.Value{ .string = try allocator.dupe(u8, self.message) });
@@ -81,14 +81,14 @@ pub const Logger = struct {
             try obj.put("function", std.json.Value{ .string = try allocator.dupe(u8, self.function) });
             try obj.put("thread_id", std.json.Value{ .integer = self.thread_id });
             try obj.put("context", std.json.Value{ .object = self.context });
-            
+
             if (self.error_info) |*err_ctx| {
                 var error_obj = std.json.ObjectMap.init(allocator);
                 try error_obj.put("code", std.json.Value{ .string = try allocator.dupe(u8, @tagName(err_ctx.error_code)) });
                 try error_obj.put("severity", std.json.Value{ .string = try allocator.dupe(u8, @tagName(err_ctx.severity)) });
                 try error_obj.put("message", std.json.Value{ .string = try allocator.dupe(u8, err_ctx.message) });
                 try error_obj.put("retry_count", std.json.Value{ .integer = err_ctx.retry_count });
-                
+
                 if (err_ctx.user_id) |user_id| {
                     try error_obj.put("user_id", std.json.Value{ .integer = user_id });
                 }
@@ -101,7 +101,7 @@ pub const Logger = struct {
                 if (err_ctx.request_id) |request_id| {
                     try error_obj.put("request_id", std.json.Value{ .string = try allocator.dupe(u8, request_id) });
                 }
-                
+
                 try obj.put("error", std.json.Value{ .object = error_obj });
             }
 
@@ -117,7 +117,7 @@ pub const Logger = struct {
         pub fn consoleFormatter(entry: LogEntry, allocator: std.mem.Allocator) []const u8 {
             const timestamp_str = std.fmt.allocPrint(allocator, "{d}", .{entry.timestamp}) catch return "";
             defer allocator.free(timestamp_str);
-            
+
             const level_str = entry.level.toString();
             const file_line = std.fmt.allocPrint(allocator, "{s}:{d}", .{ entry.file, entry.line }) catch return "";
             defer allocator.free(file_line);
@@ -585,10 +585,10 @@ pub const Monitor = struct {
         for (self.health_checks.items) |*health_check| {
             if (now - health_check.last_check >= health_check.interval_ms / 1000) {
                 const status = health_check.check();
-                
+
                 // Clean up old status
                 health_check.last_status.deinit(self.allocator);
-                
+
                 health_check.last_status = status;
                 health_check.last_check = now;
 

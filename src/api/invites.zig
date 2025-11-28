@@ -239,7 +239,7 @@ pub const InviteValidator = struct {
         // https://discord.gg/abc123
         // https://discord.com/invite/abc123
         // https://discord.com/channels/123456789/987654321/abc123
-        
+
         const patterns = [_][]const u8{
             "discord.gg/",
             "discord.com/invite/",
@@ -249,13 +249,13 @@ pub const InviteValidator = struct {
         for (patterns) |pattern| {
             if (std.mem.indexOf(u8, url, pattern)) |index| {
                 const start = index + pattern.len;
-                
+
                 // Find the end of the invite code
                 var end = start;
                 while (end < url.len and (std.ascii.isAlphanumeric(url[end]) or url[end] == '_')) {
                     end += 1;
                 }
-                
+
                 const code = url[start..end];
                 if (validateInviteCode(code)) {
                     return code;

@@ -28,7 +28,7 @@ pub const GuildSubscriptionManager = struct {
         var url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/subscriptions",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -108,7 +108,7 @@ pub const GuildSubscriptionManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/subscriptions",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

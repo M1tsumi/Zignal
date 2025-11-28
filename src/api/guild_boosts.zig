@@ -162,7 +162,7 @@ pub const GuildBoostUtils = struct {
             .tier_2 => 14,
             .tier_3 => 0, // Already at max
         };
-        
+
         if (next_boosts == 0) return 0;
         return next_boosts - current_boosts;
     }

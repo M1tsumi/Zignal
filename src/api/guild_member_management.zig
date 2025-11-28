@@ -771,13 +771,13 @@ pub const GuildMemberUtils = struct {
 
         for (members) |member| {
             stats.total += 1;
-            
+
             if (isMemberOnline(member)) {
                 stats.online += 1;
             } else {
                 stats.offline += 1;
             }
-            
+
             if (isMemberMuted(member)) stats.muted += 1;
             if (isMemberDeafened(member)) stats.deafened += 1;
             if (isMemberPending(member)) stats.pending += 1;
@@ -795,7 +795,8 @@ pub const GuildMemberUtils = struct {
         for (members) |member| {
             if (std.mem.indexOf(u8, member.user.username, query) != null or
                 std.mem.indexOf(u8, getMemberDisplayName(member), query) != null or
-                (member.nick != null and std.mem.indexOf(u8, member.nick.?, query) != null)) {
+                (member.nick != null and std.mem.indexOf(u8, member.nick.?, query) != null))
+            {
                 results.append(member) catch {};
             }
         }

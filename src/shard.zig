@@ -48,15 +48,7 @@ pub const ShardManager = struct {
 
     pub fn connectAll(self: *ShardManager) !void {
         for (0..self.total_shards) |shard_id| {
-            const shard = try Shard.init(
-                self.allocator,
-                self.token,
-                @intCast(shard_id),
-                self.total_shards,
-                self.event_handler,
-                self.intents,
-                self.compression
-            );
+            const shard = try Shard.init(self.allocator, self.token, @intCast(shard_id), self.total_shards, self.event_handler, self.intents, self.compression);
             try self.shards.append(shard);
         }
 
@@ -150,7 +142,7 @@ pub const Shard = struct {
     pub fn connect(self: *Shard) !void {
         self.gateway = try Gateway.init(self.allocator, self.token);
         self.gateway.?.compression = self.compression;
-        
+
         try self.gateway.?.connect();
         self.connected = true;
         self.reconnect_attempts = 0;
@@ -180,7 +172,7 @@ pub const Shard = struct {
         try d_data.put("token", std.json.Value{ .string = self.token });
         try d_data.put("intents", std.json.Value{ .integer = self.intents });
         try d_data.put("shard", std.json.Value{ .array = std.json.ValueArray.init(self.allocator) });
-        
+
         // Add shard info [shard_id, total_shards]
         var shard_array = std.json.ValueArray.init(self.allocator);
         try shard_array.append(std.json.Value{ .integer = self.shard_id });
@@ -244,11 +236,11 @@ pub const Shard = struct {
 
         self.reconnect_attempts += 1;
         const delay = @min(std.time.ns_per_s * std.math.pow(u64, 2, self.reconnect_attempts), 30 * std.time.ns_per_s);
-        
+
         std.log.info("Shard {d} reconnecting in {d} seconds (attempt {d}/{d})", .{ self.shard_id, delay / std.time.ns_per_s, self.reconnect_attempts, self.max_reconnect_attempts });
-        
+
         std.time.sleep(delay);
-        
+
         self.disconnect();
         try self.connect();
     }
@@ -362,15 +354,8 @@ pub const AutoSharder = struct {
         self.recommended_shards = gateway_info.shards;
 
         const total_shards = @max(1, self.recommended_shards);
-        
-        self.shard_manager = try ShardManager.init(
-            self.allocator,
-            self.token,
-            total_shards,
-            self.event_handler,
-            self.intents,
-            self.compression
-        );
+
+        self.shard_manager = try ShardManager.init(self.allocator, self.token, total_shards, self.event_handler, self.intents, self.compression);
 
         try self.shard_manager.?.connectAll();
     }
@@ -401,10 +386,5 @@ pub fn shouldHandleEvent(shard_id: u32, total_shards: u32, guild_id: u64) bool {
 
 pub fn formatShardStatus(shard_info: Shard.ShardInfo, allocator: std.mem.Allocator) ![]const u8 {
     const status = if (shard_info.connected) if (shard_info.ready) "READY" else "CONNECTING" else "DISCONNECTED";
-    return std.fmt.allocPrint(allocator, "Shard {d}/{d}: {s} (Guilds: {d})", .{ 
-        shard_info.shard_id, 
-        shard_info.total_shards, 
-        status, 
-        shard_info.guild_count 
-    });
+    return std.fmt.allocPrint(allocator, "Shard {d}/{d}: {s} (Guilds: {d})", .{ shard_info.shard_id, shard_info.total_shards, status, shard_info.guild_count });
 }

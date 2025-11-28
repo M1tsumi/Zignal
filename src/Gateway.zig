@@ -33,11 +33,11 @@ pub fn connect(self: *Gateway) !void {
     var client = std.http.Client{ .allocator = self.allocator };
     defer client.deinit();
 
-    const url = if (self.compression) 
+    const url = if (self.compression)
         "wss://gateway.discord.gg/?v=10&encoding=json&compress=zlib-stream"
-    else 
+    else
         "wss://gateway.discord.gg/?v=10&encoding=json";
-    
+
     var websocket = try client.openWebsocket(.GET, try std.Uri.parse(url), .{
         .max_header_size = 8192,
         .max_headers = 64,
@@ -89,15 +89,16 @@ fn receiveMessage(self: *Gateway) ![]u8 {
         while (true) {
             const chunk = try self.websocket.?.receiveMessage();
             defer self.allocator.free(chunk);
-            
+
             try buffer.appendSlice(chunk);
-            
+
             // Check for zlib footer (0x0000ffff)
-            if (chunk.len >= 4 and 
-                chunk[chunk.len-4] == 0x00 and 
-                chunk[chunk.len-3] == 0x00 and 
-                chunk[chunk.len-2] == 0xff and 
-                chunk[chunk.len-1] == 0xff) {
+            if (chunk.len >= 4 and
+                chunk[chunk.len - 4] == 0x00 and
+                chunk[chunk.len - 3] == 0x00 and
+                chunk[chunk.len - 2] == 0xff and
+                chunk[chunk.len - 1] == 0xff)
+            {
                 break;
             }
         }
@@ -125,7 +126,7 @@ pub fn sendHeartbeat(self: *Gateway) !void {
     defer heartbeat.deinit();
 
     try heartbeat.put("op", std.json.Value{ .integer = 1 });
-    try heartbeat.put("d", if (self.sequence) |seq| std.json.Value{ .integer = @intCast(seq) } else std.json.Value{ .null });
+    try heartbeat.put("d", if (self.sequence) |seq| std.json.Value{ .integer = @intCast(seq) } else std.json.Value{.null});
 
     const json_string = try std.json.stringifyAlloc(self.allocator, heartbeat, .{});
     defer self.allocator.free(json_string);
@@ -291,14 +292,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
         defer parsed.deinit();
 
         if (@hasDecl(@TypeOf(event_handler), "onMessageReactionAdd")) {
-            try event_handler.onMessageReactionAdd(
-                parsed.value.user_id,
-                parsed.value.channel_id,
-                parsed.value.message_id,
-                parsed.value.guild_id,
-                parsed.value.member,
-                parsed.value.emoji
-            );
+            try event_handler.onMessageReactionAdd(parsed.value.user_id, parsed.value.channel_id, parsed.value.message_id, parsed.value.guild_id, parsed.value.member, parsed.value.emoji);
         }
     } else if (std.mem.eql(u8, event_type, "MESSAGE_REACTION_REMOVE")) {
         var parsed = try std.json.parseFromSlice(struct {
@@ -311,13 +305,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
         defer parsed.deinit();
 
         if (@hasDecl(@TypeOf(event_handler), "onMessageReactionRemove")) {
-            try event_handler.onMessageReactionRemove(
-                parsed.value.user_id,
-                parsed.value.channel_id,
-                parsed.value.message_id,
-                parsed.value.guild_id,
-                parsed.value.emoji
-            );
+            try event_handler.onMessageReactionRemove(parsed.value.user_id, parsed.value.channel_id, parsed.value.message_id, parsed.value.guild_id, parsed.value.emoji);
         }
     } else if (std.mem.eql(u8, event_type, "GUILD_CREATE")) {
         var parsed = try std.json.parseFromSlice(models.Guild, self.allocator, data, .{ .ignore_unknown_fields = true });
@@ -477,13 +465,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
         defer parsed.deinit();
 
         if (@hasDecl(@TypeOf(event_handler), "onTypingStart")) {
-            try event_handler.onTypingStart(
-                parsed.value.channel_id,
-                parsed.value.guild_id,
-                parsed.value.user_id,
-                parsed.value.timestamp,
-                parsed.value.member
-            );
+            try event_handler.onTypingStart(parsed.value.channel_id, parsed.value.guild_id, parsed.value.user_id, parsed.value.timestamp, parsed.value.member);
         }
     } else if (std.mem.eql(u8, event_type, "PRESENCE_UPDATE")) {
         var parsed = try std.json.parseFromSlice(struct {
@@ -500,13 +482,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
         defer parsed.deinit();
 
         if (@hasDecl(@TypeOf(event_handler), "onPresenceUpdate")) {
-            try event_handler.onPresenceUpdate(
-                parsed.value.user,
-                parsed.value.guild_id,
-                parsed.value.status,
-                parsed.value.activities,
-                parsed.value.client_status
-            );
+            try event_handler.onPresenceUpdate(parsed.value.user, parsed.value.guild_id, parsed.value.status, parsed.value.activities, parsed.value.client_status);
         }
     } else if (std.mem.eql(u8, event_type, "VOICE_STATE_UPDATE")) {
         var parsed = try std.json.parseFromSlice(models.VoiceState, self.allocator, data, .{ .ignore_unknown_fields = true });
@@ -524,11 +500,7 @@ fn handleDispatch(self: *Gateway, event_type: []const u8, data: std.json.Value, 
         defer parsed.deinit();
 
         if (@hasDecl(@TypeOf(event_handler), "onVoiceServerUpdate")) {
-            try event_handler.onVoiceServerUpdate(
-                parsed.value.token,
-                parsed.value.guild_id,
-                parsed.value.endpoint
-            );
+            try event_handler.onVoiceServerUpdate(parsed.value.token, parsed.value.guild_id, parsed.value.endpoint);
         }
     }
 }
@@ -540,7 +512,7 @@ pub fn updatePresence(self: *Gateway, status: []const u8, _: []models.Activity) 
     const d_data = std.json.ObjectMap.init(self.allocator);
     defer d_data.deinit();
 
-    try d_data.put("since", std.json.Value{ .null });
+    try d_data.put("since", std.json.Value{.null});
     try d_data.put("activities", std.json.Value{ .array = std.json.ValueArray.init(self.allocator) });
     try d_data.put("status", std.json.Value{ .string = status });
     try d_data.put("afk", std.json.Value{ .bool = false });

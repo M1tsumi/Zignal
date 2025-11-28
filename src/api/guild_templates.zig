@@ -342,7 +342,8 @@ pub const GuildTemplateUtils = struct {
 
         for (templates) |template| {
             if (std.mem.indexOf(u8, getTemplateName(template), query) != null or
-                (getTemplateDescription(template) != null and std.mem.indexOf(u8, getTemplateDescription(template).?, query) != null)) {
+                (getTemplateDescription(template) != null and std.mem.indexOf(u8, getTemplateDescription(template).?, query) != null))
+            {
                 results.append(template) catch {};
             }
         }

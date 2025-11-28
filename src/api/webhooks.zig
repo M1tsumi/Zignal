@@ -558,39 +558,39 @@ pub const WebhookUtils = struct {
     pub fn extractWebhookInfo(url: []const u8) ?struct { id: u64, token: []const u8 } {
         // Extract webhook ID and token from URL
         // https://discord.com/api/webhooks/1234567890123456789/abcdef-ghijkl-mnopqr-stuvwx-yz123456
-        
+
         if (std.mem.indexOf(u8, url, "webhooks/")) |index| {
             const start = index + 9; // length of "webhooks/"
-            
+
             // Find the end of the webhook ID
             var id_end = start;
             while (id_end < url.len and std.ascii.isDigit(url[id_end])) {
                 id_end += 1;
             }
-            
+
             if (id_end == start or id_end >= url.len or url[id_end] != '/') {
                 return null;
             }
-            
+
             const id_str = url[start..id_end];
             const webhook_id = std.fmt.parseInt(u64, id_str, 10) catch return null;
-            
+
             const token_start = id_end + 1;
             if (token_start >= url.len) {
                 return null;
             }
-            
+
             // Find the end of the token
             var token_end = token_start;
             while (token_end < url.len and (std.ascii.isAlphanumeric(url[token_end]) or url[token_end] == '-')) {
                 token_end += 1;
             }
-            
+
             const token = url[token_start..token_end];
-            
+
             return .{ .id = webhook_id, .token = token };
         }
-        
+
         return null;
     }
 

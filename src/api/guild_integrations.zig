@@ -402,7 +402,8 @@ pub const GuildIntegrationUtils = struct {
         for (integrations) |integration| {
             if (std.mem.indexOf(u8, getIntegrationName(integration), query) != null or
                 std.mem.indexOf(u8, getIntegrationType(integration), query) != null or
-                std.mem.indexOf(u8, getIntegrationAccountName(integration), query) != null) {
+                std.mem.indexOf(u8, getIntegrationAccountName(integration), query) != null)
+            {
                 results.append(integration) catch {};
             }
         }

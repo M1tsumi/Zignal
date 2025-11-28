@@ -304,7 +304,7 @@ pub const GuildEmojiUtils = struct {
 
     pub fn validateEmoji(emoji: models.Emoji) bool {
         if (!isEmojiCustom(emoji)) return true; // Unicode emojis are always valid
-        
+
         if (!validateEmojiName(getEmojiName(emoji))) return false;
         if (getEmojiId(emoji) == 0) return false;
 
@@ -470,7 +470,7 @@ pub const GuildEmojiUtils = struct {
         for (emojis) |emoji| {
             if (isEmojiCustom(emoji)) {
                 custom_count += 1;
-                
+
                 if (isEmojiAnimated(emoji)) {
                     animated_count += 1;
                 } else {

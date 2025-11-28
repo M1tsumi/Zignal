@@ -16,7 +16,7 @@ pub const EventHandler = struct {
         self.handlers.deinit();
     }
 
-    pub fn onMessageCreate(self: *EventHandler, handler: fn(*models.Message) void) !void {
+    pub fn onMessageCreate(self: *EventHandler, handler: fn (*models.Message) void) !void {
         const handler_wrapper = struct {
             fn wrapper(json_data: []const u8) void {
                 var parsed = std.json.parseFromSlice(struct {
@@ -91,7 +91,7 @@ pub const EventHandler = struct {
         try self.handlers.put("MESSAGE_CREATE", std.json.Value{ .string = @ptrCast(&handler_wrapper.wrapper) });
     }
 
-    pub fn onMessageUpdate(self: *EventHandler, handler: fn(*models.Message) void) !void {
+    pub fn onMessageUpdate(self: *EventHandler, handler: fn (*models.Message) void) !void {
         const handler_wrapper = struct {
             fn wrapper(json_data: []const u8) void {
                 var parsed = std.json.parseFromSlice(struct {
@@ -166,7 +166,7 @@ pub const EventHandler = struct {
         try self.handlers.put("MESSAGE_UPDATE", std.json.Value{ .string = @ptrCast(&handler_wrapper.wrapper) });
     }
 
-    pub fn onMessageDelete(self: *EventHandler, handler: fn(u64, u64) void) !void {
+    pub fn onMessageDelete(self: *EventHandler, handler: fn (u64, u64) void) !void {
         const handler_wrapper = struct {
             fn wrapper(json_data: []const u8) void {
                 var parsed = std.json.parseFromSlice(struct {
@@ -183,7 +183,7 @@ pub const EventHandler = struct {
         try self.handlers.put("MESSAGE_DELETE", std.json.Value{ .string = @ptrCast(&handler_wrapper.wrapper) });
     }
 
-    pub fn onGuildCreate(self: *EventHandler, handler: fn(*models.Guild) void) !void {
+    pub fn onGuildCreate(self: *EventHandler, handler: fn (*models.Guild) void) !void {
         const handler_wrapper = struct {
             fn wrapper(json_data: []const u8) void {
                 var parsed = std.json.parseFromSlice(struct {
@@ -280,7 +280,7 @@ pub const EventHandler = struct {
         try self.handlers.put("GUILD_CREATE", std.json.Value{ .string = @ptrCast(&handler_wrapper.wrapper) });
     }
 
-    pub fn onReady(self: *EventHandler, handler: fn([]const u8, u64) void) !void {
+    pub fn onReady(self: *EventHandler, handler: fn ([]const u8, u64) void) !void {
         const handler_wrapper = struct {
             fn wrapper(json_data: []const u8) void {
                 var parsed = std.json.parseFromSlice(struct {
@@ -300,8 +300,8 @@ pub const EventHandler = struct {
 
     pub fn callHandler(self: *EventHandler, event_type: []const u8, data: ?std.json.Value) void {
         if (self.handlers.get(event_type)) |handler_value| {
-            const handler = @as(fn([]const u8) void, @ptrCast(handler_value.string));
-            
+            const handler = @as(fn ([]const u8) void, @ptrCast(handler_value.string));
+
             if (data) |d| {
                 const json_string = std.json.stringifyAlloc(std.heap.page_allocator, d, .{}) catch return;
                 defer std.heap.page_allocator.free(json_string);

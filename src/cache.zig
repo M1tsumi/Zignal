@@ -154,14 +154,14 @@ pub const Cache = struct {
         if (self.current_size >= self.max_size) {
             // Simple LRU: clear 25% of the cache
             const target_size = @divFloor(self.max_size * 3, 4);
-            
+
             // Clear some messages first (they're most numerous)
             var message_iter = self.messages.iterator();
             var messages_to_remove: usize = 0;
             while (message_iter.next() != null and self.current_size > target_size) {
                 messages_to_remove += 1;
             }
-            
+
             for (0..messages_to_remove) |_| {
                 if (self.messages.pop()) |entry| {
                     self.deinitMessage(entry.value);
@@ -182,7 +182,7 @@ pub const Cache = struct {
 
     pub fn setGuild(self: *Cache, guild: models.Guild) !void {
         try self.ensureCapacity();
-        
+
         // Remove old entry if exists
         if (self.guilds.fetchRemove(guild.id)) |old_entry| {
             self.deinitGuild(old_entry.value);
@@ -213,7 +213,7 @@ pub const Cache = struct {
 
     pub fn setChannel(self: *Cache, channel: models.Channel) !void {
         try self.ensureCapacity();
-        
+
         if (self.channels.fetchRemove(channel.id)) |old_entry| {
             self.deinitChannel(old_entry.value);
             self.current_size -= 1;
@@ -243,7 +243,7 @@ pub const Cache = struct {
 
     pub fn setUser(self: *Cache, user: models.User) !void {
         try self.ensureCapacity();
-        
+
         if (self.users.fetchRemove(user.id)) |old_entry| {
             self.deinitUser(old_entry.value);
             self.current_size -= 1;
@@ -275,7 +275,7 @@ pub const Cache = struct {
 
     pub fn setMember(self: *Cache, guild_id: u64, member: models.GuildMember) !void {
         try self.ensureCapacity();
-        
+
         const guild_members_entry = try self.members.getOrPut(guild_id);
         if (!guild_members_entry.found_existing) {
             guild_members_entry.value_ptr.* = std.hash_map.AutoHashMap(u64, models.GuildMember).init(self.allocator);
@@ -315,7 +315,7 @@ pub const Cache = struct {
 
     pub fn setRole(self: *Cache, guild_id: u64, role: models.Role) !void {
         try self.ensureCapacity();
-        
+
         const guild_roles_entry = try self.roles.getOrPut(guild_id);
         if (!guild_roles_entry.found_existing) {
             guild_roles_entry.value_ptr.* = std.hash_map.AutoHashMap(u64, models.Role).init(self.allocator);
@@ -353,7 +353,7 @@ pub const Cache = struct {
 
     pub fn setMessage(self: *Cache, message: models.Message) !void {
         try self.ensureCapacity();
-        
+
         if (self.messages.fetchRemove(message.id)) |old_entry| {
             self.deinitMessage(old_entry.value);
             self.current_size -= 1;

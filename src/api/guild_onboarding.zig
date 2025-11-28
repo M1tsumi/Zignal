@@ -571,7 +571,8 @@ pub const GuildOnboardingUtils = struct {
         for (onboarding.prompts) |prompt| {
             for (prompt.options) |option| {
                 if (std.mem.indexOf(u8, option.title, query) != null or
-                    (option.description != null and std.mem.indexOf(u8, option.description.?, query) != null)) {
+                    (option.description != null and std.mem.indexOf(u8, option.description.?, query) != null))
+                {
                     results.append(option) catch {};
                 }
             }

@@ -273,15 +273,15 @@ pub const GuildRoleUtils = struct {
     }
 
     pub fn isRoleModerator(role: models.Role) bool {
-        return roleHasPermission(role, .manage_messages) or 
-               roleHasPermission(role, .kick_members) or 
-               roleHasPermission(role, .ban_members);
+        return roleHasPermission(role, .manage_messages) or
+            roleHasPermission(role, .kick_members) or
+            roleHasPermission(role, .ban_members);
     }
 
     pub fn isRoleBooster(role: models.Role) bool {
-        return roleHasPermission(role, .manage_guild) or 
-               roleHasPermission(role, .manage_channels) or 
-               roleHasPermission(role, .manage_roles);
+        return roleHasPermission(role, .manage_guild) or
+            roleHasPermission(role, .manage_channels) or
+            roleHasPermission(role, .manage_roles);
     }
 
     pub fn hasRoleIcon(role: models.Role) bool {
@@ -639,7 +639,7 @@ pub const GuildRoleUtils = struct {
 
     pub fn getHighestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
-        
+
         var highest = roles[0];
         for (roles[1..]) |role| {
             if (getRolePosition(role) > getRolePosition(highest)) {
@@ -651,7 +651,7 @@ pub const GuildRoleUtils = struct {
 
     pub fn getLowestRole(roles: []models.Role) ?models.Role {
         if (roles.len == 0) return null;
-        
+
         var lowest = roles[0];
         for (roles[1..]) |role| {
             if (getRolePosition(role) < getRolePosition(lowest)) {

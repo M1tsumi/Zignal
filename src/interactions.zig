@@ -24,11 +24,11 @@ pub const ComponentType = enum(u8) {
 
 /// Button styles with proper color coding
 pub const ButtonStyle = enum(u8) {
-    primary = 1,    // Blue
-    secondary = 2,  // Gray
-    success = 3,    // Green
-    danger = 4,     // Red
-    link = 5,       // Gray with link icon
+    primary = 1, // Blue
+    secondary = 2, // Gray
+    success = 3, // Green
+    danger = 4, // Red
+    link = 5, // Gray with link icon
 };
 
 /// Text input styles for modals

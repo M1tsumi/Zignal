@@ -528,7 +528,8 @@ pub const GuildInviteUtils = struct {
             if (std.mem.indexOf(u8, getInviteCode(invite), query) != null or
                 (hasInviteGuild(invite) and std.mem.indexOf(u8, getInviteGuild(invite).?.name, query) != null) or
                 (hasInviteChannel(invite) and std.mem.indexOf(u8, getInviteChannel(invite).?.name, query) != null) or
-                (hasInviteInviter(invite) and std.mem.indexOf(u8, getInviteInviter(invite).?.username, query) != null)) {
+                (hasInviteInviter(invite) and std.mem.indexOf(u8, getInviteInviter(invite).?.username, query) != null))
+            {
                 results.append(invite) catch {};
             }
         }

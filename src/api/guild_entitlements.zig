@@ -28,7 +28,7 @@ pub const GuildEntitlementManager = struct {
         var url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/entitlements",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -106,7 +106,7 @@ pub const GuildEntitlementManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/entitlements",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

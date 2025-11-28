@@ -99,7 +99,7 @@ pub const GuildThreadManager = struct {
         defer params.deinit();
 
         try params.append(try std.fmt.allocPrint(self.allocator, "query={s}", .{query}));
-        
+
         if (limit) |l| {
             try params.append(try std.fmt.allocPrint(self.allocator, "limit={d}", .{l}));
         }

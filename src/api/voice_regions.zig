@@ -20,7 +20,7 @@ pub const VoiceRegionManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/voice/regions",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -88,7 +88,7 @@ pub const VoiceRegionManager = struct {
 
         const SortContext = struct {
             latencies: std.json.ObjectMap,
-            
+
             fn compare(ctx: @This(), a: models.VoiceRegion, b: models.VoiceRegion) std.math.Order {
                 const a_latency = ctx.latencies.get(a.id).?.float;
                 const b_latency = ctx.latencies.get(b.id).?.float;
@@ -98,7 +98,7 @@ pub const VoiceRegionManager = struct {
             }
         };
         const sort_context = SortContext{ .latencies = latencies };
-        
+
         std.sort.sort(models.VoiceRegion, regions, sort_context, SortContext.compare);
 
         return regions;

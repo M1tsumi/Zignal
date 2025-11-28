@@ -196,7 +196,7 @@ pub const ApplicationCommandPermissionEventUtils = struct {
         return summaries.toOwnedSlice();
     }
 
-    pub function hasAnyPermissions(event: ApplicationCommandPermissionEvents.ApplicationCommandPermissionsUpdateEvent) bool {
+    pub fn hasAnyPermissions(event: ApplicationCommandPermissionEvents.ApplicationCommandPermissionsUpdateEvent) bool {
         return event.permissions.len > 0;
     }
 

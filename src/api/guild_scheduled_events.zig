@@ -488,15 +488,15 @@ pub const GuildScheduledEventUtils = struct {
 
     pub fn validateEventTime(start_time: u64, end_time: ?u64) bool {
         const current_time = @as(u64, @intCast(std.time.timestamp())) * 1000;
-        
+
         // Start time must be in the future
         if (start_time <= current_time) return false;
-        
+
         // If end time is provided, it must be after start time
         if (end_time) |end| {
             if (end <= start_time) return false;
         }
-        
+
         return true;
     }
 
@@ -521,14 +521,14 @@ pub const GuildScheduledEventUtils = struct {
 
         for (events) |event| {
             stats.total += 1;
-            
+
             switch (event.status) {
                 .scheduled => stats.scheduled += 1,
                 .active => stats.active += 1,
                 .completed => stats.completed += 1,
                 .canceled => stats.canceled += 1,
             }
-            
+
             if (isEventInFuture(event)) {
                 stats.upcoming += 1;
             } else if (isEventInPast(event)) {

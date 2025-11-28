@@ -20,7 +20,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -39,7 +39,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/applications/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -65,7 +65,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/token",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -105,7 +105,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/token",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -144,7 +144,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/token",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -182,7 +182,7 @@ pub const OAuth2Manager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/oauth2/token/revoke",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

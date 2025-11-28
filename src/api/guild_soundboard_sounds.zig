@@ -559,12 +559,12 @@ pub const GuildSoundboardSoundUtils = struct {
         for (sounds) |sound| {
             total_duration += sound.duration;
             total_volume += sound.volume;
-            
+
             if (sound.duration < shortest) shortest = sound.duration;
             if (sound.duration > longest) longest = sound.duration;
             if (sound.volume < quietest) quietest = sound.volume;
             if (sound.volume > loudest) loudest = sound.volume;
-            
+
             if (isSoundAvailable(sound)) available_count += 1;
             if (isSoundCustom(sound)) custom_count += 1;
             if (isCustomEmoji(sound)) custom_emoji_count += 1;

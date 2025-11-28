@@ -75,21 +75,21 @@ pub const ConnectionPool = struct {
         // Try to reuse an available connection to the same endpoint
         for (self.available_connections.items) |index| {
             const connection = &self.connections.items[index];
-            
-            if (std.mem.eql(u8, connection.endpoint, endpoint) and 
+
+            if (std.mem.eql(u8, connection.endpoint, endpoint) and
                 !connection.in_use and
-                (now - connection.last_used) * 1000 <= self.max_idle_time_ms) {
-                
+                (now - connection.last_used) * 1000 <= self.max_idle_time_ms)
+            {
                 connection.in_use = true;
                 connection.last_used = now;
                 connection.requests_served += 1;
                 self.metrics.connection_reuse_count += 1;
-                
+
                 // Remove from available list
                 _ = self.available_connections.orderedRemove(index);
                 self.metrics.idle_connections -= 1;
                 self.metrics.active_connections += 1;
-                
+
                 return connection;
             }
         }
@@ -101,22 +101,22 @@ pub const ConnectionPool = struct {
 
         // Clean up idle connections and try again
         self.cleanupIdleConnections();
-        
+
         // Try to find an available connection after cleanup
         for (self.available_connections.items) |index| {
             const connection = &self.connections.items[index];
-            
+
             if (std.mem.eql(u8, connection.endpoint, endpoint) and !connection.in_use) {
                 connection.in_use = true;
                 connection.last_used = now;
                 connection.requests_served += 1;
                 self.metrics.connection_reuse_count += 1;
-                
+
                 // Remove from available list
                 _ = self.available_connections.orderedRemove(index);
                 self.metrics.idle_connections -= 1;
                 self.metrics.active_connections += 1;
-                
+
                 return connection;
             }
         }
@@ -129,7 +129,7 @@ pub const ConnectionPool = struct {
 
         connection.in_use = false;
         connection.last_used = std.time.timestamp();
-        
+
         // Add to available list
         self.available_connections.append(self.connections.items.len) catch {};
         self.metrics.idle_connections += 1;
@@ -141,7 +141,7 @@ pub const ConnectionPool = struct {
         self.connection_counter += 1;
 
         var client = std.http.Client{ .allocator = self.allocator };
-        
+
         const pooled_connection = PooledConnection{
             .id = connection_id,
             .client = client,
@@ -166,21 +166,21 @@ pub const ConnectionPool = struct {
         while (i < self.available_connections.items.len) {
             const index = self.available_connections.items[i];
             const connection = &self.connections.items[index];
-            
+
             if ((now - connection.last_used) * 1000 > self.max_idle_time_ms) {
                 // Close and remove the connection
                 connection.deinit();
                 self.allocator.free(connection.endpoint);
-                
+
                 // Remove from connections list
                 _ = self.connections.orderedRemove(index);
-                
+
                 // Remove from available list
                 _ = self.available_connections.orderedRemove(i);
-                
+
                 self.metrics.total_connections_closed += 1;
                 self.metrics.idle_connections -= 1;
-                
+
                 // Update remaining indices
                 for (self.available_connections.items) |*available_index| {
                     if (available_index.* > index) {
@@ -349,7 +349,7 @@ pub const RequestBatcher = struct {
         max_retries: u32,
     ) !void {
         const request_id = std.crypto.random.int(u64);
-        
+
         const request = PendingRequest{
             .id = request_id,
             .method = try self.allocator.dupe(u8, method),
@@ -412,7 +412,7 @@ pub const RequestBatcher = struct {
                             break;
                         }
                     }
-                    
+
                     if (!found_group) {
                         var requests = std.ArrayList(PendingRequest).init(self.allocator);
                         try requests.append(request);
@@ -430,7 +430,7 @@ pub const RequestBatcher = struct {
         for (grouped_requests.items) |group| {
             const batch_size = @min(group.requests.items.len, group.handler.max_batch_size);
             const batch_requests = try self.allocator.dupe(PendingRequest, group.requests.items[0..batch_size]);
-            
+
             const result = group.handler.batch_processor(batch_requests, self.allocator) catch |err| {
                 // Handle batch processing error
                 const error_result = BatchResult{
@@ -445,11 +445,11 @@ pub const RequestBatcher = struct {
                         },
                     }),
                 };
-                
+
                 for (batch_requests) |request| {
                     request.callback(error_result);
                 }
-                
+
                 error_result.deinit(self.allocator);
                 continue;
             };
@@ -479,8 +479,8 @@ pub const RequestBatcher = struct {
         // Update metrics
         self.metrics.total_batches_processed += 1;
         self.metrics.total_requests_processed += grouped_requests.items.len;
-        self.metrics.average_processing_time_ms = 
-            (self.metrics.average_processing_time_ms * @as(f64, @floatFromInt(self.metrics.total_batches_processed - 1)) + processing_time_ms) / 
+        self.metrics.average_processing_time_ms =
+            (self.metrics.average_processing_time_ms * @as(f64, @floatFromInt(self.metrics.total_batches_processed - 1)) + processing_time_ms) /
             @as(f64, @floatFromInt(self.metrics.total_batches_processed));
 
         grouped_requests.deinit();
@@ -498,7 +498,7 @@ pub const RequestBatcher = struct {
         var i: usize = 0;
         while (i < self.pending_requests.items.len) {
             const request = &self.pending_requests.items[i];
-            
+
             if ((now - request.timestamp) * 1000 > request.timeout_ms) {
                 // Handle timeout
                 if (request.retry_count < request.max_retries) {
@@ -506,12 +506,12 @@ pub const RequestBatcher = struct {
                     request.retry_count += 1;
                     request.timestamp = now;
                     self.metrics.retry_count += 1;
-                    
+
                     logging.info(
                         "Retrying request {d} (attempt {d}/{d})",
                         .{ request.id, request.retry_count + 1, request.max_retries },
                     );
-                    
+
                     i += 1;
                 } else {
                     // Max retries exceeded, fail the request
@@ -527,10 +527,10 @@ pub const RequestBatcher = struct {
                             },
                         }),
                     };
-                    
+
                     request.callback(error_result);
                     error_result.deinit(self.allocator);
-                    
+
                     // Remove from pending list
                     request.deinit(self.allocator);
                     _ = self.pending_requests.orderedRemove(i);
@@ -602,7 +602,7 @@ pub const RateLimiter = struct {
 
     pub fn tryAcquire(self: *RateLimiter) bool {
         self.refillTokens();
-        
+
         if (self.tokens >= 1.0) {
             self.tokens -= 1.0;
             self.metrics.total_requests += 1;
@@ -619,17 +619,17 @@ pub const RateLimiter = struct {
 
     pub fn acquire(self: *RateLimiter, timeout_ms: u64) !bool {
         const start_time = std.time.nanoTimestamp();
-        
+
         while (true) {
             if (self.tryAcquire()) {
                 const end_time = std.time.nanoTimestamp();
                 const wait_time_ms = @as(f64, @floatFromInt(end_time - start_time)) / 1_000_000.0;
-                
+
                 // Update average wait time
-                self.metrics.average_wait_time_ms = 
-                    (self.metrics.average_wait_time_ms * @as(f64, @floatFromInt(self.metrics.allowed_requests - 1)) + wait_time_ms) / 
+                self.metrics.average_wait_time_ms =
+                    (self.metrics.average_wait_time_ms * @as(f64, @floatFromInt(self.metrics.allowed_requests - 1)) + wait_time_ms) /
                     @as(f64, @floatFromInt(self.metrics.allowed_requests));
-                
+
                 return true;
             }
 
@@ -646,11 +646,11 @@ pub const RateLimiter = struct {
 
     pub fn getWaitTime(self: *RateLimiter) u64 {
         self.refillTokens();
-        
+
         if (self.tokens >= 1.0) {
             return 0;
         }
-        
+
         const tokens_needed = 1.0 - self.tokens;
         const wait_time_seconds = tokens_needed / self.refill_rate;
         return @as(u64, @intFromFloat(wait_time_seconds * 1000.0));
@@ -659,7 +659,7 @@ pub const RateLimiter = struct {
     fn refillTokens(self: *RateLimiter) void {
         const now = std.time.timestamp();
         const time_passed = @as(f64, @floatFromInt(now - self.last_refill));
-        
+
         if (time_passed > 0.0) {
             const tokens_to_add = time_passed * self.refill_rate;
             self.tokens = @min(@as(f64, @floatFromInt(self.capacity)), self.tokens + tokens_to_add);
@@ -677,9 +677,10 @@ pub const RateLimiter = struct {
         refill_rate: f64,
         utilization: f64,
     } {
-        const utilization = if (self.capacity > 0) 
-            (@as(f64, @floatFromInt(self.capacity)) - self.tokens) / @as(f64, @floatFromInt(self.capacity)) 
-        else 0.0;
+        const utilization = if (self.capacity > 0)
+            (@as(f64, @floatFromInt(self.capacity)) - self.tokens) / @as(f64, @floatFromInt(self.capacity))
+        else
+            0.0;
 
         return .{
             .capacity = self.capacity,
@@ -741,7 +742,7 @@ pub const PerformanceMonitor = struct {
 
     pub fn recordRequest(self: *PerformanceMonitor, response_time_ms: u64, success: bool) void {
         self.metrics.total_requests += 1;
-        
+
         if (success) {
             self.metrics.successful_requests += 1;
         } else {
@@ -749,8 +750,8 @@ pub const PerformanceMonitor = struct {
         }
 
         // Update average response time
-        self.metrics.average_response_time_ms = 
-            (self.metrics.average_response_time_ms * @as(f64, @floatFromInt(self.metrics.total_requests - 1)) + @as(f64, @floatFromInt(response_time_ms))) / 
+        self.metrics.average_response_time_ms =
+            (self.metrics.average_response_time_ms * @as(f64, @floatFromInt(self.metrics.total_requests - 1)) + @as(f64, @floatFromInt(response_time_ms))) /
             @as(f64, @floatFromInt(self.metrics.total_requests));
     }
 
@@ -758,25 +759,25 @@ pub const PerformanceMonitor = struct {
         // Update connection pool metrics
         _ = self.connection_pool.getStats();
         const pool_metrics = self.connection_pool.getMetrics();
-        
+
         if (pool_metrics.total_connections_created > 0) {
-            self.metrics.connection_reuse_rate = 
-                @as(f64, @floatFromInt(pool_metrics.connection_reuse_count)) / 
+            self.metrics.connection_reuse_rate =
+                @as(f64, @floatFromInt(pool_metrics.connection_reuse_count)) /
                 @as(f64, @floatFromInt(pool_metrics.total_connections_created));
         }
 
         // Update batch metrics
         const batch_metrics = self.request_batcher.getMetrics();
         if (batch_metrics.total_batches_processed > 0) {
-            self.metrics.batch_efficiency = 
-                @as(f64, @floatFromInt(batch_metrics.total_requests_processed)) / 
+            self.metrics.batch_efficiency =
+                @as(f64, @floatFromInt(batch_metrics.total_requests_processed)) /
                 @as(f64, @floatFromInt(batch_metrics.total_batches_processed));
         }
 
         // Calculate requests per second (simplified)
         if (self.metrics.total_requests > 0) {
-            self.metrics.requests_per_second = 
-                @as(f64, @floatFromInt(self.metrics.total_requests)) / 
+            self.metrics.requests_per_second =
+                @as(f64, @floatFromInt(self.metrics.total_requests)) /
                 @as(f64, @floatFromInt(60.0)); // Assuming 1 minute window
         }
 
@@ -808,23 +809,23 @@ pub const PerformanceMonitor = struct {
 
     pub fn generateReport(self: PerformanceMonitor) ![]const u8 {
         const stats = self.getStats();
-        
+
         var report = std.ArrayList(u8).init(self.allocator);
         defer report.deinit();
 
         try report.appendSlice("=== Performance Report ===\n\n");
-        
+
         try report.appendSlice("Connection Pool:\n");
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Total: {d}\n", .{stats.connection_pool.total_connections}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Active: {d}\n", .{stats.connection_pool.active_connections}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Idle: {d}\n", .{stats.connection_pool.idle_connections}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Utilization: {d:.2}%\n\n", .{stats.connection_pool.connection_utilization * 100.0}));
-        
+
         try report.appendSlice("Request Batching:\n");
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Pending: {d}\n", .{stats.request_batcher.pending_requests}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Handlers: {d}\n", .{stats.request_batcher.batch_handlers}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Average Wait: {d:.2}ms\n\n", .{stats.request_batcher.average_wait_time_ms}));
-        
+
         try report.appendSlice("Performance Metrics:\n");
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Total Requests: {d}\n", .{stats.performance.total_requests}));
         try report.appendSlice(try std.fmt.allocPrint(self.allocator, "  Success Rate: {d:.2}%\n", .{@as(f64, @floatFromInt(stats.performance.successful_requests)) / @as(f64, @floatFromInt(stats.performance.total_requests)) * 100.0}));

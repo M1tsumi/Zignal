@@ -20,7 +20,7 @@ pub const GuildApplicationManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/applications/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 
@@ -72,7 +72,7 @@ pub const GuildApplicationManager = struct {
         const url = try std.fmt.allocPrint(
             self.allocator,
             "{s}/applications/@me",
-            .{ self.client.base_url },
+            .{self.client.base_url},
         );
         defer self.allocator.free(url);
 

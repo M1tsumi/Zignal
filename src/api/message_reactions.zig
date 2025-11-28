@@ -388,11 +388,11 @@ pub const MessageReactionUtils = struct {
 
         for (reactions) |reaction| {
             total_reacts += reaction.count;
-            
+
             if (isReactionCustom(reaction)) custom_count += 1;
             if (isReactionUnicode(reaction)) unicode_count += 1;
             if (isReactionAnimated(reaction)) animated_count += 1;
-            
+
             if (most_popular == null or reaction.count > most_popular.?.count) {
                 most_popular = reaction;
             }
@@ -460,28 +460,28 @@ pub const MessageReactionUtils = struct {
                 if (colon_pos != last_colon_pos) {
                     // Format: name:id
                     const name = emoji_str[0..colon_pos];
-                    const id_str = emoji_str[last_colon_pos + 1..];
+                    const id_str = emoji_str[last_colon_pos + 1 ..];
                     const id = std.fmt.parseInt(u64, id_str, 10) catch 0;
                     return .{ .name = name, .id = id };
                 }
             }
         }
-        
+
         // Unicode emoji (no ID)
         return .{ .name = emoji_str, .id = null };
     }
 
     pub fn isValidEmojiString(emoji_str: []const u8) bool {
         const parsed = parseEmojiString(emoji_str);
-        
+
         // Name must be valid
         if (parsed.name.len == 0) return false;
-        
+
         // If ID is present, it must be valid
         if (parsed.id) |id| {
             if (id == 0) return false;
         }
-        
+
         return true;
     }
 
@@ -571,16 +571,16 @@ pub const MessageReactionUtils = struct {
 
     pub fn getMedianReactionCount(reactions: []models.Reaction) u32 {
         if (reactions.len == 0) return 0;
-        
+
         var sorted = std.ArrayList(models.Reaction).init(std.heap.page_allocator);
         defer sorted.deinit();
-        
+
         for (reactions) |reaction| {
             sorted.append(reaction) catch {};
         }
-        
+
         sortReactionsByCount(sorted.items);
-        
+
         const mid = sorted.items.len / 2;
         if (sorted.items.len % 2 == 0) {
             // Even number of items, return average of middle two

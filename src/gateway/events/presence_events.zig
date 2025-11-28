@@ -65,8 +65,8 @@ pub const PresenceManager = struct {
     }
 
     pub fn isUserActive(client_status: PresenceEvents.ClientStatus) bool {
-        return client_status.desktop != null or 
-               client_status.mobile != null or 
-               client_status.web != null;
+        return client_status.desktop != null or
+            client_status.mobile != null or
+            client_status.web != null;
     }
 };

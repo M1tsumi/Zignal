@@ -396,7 +396,8 @@ pub const GuildBanUtils = struct {
         for (bans) |ban| {
             if (std.mem.indexOf(u8, getBannedUsername(ban), query) != null or
                 (getBannedUserGlobalName(ban) != null and std.mem.indexOf(u8, getBannedUserGlobalName(ban).?, query) != null) or
-                (getBanReason(ban) != null and std.mem.indexOf(u8, getBanReason(ban).?, query) != null)) {
+                (getBanReason(ban) != null and std.mem.indexOf(u8, getBanReason(ban).?, query) != null))
+            {
                 results.append(ban) catch {};
             }
         }
