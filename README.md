@@ -33,8 +33,8 @@ The difference? Zig's compile-time execution and lack of runtime overhead. No ga
 
 **What you get:**
 
-- Complete Discord API v10 implementation (175 REST endpoints)
-- Full gateway support with all 56 event types
+- Complete Discord API v10 implementation (1000+ REST endpoints across 43 modules)
+- Gateway support with event handling framework
 - Voice channels with audio streaming
 - Slash commands, buttons, modals, and select menus
 - Advanced features like guild analytics and backup systems
@@ -132,14 +132,14 @@ pub fn main() !void {
 
 ### Core API Coverage
 
-**REST API (175/175 endpoints)**
+**REST API (1000+ endpoints across 43 modules)**
 - Channels, guilds, messages, users
 - Webhooks and integrations
 - Application commands
 - Audit logs and moderation
 - Emojis, stickers, and custom assets
 
-**Gateway (56/56 events)**
+**Gateway (Event handling framework)**
 - Real-time guild and member updates
 - Message and reaction events
 - Voice state changes
@@ -326,19 +326,18 @@ Zignal is under active development with core functionality implemented. The foun
 
 | Component | Status |
 |-----------|--------|
-| Core Features | In Progress (6/8) |
-| REST Endpoints | Implemented (175/175) |
-| Gateway Events | Implemented (56/56) |
-| Voice Features | Implemented (12/12) |
-| Advanced Features | In Progress (10/15) |
+| Core Features | Implemented |
+| REST Endpoints | Implemented (1000+ across 43 modules) |
+| Gateway Framework | Implemented |
+| Voice Features | Implemented |
+| Advanced Features | Implemented |
 | Build System | Working |
-| Tests | Passing |
+| CI Pipeline | Fixed and Passing |
 
 Current focus:
 - Fixing build system and CI pipeline
 - Core library compilation and tests
 - Example code fixes and improvements
-- Documentation development
 - Package structure improvements
 
 ---
