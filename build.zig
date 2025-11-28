@@ -14,6 +14,23 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(lib);
 
+    // Create module for external use
+    const zignal_module = b.addModule("zignal", .{
+        .source_file = .{ .path = "src/root.zig" },
+    });
+
+    // Examples
+    const basic_bot = b.addExecutable(.{
+        .name = "basic_bot",
+        .root_source_file = .{ .path = "examples/basic_bot.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    
+    // Add the zignal module to the example
+    basic_bot.addModule("zignal", zignal_module);
+    b.installArtifact(basic_bot);
+
     // Tests
     const tests = b.addTest(.{
         .root_source_file = .{ .path = "src/root.zig" },

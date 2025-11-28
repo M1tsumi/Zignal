@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Discord API](https://img.shields.io/badge/Discord%20API-v10-7289da.svg)](https://discord.com/developers/docs)
 
-[Documentation](https://docs.zignal.dev) • [Examples](examples/) • [Discord Server](https://discord.gg/6nS2KqxQtj) • [Contributing](CONTRIBUTING.md)
+[Examples](examples/) • [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -46,7 +46,7 @@ The difference? Zig's compile-time execution and lack of runtime overhead. No ga
 Add Zignal to your `build.zig`:
 
 ```zig
-const zignal = @import("path/to/zignal");
+const zignal = @import("path/to/zignal/src/root.zig");
 
 pub fn build(b: *std.Build) void {
     const exe = b.addExecutable(.{
@@ -56,11 +56,15 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     
-    exe.root_module.addImport("zignal", zignal.module(b, target, optimize));
+    // Add Zignal as a module
+    const zignal_module = b.addModule("zignal", .{
+        .source_file = .{ .path = "path/to/zignal/src/root.zig" },
+    });
+    exe.addModule("zignal", zignal_module);
 }
 ```
 
-Requirements are simple: Zig 0.11.0+ and a Discord bot token.
+Requirements: Zig 0.11.0+ and a Discord bot token.
 
 ---
 
@@ -77,32 +81,27 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var client = try zignal.Client.init(allocator, .{
-        .token = "YOUR_BOT_TOKEN",
-        .intents = .{
-            .guilds = true,
-            .guild_messages = true,
-            .message_content = true,
-        },
-    });
+    const token = "YOUR_BOT_TOKEN_HERE";
+    
+    var client = zignal.Client.init(allocator, token);
     defer client.deinit();
 
-    client.on(.ready, onReady);
-    client.on(.message_create, onMessage);
+    var gateway = try zignal.Gateway.init(allocator, token);
+    defer gateway.deinit();
 
-    try client.connect();
-}
+    var event_handler = zignal.EventHandler.init(allocator);
+    defer event_handler.deinit();
 
-fn onReady(session: *const zignal.models.Ready) void {
-    std.log.info("Bot online: {s}", .{session.user.username});
-}
+    try event_handler.onReady(struct {
+        fn handler(session_id: []const u8, application_id: u64) void {
+            std.log.info("Bot ready! Session ID: {s}, Application ID: {d}", .{ session_id, application_id });
+        }
+    }.handler);
 
-fn onMessage(message: *const zignal.models.Message) void {
-    if (std.mem.eql(u8, message.content, "!ping")) {
-        message.reply("Pong!") catch |err| {
-            std.log.err("Reply failed: {}", .{err});
-        };
-    }
+    try gateway.connect();
+    std.log.info("Connected to Discord Gateway");
+    
+    try gateway.startEventLoop();
 }
 ```
 
@@ -117,29 +116,13 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var client = try zignal.Client.init(allocator, .{
-        .token = "YOUR_BOT_TOKEN",
-    });
+    var client = zignal.Client.init(allocator, "YOUR_BOT_TOKEN");
     defer client.deinit();
 
     const user = try client.getCurrentUser();
     defer user.deinit();
     
     std.log.info("Logged in as {s}#{s}", .{user.username, user.discriminator});
-
-    const embed = try zignal.builders.EmbedBuilder.init(allocator)
-        .title("Hello from Zignal!")
-        .description("Lightning-fast Discord bots in Zig")
-        .color(0x5865F2)
-        .addField("Language", "Zig", true)
-        .addField("Dependencies", "Zero", true)
-        .build();
-    defer embed.deinit();
-
-    const message = try client.createMessage(channel_id, .{
-        .embeds = &[_]zignal.models.Embed{embed},
-    });
-    defer message.deinit();
 }
 ```
 
@@ -226,7 +209,7 @@ Additional modules for advanced features:
 | `guild_backups` | Full server backup and restore |
 | `monetization` | Premium features and payments |
 
-Full documentation is available at [docs.zignal.dev](https://docs.zignal.dev).
+Documentation is being developed. See the source code and examples for reference.
 
 ---
 
@@ -339,21 +322,24 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## Project Status
 
-Zignal is feature-complete and ready for production use. All Discord API v10 endpoints are implemented and tested.
+Zignal is under active development with core functionality implemented. The foundation is solid and the library builds successfully.
 
 | Component | Status |
 |-----------|--------|
-| Core Features | Complete (8/8) |
-| REST Endpoints | Complete (175/175) |
-| Gateway Events | Complete (56/56) |
-| Voice Features | Complete (12/12) |
-| Advanced Features | Complete (15/15) |
+| Core Features | In Progress (6/8) |
+| REST Endpoints | Implemented (175/175) |
+| Gateway Events | Implemented (56/56) |
+| Voice Features | Implemented (12/12) |
+| Advanced Features | In Progress (10/15) |
+| Build System | Working |
+| Tests | Passing |
 
-Future work focuses on enhancements rather than core features:
-- Optimized sharding for bots in 10,000+ guilds
-- More sophisticated caching strategies
-- Additional examples and documentation
-- Plugin system for community extensions
+Current focus:
+- Fixing build system and CI pipeline
+- Core library compilation and tests
+- Example code fixes and improvements
+- Documentation development
+- Package structure improvements
 
 ---
 
@@ -365,10 +351,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- Documentation: [docs.zignal.dev](https://docs.zignal.dev)
-- Discord: [Join our server](https://discord.gg/6nS2KqxQtj)
 - Issues: [GitHub Issues](https://github.com/M1tsumi/Zignal/issues)
-- Email: support@zignal.dev
 
 ---
 
