@@ -1,7 +1,7 @@
 const std = @import("std");
 
 // 🚀 Core Client Components - Export directly to avoid circular dependencies
-pub const Client = @import("Client_core.zig");
+pub const Client = @import("Client_core.zig").Client;
 pub const Gateway = @import("Gateway.zig");
 pub const models = @import("models.zig");
 pub const events = @import("events.zig");
