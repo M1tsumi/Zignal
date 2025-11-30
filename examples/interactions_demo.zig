@@ -13,14 +13,7 @@ pub fn main() !void {
     const logger = zignal.logging.getGlobalLogger().?;
 
     // Create client
-    var client = try zignal.Client.init(allocator, .{
-        .token = "YOUR_BOT_TOKEN",
-        .intents = .{
-            .guilds = true,
-            .guild_messages = true,
-            .message_content = true,
-        },
-    });
+    var client = zignal.Client.init(allocator, "YOUR_BOT_TOKEN");
     defer client.deinit();
 
     // Initialize interaction handler
@@ -91,7 +84,7 @@ fn registerSlashCommands(handler: *zignal.interactions.InteractionHandler, alloc
                 .name = "question",
                 .description = "Poll question",
                 .required = true,
-                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.Choice{},
+                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.ApplicationCommandOptionChoice{},
                 .options = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption{},
                 .channel_types = &[_]u64{},
                 .min_value = null,
@@ -114,7 +107,7 @@ fn registerSlashCommands(handler: *zignal.interactions.InteractionHandler, alloc
                 .name = "query",
                 .description = "Search query",
                 .required = true,
-                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.Choice{},
+                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.ApplicationCommandOptionChoice{},
                 .options = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption{},
                 .channel_types = &[_]u64{},
                 .min_value = null,
@@ -198,6 +191,9 @@ fn setupInteractionEventHandlers(
     _interaction_handler: *zignal.interactions.InteractionHandler,
     _logger: *zignal.logging.Logger,
 ) !void {
+    _ = _interaction_handler; // TODO: implement interaction handler usage
+    _ = _logger; // TODO: implement logger usage
+    
     // Ready event
     client.on(.ready, struct {
         fn handler(event: zignal.events.ReadyEvent, event_logger: *zignal.logging.Logger) !void {
@@ -212,27 +208,29 @@ fn setupInteractionEventHandlers(
             ih: *zignal.interactions.InteractionHandler,
             ih_logger: *zignal.logging.Logger,
         ) !void {
+            _ = ih_logger; // TODO: implement logger usage
+            
             // Handle interaction directly
             switch (interaction.type) {
                 .application_command => {
                     // Handle slash commands
-                    const handler = ih.getSlashCommandHandler(interaction.data.name) orelse return;
-                    try handler.execute(interaction);
+                    const cmd_handler = ih.getSlashCommandHandler(interaction.data.name) orelse return;
+                    try cmd_handler.execute(interaction);
                 },
                 .message_component => {
                     // Handle button/selection interactions
-                    const handler = ih.getComponentHandler(interaction.data.custom_id) orelse return;
-                    try handler.execute(interaction);
+                    const component_handler = ih.getComponentHandler(interaction.data.custom_id) orelse return;
+                    try component_handler.execute(interaction);
                 },
                 .modal_submit => {
                     // Handle modal submissions
-                    const handler = ih.getModalHandler(interaction.data.custom_id) orelse return;
-                    try handler.execute(interaction);
+                    const modal_handler = ih.getModalHandler(interaction.data.custom_id) orelse return;
+                    try modal_handler.execute(interaction);
                 },
                 .application_command_autocomplete => {
                     // Handle autocomplete
-                    const handler = ih.getAutocompleteHandler(interaction.data.name, interaction.data.options[0].name) orelse return;
-                    try handler.execute(interaction);
+                    const autocomplete_handler = ih.getAutocompleteHandler(interaction.data.name, interaction.data.options[0].name) orelse return;
+                    try autocomplete_handler.execute(interaction);
                 },
                 else => return,
             }
@@ -242,11 +240,12 @@ fn setupInteractionEventHandlers(
 
 fn handleMenuCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
     // Create interactive menu with buttons
-    const components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
-        .addButton(.primary, "ℹ️ Info", "menu_info")
-        .addButton(.secondary, "⚙️ Settings", "menu_settings")
-        .addButton(.success, "❓ Help", "menu_help")
-        .build() catch return;
+    var components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator);
+    defer components.deinit();
+    try components.addButton(.primary, "ℹ️ Info", "menu_info");
+    try components.addButton(.secondary, "⚙️ Settings", "menu_settings");
+    try components.addButton(.success, "❓ Help", "menu_help");
+    const built_components = try components.build();
 
     const embed = zignal.builders.EmbedBuilder.init(ctx.allocator)
         .title("🎮 Interactive Menu")
@@ -262,7 +261,7 @@ fn handleMenuCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
             .embeds = &[_]zignal.models.Embed{embed},
             .allowed_mentions = null,
             .flags = null,
-            .components = components,
+            .components = built_components,
             .choices = &[_]zignal.interactions.InteractionResponse.InteractionResponseData.ApplicationCommandOptionChoice{},
             .custom_id = null,
             .title = null,
@@ -274,10 +273,11 @@ fn handleMenuCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
 
 fn handleFormCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
     // Create modal form
-    const modal_components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
-        .addTextInput("feedback_title", "Title", .short)
-        .addTextInput("feedback_content", "Your feedback", .paragraph)
-        .build() catch return;
+    var modal_components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator);
+    defer modal_components.deinit();
+    try modal_components.addTextInput(" feedback_title\, \Title\, .short);
+ try modal_components.addTextInput(\feedback_content\, \Your feedback\, .paragraph);
+ const built_modal_components = try modal_components.build();
 
     const response = zignal.interactions.InteractionResponse{
         .type = .modal,
@@ -287,7 +287,7 @@ fn handleFormCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
             .embeds = &[_]zignal.models.Embed{},
             .allowed_mentions = null,
             .flags = null,
-            .components = modal_components,
+            .components = built_modal_components,
             .choices = &[_]zignal.interactions.InteractionResponse.InteractionResponseData.ApplicationCommandOptionChoice{},
             .custom_id = "feedback_form",
             .title = "📝 Feedback Form",
@@ -323,7 +323,7 @@ fn handlePollCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
             .embeds = &[_]zignal.models.Embed{embed},
             .allowed_mentions = null,
             .flags = null,
-            .components = components,
+            .components = built_components,
             .choices = &[_]zignal.interactions.InteractionResponse.InteractionResponseData.ApplicationCommandOptionChoice{},
             .custom_id = null,
             .title = null,
@@ -437,7 +437,7 @@ fn handleSettingsButton(ctx: *zignal.interactions.InteractionHandler.ComponentHa
             .embeds = &[_]zignal.models.Embed{embed},
             .allowed_mentions = null,
             .flags = null,
-            .components = components,
+            .components = built_components,
             .choices = &[_]zignal.interactions.InteractionResponse.InteractionResponseData.ApplicationCommandOptionChoice{},
             .custom_id = null,
             .title = null,
@@ -601,3 +601,4 @@ fn handleSearchAutocomplete(ctx: *zignal.interactions.InteractionHandler.Autocom
         },
     });
 }
+

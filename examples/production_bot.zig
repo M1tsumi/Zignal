@@ -42,31 +42,15 @@ pub fn main() !void {
     defer monitor.deinit();
 
     // Create client with advanced configuration
-    var client = try zignal.Client.init(allocator, .{
-        .token = "YOUR_BOT_TOKEN",
-        .intents = .{
-            .guilds = true,
-            .guild_messages = true,
-            .guild_members = true,
-            .message_content = true,
-            .voice_states = true,
-        },
-        .connection_pool = &connection_pool,
-        .request_batcher = &request_batcher,
-        .error_handler = &error_handler,
-    });
+    var client = zignal.Client.init(allocator, "YOUR_BOT_TOKEN");
     defer client.deinit();
 
     // Initialize cache
-    var cache = zignal.cache.Cache.init(allocator, 10000);
+    var cache = try zignal.cache.Cache.init(allocator, 10000);
     defer cache.deinit();
 
     // Initialize shard manager for large bots
-    var shard_manager = zignal.shard.ShardManager.init(allocator, .{
-        .auto_sharding = true,
-        .max_shards = 10,
-        .client = &client,
-    });
+    var shard_manager = try zignal.shard.ShardManager.init(allocator, "YOUR_BOT_TOKEN", 1, undefined, 513, false);
     defer shard_manager.deinit();
 
     // Initialize interaction handler
@@ -140,7 +124,7 @@ fn registerSlashCommands(handler: *zignal.interactions.InteractionHandler, alloc
                 .name = "message",
                 .description = "Message to echo",
                 .required = true,
-                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.Choice{},
+                .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.ApplicationCommandOptionChoice{},
                 .options = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption{},
                 .channel_types = &[_]u64{},
                 .min_value = null,
@@ -170,6 +154,9 @@ fn setupEventHandlers(
     _interaction_handler: *zignal.interactions.InteractionHandler,
     logger: *zignal.logging.Logger,
 ) !void {
+    _ = _cache; // TODO: implement cache usage
+    _ = _voice_manager; // TODO: implement voice manager usage
+    _ = _interaction_handler; // TODO: implement interaction handler usage
     // Ready event
     client.on(.ready, struct {
         fn handler(event: zignal.events.ReadyEvent) !void {
@@ -208,6 +195,8 @@ fn setupEventHandlers(
             _vm: *zignal.voice.VoiceManager,
             vm_logger: *zignal.logging.Logger,
         ) !void {
+            _ = _vm; // TODO: implement voice manager usage
+            
             vm_logger.info(
                 "Voice state update: {d} in channel {d}",
                 .{ voice_state.user_id, voice_state.channel_id orelse 0 }
@@ -241,7 +230,7 @@ fn handlePing(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.S
         },
     };
 
-    ctx.respond(&ctx, response);
+    ctx.respond(ctx, response);
 }
 
 fn handleEcho(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
@@ -270,18 +259,21 @@ fn handleEcho(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.S
         },
     };
 
-    ctx.respond(&ctx, response);
+    ctx.respond(ctx, response);
 }
 
 fn handleVoiceJoin(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
     // Get user's voice channel
-    const _guild_id = ctx.interaction.guild_id orelse return;
-    const _user_id = ctx.interaction.user.?.id;
+    const guild_id = ctx.interaction.guild_id orelse return;
+    const user_id = ctx.interaction.user.?.id;
 
     // This would typically involve:
     // 1. Finding the user's current voice channel
     // 2. Joining the voice channel using the voice manager
     // 3. Setting up voice connection
+    
+    _ = guild_id; // TODO: use guild_id for voice channel lookup
+    _ = user_id; // TODO: use user_id for voice channel lookup
 
     const response = zignal.interactions.InteractionResponse{
         .type = .channel_message_with_source,
@@ -298,7 +290,7 @@ fn handleVoiceJoin(ctx: *zignal.interactions.InteractionHandler.SlashCommandHand
         },
     };
 
-    ctx.respond(&ctx, response);
+    ctx.respond(ctx, response);
 }
 
 fn handleTextCommand(message: zignal.models.Message, cache: *zignal.cache.Cache, logger: *zignal.logging.Logger) !void {

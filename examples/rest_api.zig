@@ -11,7 +11,7 @@ pub fn main() !void {
     var client = zignal.Client.init(allocator, token);
     defer client.deinit();
 
-    std.log.info("Getting current user information...");
+    std.log.info("Getting current user information...", .{});
     const user = try client.getCurrentUser();
     defer {
         allocator.free(user.username);
@@ -25,7 +25,7 @@ pub fn main() !void {
     
     std.log.info("Bot user: {s}#{s} (ID: {d})", .{ user.username, user.discriminator, user.id });
 
-    std.log.info("Getting guilds...");
+    std.log.info("Getting guilds...", .{});
     const guilds = try client.getGuilds();
     defer {
         for (guilds) |guild| {
@@ -65,8 +65,9 @@ pub fn main() !void {
         var request = try client.makeRequest(.GET, channels_path, null, null);
         defer request.deinit();
 
-        const body = try request.readAllAlloc(allocator, 1024 * 1024);
+        const body = try request.reader().readAllAlloc(allocator, 1024 * 1024);
         defer allocator.free(body);
+        defer allocator.destroy(request);
 
         var parsed = try std.json.parseFromSlice([]struct {
             id: u64,
@@ -217,14 +218,14 @@ pub fn main() !void {
                 
                 std.time.sleep(3 * std.time.ns_per_s);
                 
-                std.log.info("Deleting test message...");
+                std.log.info("Deleting test message...", .{});
                 try client.deleteMessage(channel.id, message.id);
-                std.log.info("Message deleted successfully");
+                std.log.info("Message deleted successfully", .{});
                 
                 break;
             }
         }
     }
 
-    std.log.info("REST API example completed successfully!");
+    std.log.info("REST API example completed successfully!", .{});
 }

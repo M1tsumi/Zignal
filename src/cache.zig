@@ -7,7 +7,7 @@ pub const Cache = struct {
     guilds: std.hash_map.AutoHashMap(u64, models.Guild),
     channels: std.hash_map.AutoHashMap(u64, models.Channel),
     users: std.hash_map.AutoHashMap(u64, models.User),
-    members: std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.GuildMember)),
+    members: std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.PartialGuildMember)),
     roles: std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.Role)),
     messages: std.hash_map.AutoHashMap(u64, models.Message),
     max_size: usize,
@@ -20,7 +20,7 @@ pub const Cache = struct {
             .guilds = std.hash_map.AutoHashMap(u64, models.Guild).init(allocator),
             .channels = std.hash_map.AutoHashMap(u64, models.Channel).init(allocator),
             .users = std.hash_map.AutoHashMap(u64, models.User).init(allocator),
-            .members = std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.GuildMember)).init(allocator),
+            .members = std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.PartialGuildMember)).init(allocator),
             .roles = std.hash_map.AutoHashMap(u64, std.hash_map.AutoHashMap(u64, models.Role)).init(allocator),
             .messages = std.hash_map.AutoHashMap(u64, models.Message).init(allocator),
             .max_size = max_size,
@@ -118,7 +118,7 @@ pub const Cache = struct {
         if (user.email) |email| self.allocator.free(email);
     }
 
-    fn deinitGuildMember(self: *Cache, member: models.GuildMember) void {
+    fn deinitGuildMember(self: *Cache, member: models.PartialGuildMember) void {
         if (member.nick) |nick| self.allocator.free(nick);
         self.allocator.free(member.roles);
         self.allocator.free(member.joined_at);
@@ -264,7 +264,7 @@ pub const Cache = struct {
     }
 
     // Member operations
-    pub fn getMember(self: *Cache, guild_id: u64, user_id: u64) ?models.GuildMember {
+    pub fn getMember(self: *Cache, guild_id: u64, user_id: u64) ?models.PartialGuildMember {
         if (self.members.get(guild_id)) |guild_members| {
             if (guild_members.get(user_id)) |member| {
                 return self.cloneGuildMember(member);
@@ -273,12 +273,12 @@ pub const Cache = struct {
         return null;
     }
 
-    pub fn setMember(self: *Cache, guild_id: u64, member: models.GuildMember) !void {
+    pub fn setMember(self: *Cache, guild_id: u64, member: models.PartialGuildMember) !void {
         try self.ensureCapacity();
 
         const guild_members_entry = try self.members.getOrPut(guild_id);
         if (!guild_members_entry.found_existing) {
-            guild_members_entry.value_ptr.* = std.hash_map.AutoHashMap(u64, models.GuildMember).init(self.allocator);
+            guild_members_entry.value_ptr.* = std.hash_map.AutoHashMap(u64, models.PartialGuildMember).init(self.allocator);
         }
 
         const user_id = member.user.id;
@@ -472,8 +472,8 @@ pub const Cache = struct {
         };
     }
 
-    fn cloneGuildMember(self: *Cache, member: models.GuildMember) !models.GuildMember {
-        return models.GuildMember{
+    fn cloneGuildMember(self: *Cache, member: models.PartialGuildMember) !models.PartialGuildMember {
+        return models.PartialGuildMember{
             .user = try self.cloneUser(member.user),
             .nick = if (member.nick) |nick| try self.allocator.dupe(u8, nick) else null,
             .roles = try self.allocator.dupe(u64, member.roles),

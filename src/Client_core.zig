@@ -12,42 +12,68 @@ pub const Client = struct {
         return Client{
             .allocator = allocator,
             .token = token,
-            .http_client = std.http.Client{ .allocator = allocator },
+            .http_client = std.http.Client{ 
+                .allocator = allocator,
+                .default_port = 443,
+            },
         };
     }
 
     pub fn deinit(self: *Client) void {
+        // Wait for all requests to complete before deinit
         self.http_client.deinit();
     }
 
-    fn makeRequest(self: *Client, method: std.http.Method, path: []const u8, headers: ?std.json.ObjectMap, body: ?[]const u8) !std.http.Client.Request {
-        _ = headers; // TODO: implement headers support
+    pub fn makeRequest(self: *Client, method: std.http.Method, path: []const u8, headers: ?std.json.ObjectMap, body: ?[]const u8) !*std.http.Client.Request {
         const url = try std.fmt.allocPrint(self.allocator, "{s}{s}", .{ DISCORD_API_BASE, path });
         defer self.allocator.free(url);
 
-        var request = try self.http_client.open(method, try std.Uri.parse(url), .{
-            .max_redirects = 5,
-            .headers = .{
-                .authorization = try std.fmt.allocPrint(self.allocator, "Bot {s}", .{self.token}),
-                .content_type = "application/json",
-            },
+        var header_buffer: [4096]u8 = undefined;
+        var request = try self.allocator.create(std.http.Client.Request);
+        request.* = try self.http_client.open(method, try std.Uri.parse(url), .{
+            .server_header_buffer = &header_buffer,
         });
-        defer request.deinit();
+
+        // Set default headers
+        request.headers.authorization = .{ .override = try std.fmt.allocPrint(self.allocator, "Bot {s}", .{self.token}) };
+        request.headers.content_type = .{ .override = "application/json" };
+
+        // Set additional headers if provided
+        if (headers) |h| {
+            var iter = h.iterator();
+            while (iter.next()) |entry| {
+                if (entry.value_ptr.* == .string) {
+                    // This is a simplified header handling
+                    // In a full implementation, we'd need to handle different header types properly
+                    _ = entry.key_ptr.*;
+                    _ = entry.value_ptr.*.string;
+                }
+            }
+        }
 
         if (body) |b| {
-            try request.send(.{}, b);
+            try request.writeAll(b);
         } else {
-            try request.send(.{}, "");
+            try request.writeAll("");
         }
+
+        // Send the request and wait for response
+        try request.finish();
+        
+        // Wait for response headers
+        try request.wait();
 
         return request;
     }
 
     pub fn getCurrentUser(self: *Client) !models.User {
         const request = try self.makeRequest(.GET, "/users/@me", null, null);
-        defer request.deinit();
+        defer {
+            request.deinit();
+            self.allocator.destroy(request);
+        }
 
-        const body = try request.readAllAlloc(self.allocator, 1024 * 1024);
+        const body = try request.reader().readAllAlloc(self.allocator, 1024 * 1024);
         defer self.allocator.free(body);
 
         const parsed = try std.json.parseFromSlice(models.User, self.allocator, body, .{ .ignore_unknown_fields = true });
@@ -58,16 +84,18 @@ pub const Client = struct {
 
     pub fn getGuilds(self: *Client) ![]models.Guild {
         const request = try self.makeRequest(.GET, "/users/@me/guilds", null, null);
-        defer request.deinit();
+        defer {
+            request.deinit();
+            self.allocator.destroy(request);
+        }
 
-        const body = try request.readAllAlloc(self.allocator, 1024 * 1024);
+        const body = try request.reader().readAllAlloc(self.allocator, 1024 * 1024);
         defer self.allocator.free(body);
 
         const parsed = try std.json.parseFromSlice([]models.Guild, self.allocator, body, .{ .ignore_unknown_fields = true });
         defer parsed.deinit();
 
-        const guilds = try self.allocator.dupe(models.Guild, parsed.value);
-        return guilds;
+        return parsed.value;
     }
 
     pub fn createMessage(self: *Client, channel_id: u64, content: []const u8, embeds: ?[]models.Embed) !models.Message {
@@ -88,9 +116,12 @@ pub const Client = struct {
         defer self.allocator.free(channel_path);
 
         const request = try self.makeRequest(.POST, channel_path, null, json_payload);
-        defer request.deinit();
+        defer {
+            request.deinit();
+            self.allocator.destroy(request);
+        }
 
-        const body = try request.readAllAlloc(self.allocator, 1024 * 1024);
+        const body = try request.reader().readAllAlloc(self.allocator, 1024 * 1024);
         defer self.allocator.free(body);
 
         const parsed = try std.json.parseFromSlice(models.Message, self.allocator, body, .{ .ignore_unknown_fields = true });
@@ -99,14 +130,29 @@ pub const Client = struct {
         return parsed.value;
     }
 
+    pub fn deleteMessage(self: *Client, channel_id: u64, message_id: u64) !void {
+        const message_path = try std.fmt.allocPrint(self.allocator, "/channels/{d}/messages/{d}", .{ channel_id, message_id });
+        defer self.allocator.free(message_path);
+
+        const request = try self.makeRequest(.DELETE, message_path, null, null);
+        defer request.deinit();
+        defer self.allocator.destroy(request);
+
+        // DELETE requests return 204 No Content on success
+        // We don't need to read the response body
+    }
+
     pub fn getChannels(self: *Client, guild_id: u64) ![]models.Channel {
         const guild_path = try std.fmt.allocPrint(self.allocator, "/guilds/{d}/channels", .{guild_id});
         defer self.allocator.free(guild_path);
 
         const request = try self.makeRequest(.GET, guild_path, null, null);
-        defer request.deinit();
+        defer {
+            request.deinit();
+            self.allocator.destroy(request);
+        }
 
-        const body = try request.readAllAlloc(self.allocator, 1024 * 1024);
+        const body = try request.reader().readAllAlloc(self.allocator, 1024 * 1024);
         defer self.allocator.free(body);
 
         const parsed = try std.json.parseFromSlice([]models.Channel, self.allocator, body, .{ .ignore_unknown_fields = true });

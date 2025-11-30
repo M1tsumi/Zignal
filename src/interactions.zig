@@ -19,7 +19,7 @@ pub const ComponentType = enum(u8) {
     role_select = 5,
     mentionable_select = 6,
     channel_select = 7,
-    text_input = 4,
+    text_input = 8,
 };
 
 /// Button styles with proper color coding
@@ -59,7 +59,7 @@ pub const Interaction = struct {
     data: ?InteractionData,
     guild_id: ?u64,
     channel_id: ?u64,
-    member: ?models.GuildMember,
+    member: ?models.PartialGuildMember,
     user: ?models.User,
     token: []const u8,
     version: u8,

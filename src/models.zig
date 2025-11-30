@@ -112,7 +112,7 @@ pub const Message = struct {
     application: ?MessageApplication,
     message_reference: ?MessageReference,
     flags: ?u32,
-    referenced_message: ?Message,
+    referenced_message: ?*Message,
     interaction: ?MessageInteraction,
     thread: ?Channel,
     components: []Component,
@@ -364,4 +364,30 @@ pub const GuildScheduledEvent = struct {
 
 pub const GuildScheduledEventEntityMetadata = struct {
     location: ?[]const u8,
+};
+
+pub const AllowedMentions = struct {
+    parse: ?[]const []const u8 = null,
+    roles: ?[]const u64 = null,
+    users: ?[]const u64 = null,
+    replied_user: ?bool = null,
+};
+
+pub const Entitlement = struct {
+    id: u64,
+    sku_id: u64,
+    application_id: u64,
+    user_id: ?u64,
+    type: u8,
+    deleted: bool,
+    start_time: ?[]const u8,
+    end_time: ?[]const u8,
+    guild_id: ?u64,
+    consumable: bool,
+};
+
+pub const ReadyEvent = struct {
+    user: User,
+    session_id: []const u8,
+    guilds: []Guild,
 };

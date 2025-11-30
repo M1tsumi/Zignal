@@ -272,7 +272,9 @@ pub const VoiceConnection = struct {
         defer self.allocator.free(json_string);
 
         // Send speaking notification via websocket
-        // TODO: Actually send through websocket connection
+        if (self.websocket) |*ws| {
+            try ws.writeAll(json_string);
+        }
 
         self.state = if (speaking) .speaking else .connected;
     }
@@ -314,7 +316,9 @@ pub const VoiceConnection = struct {
         defer self.allocator.free(json_string);
 
         // Send authentication via websocket
-        // TODO: Actually send through websocket connection
+        if (self.websocket) |*ws| {
+            try ws.writeAll(json_string);
+        }
 
         self.state = .authenticating;
     }

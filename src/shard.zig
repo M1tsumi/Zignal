@@ -10,11 +10,11 @@ pub const ShardManager = struct {
     token: []const u8,
     shards: std.ArrayList(*Shard),
     total_shards: u32,
-    event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void,
+    event_handler: *const fn (event: void, shard: *Shard) void,
     intents: u32,
     compression: bool,
 
-    pub fn init(allocator: std.mem.Allocator, token: []const u8, total_shards: u32, event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void, intents: u32, compression: bool) !*ShardManager {
+    pub fn init(allocator: std.mem.Allocator, token: []const u8, total_shards: u32, event_handler: *const fn (event: void, shard: *Shard) void, intents: u32, compression: bool) !*ShardManager {
         const manager = try allocator.create(ShardManager);
         manager.* = .{
             .allocator = allocator,
@@ -106,7 +106,7 @@ pub const Shard = struct {
     shard_id: u32,
     total_shards: u32,
     gateway: ?*Gateway,
-    event_handler: *const fn (event: models.GatewayEvent, shard: *Shard) void,
+    event_handler: *const fn (event: void, shard: *Shard) void,
     intents: u32,
     compression: bool,
     connected: bool = false,

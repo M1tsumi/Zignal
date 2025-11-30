@@ -131,7 +131,7 @@ pub const Logger = struct {
             components.append(std.fmt.allocPrint(allocator, "{s}", .{entry.message}) catch "") catch {};
 
             if (entry.error_info) |*err_ctx| {
-                components.append(std.fmt.allocPrint(allocator, "({s}: {s})", .{ @tagName(err_ctx.error_code), err_ctx.message }) catch "") catch {};
+                components.append(std.fmt.allocPrint(allocator, "({any}: {s})", .{ err_ctx.error_code, err_ctx.message }) catch "") catch {};
             }
 
             return std.mem.join(allocator, " ", components.items) catch "";
