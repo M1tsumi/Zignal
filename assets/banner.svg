@@ -91,32 +91,32 @@
     </path>
   </g>
   
-  <!-- Main text with natural spacing -->
+  <!-- Main text with professional typography -->
   <text x="155" y="165" 
-        font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" 
-        font-size="84" 
-        font-weight="800" 
+        font-family="'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif" 
+        font-size="88" 
+        font-weight="700" 
         fill="#FFFFFF"
-        letter-spacing="-2"
+        letter-spacing="-1.5"
         filter="url(#softShadow)">
     Zignal
   </text>
   
-  <!-- Underline accent (hand-drawn feel) -->
-  <path d="M 155,178 Q 250,182 345,178" 
-        stroke="#F7A41D" 
-        stroke-width="3" 
+  <!-- Professional underline accent -->
+  <path d="M 155,180 Q 280,184 405,180" 
+        stroke="url(#orangeGlow)" 
+        stroke-width="4" 
         fill="none"
         stroke-linecap="round"
-        opacity="0.8"/>
+        opacity="0.9"/>
   
-  <!-- Tagline with better spacing -->
-  <text x="155" y="210" 
-        font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" 
-        font-size="18" 
-        font-weight="400" 
-        fill="#9CA3AF"
-        letter-spacing="0.3">
+  <!-- Enhanced tagline with better typography -->
+  <text x="155" y="215" 
+        font-family="'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif" 
+        font-size="20" 
+        font-weight="500" 
+        fill="#B8BCC8"
+        letter-spacing="0.4">
     High-performance Discord API wrapper for Zig
   </text>
   
@@ -200,7 +200,7 @@
           font-weight="600" 
           fill="#5865F2"
           text-anchor="middle">
-      v1.0.0
+      v1.1.0
     </text>
   </g>
   
