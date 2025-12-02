@@ -39,10 +39,11 @@ jobs:
         cd ..
 
     - name: Generate Hash
+      id: hash
       run: |
         # Generate SHA256 hash for the archive
         HASH=$(sha256sum zignal-${{ github.ref_name }}.tar.gz | cut -d' ' -f1)
-        echo "HASH=$HASH" >> $GITHUB_ENV
+        echo "hash=$HASH" >> $GITHUB_OUTPUT
         echo "Package hash: $HASH"
 
     - name: Create GitHub Release
@@ -64,7 +65,7 @@ jobs:
           .dependencies = .{
               .zignal = .{
                   .url = "https://github.com/M1tsumi/Zignal/archive/refs/tags/${{ github.ref_name }}.tar.gz",
-                  .hash = "${{ env.HASH }}",
+                  .hash = "${{ steps.hash.outputs.hash }}",
               },
           }
           ```
