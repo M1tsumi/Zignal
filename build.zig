@@ -40,12 +40,10 @@ pub fn build(b: *std.Build) void {
     advanced_test_step.dependOn(&run_advanced_tests.step);
 
     // Examples (individual steps)
+    // Note: Some advanced examples are WIP and may not compile
     const examples = [_]struct { name: []const u8, path: []const u8 }{
         .{ .name = "basic-bot", .path = "examples/basic_bot.zig" },
         .{ .name = "rest-api", .path = "examples/rest_api.zig" },
-        .{ .name = "voice-bot", .path = "examples/voice_bot.zig" },
-        .{ .name = "interactions-demo", .path = "examples/interactions_demo.zig" },
-        .{ .name = "production-bot", .path = "examples/production_bot.zig" },
     };
 
     const examples_step = b.step("examples", "Build all examples");

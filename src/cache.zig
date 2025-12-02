@@ -87,7 +87,7 @@ pub const Cache = struct {
         if (guild.vanity_url_code) |v| self.allocator.free(v);
         if (guild.description) |d| self.allocator.free(d);
         if (guild.banner) |b| self.allocator.free(b);
-        if (guild.preferred_locale) |pl| self.allocator.free(pl);
+        self.allocator.free(guild.preferred_locale);
         self.allocator.free(guild.roles);
         self.allocator.free(guild.emojis);
         self.allocator.free(guild.features);
@@ -112,19 +112,17 @@ pub const Cache = struct {
         self.allocator.free(user.discriminator);
         if (user.global_name) |gn| self.allocator.free(gn);
         if (user.avatar) |avatar| self.allocator.free(avatar);
-        if (user.banner) |banner| self.allocator.free(banner);
-        if (user.bio) |bio| self.allocator.free(bio);
         if (user.locale) |locale| self.allocator.free(locale);
         if (user.email) |email| self.allocator.free(email);
+        if (user.avatar_decoration) |ad| self.allocator.free(ad);
     }
 
     fn deinitGuildMember(self: *Cache, member: models.PartialGuildMember) void {
         if (member.nick) |nick| self.allocator.free(nick);
         self.allocator.free(member.roles);
-        self.allocator.free(member.joined_at);
+        if (member.joined_at) |ja| self.allocator.free(ja);
         if (member.premium_since) |ps| self.allocator.free(ps);
         if (member.permissions) |p| self.allocator.free(p);
-        if (member.communication_disabled_until) |cdu| self.allocator.free(cdu);
     }
 
     fn deinitRole(self: *Cache, role: models.Role) void {
@@ -145,7 +143,6 @@ pub const Cache = struct {
         self.allocator.free(message.embeds);
         self.allocator.free(message.reactions);
         if (message.nonce) |nonce| self.allocator.free(nonce);
-        if (message.last_pin_timestamp) |lpt| self.allocator.free(lpt);
         self.allocator.free(message.components);
         self.allocator.free(message.sticker_items);
     }

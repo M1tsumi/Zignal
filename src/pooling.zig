@@ -241,7 +241,7 @@ pub const RequestBatcher = struct {
         retry_count: u32,
         max_retries: u32,
 
-        pub fn deinit(self: PendingRequest, allocator: std.mem.Allocator) void {
+        pub fn deinit(self: *PendingRequest, allocator: std.mem.Allocator) void {
             allocator.free(self.method);
             allocator.free(self.url);
             self.headers.deinit();

@@ -11,7 +11,7 @@ pub const VoiceConnection = struct {
     token: []const u8,
     endpoint: ?[]const u8,
     websocket: ?std.http.Client = null,
-    udp_socket: ?std.net.UdpSocket = null,
+    udp_socket: ?std.posix.socket_t = null,
     state: ConnectionState,
     encryption: EncryptionState,
     audio: AudioState,

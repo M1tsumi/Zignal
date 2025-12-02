@@ -275,9 +275,9 @@ fn handleFormCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
     // Create modal form
     var modal_components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator);
     defer modal_components.deinit();
-    try modal_components.addTextInput(" feedback_title\, \Title\, .short);
- try modal_components.addTextInput(\feedback_content\, \Your feedback\, .paragraph);
- const built_modal_components = try modal_components.build();
+    try modal_components.addTextInput("feedback_title", "Title", .short);
+    try modal_components.addTextInput("feedback_content", "Your feedback", .paragraph);
+    const built_modal_components = try modal_components.build();
 
     const response = zignal.interactions.InteractionResponse{
         .type = .modal,
@@ -302,7 +302,7 @@ fn handlePollCommand(ctx: *zignal.interactions.InteractionHandler.SlashCommandHa
     const question = question_value.string;
 
     // Create poll with voting buttons
-    const components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
+    const built_components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
         .addButton(.primary, "👍 Option A", "poll_vote_a")
         .addButton(.secondary, "👎 Option B", "poll_vote_b")
         .build() catch return;
@@ -393,7 +393,7 @@ fn handleInfoButton(ctx: *zignal.interactions.InteractionHandler.ComponentHandle
 }
 
 fn handleSettingsButton(ctx: *zignal.interactions.InteractionHandler.ComponentHandler.ComponentContext) !void {
-    const components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
+    const built_components = zignal.interactions.InteractionBuilder.ComponentBuilder.init(ctx.allocator)
         .addStringSelect(
             "role_select",
             "Select your role",

@@ -14,7 +14,6 @@ pub const Client = struct {
             .token = token,
             .http_client = std.http.Client{ 
                 .allocator = allocator,
-                .default_port = 443,
             },
         };
     }

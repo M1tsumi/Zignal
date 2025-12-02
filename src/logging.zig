@@ -281,27 +281,27 @@ pub const Logger = struct {
         }
 
         pub fn deinit(self: *Metrics) void {
-            var iter = self.counters.iterator();
-            while (iter.next()) |entry| {
+            var counter_iter = self.counters.iterator();
+            while (counter_iter.next()) |entry| {
                 self.allocator.free(entry.key_ptr.*);
             }
             self.counters.deinit();
 
-            iter = self.gauges.iterator();
-            while (iter.next()) |entry| {
+            var gauge_iter = self.gauges.iterator();
+            while (gauge_iter.next()) |entry| {
                 self.allocator.free(entry.key_ptr.*);
             }
             self.gauges.deinit();
 
-            iter = self.histograms.iterator();
-            while (iter.next()) |entry| {
+            var hist_iter = self.histograms.iterator();
+            while (hist_iter.next()) |entry| {
                 self.allocator.free(entry.key_ptr.*);
                 entry.value_ptr.buckets.deinit();
             }
             self.histograms.deinit();
 
-            iter = self.timers.iterator();
-            while (iter.next()) |entry| {
+            var timer_iter = self.timers.iterator();
+            while (timer_iter.next()) |entry| {
                 self.allocator.free(entry.key_ptr.*);
             }
             self.timers.deinit();

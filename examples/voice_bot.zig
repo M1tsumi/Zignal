@@ -12,16 +12,9 @@ pub fn main() !void {
     defer zignal.logging.deinitGlobalLogger(allocator);
     const logger = zignal.logging.getGlobalLogger().?;
 
-    // Create client with voice intents
-    var client = try zignal.Client.init(allocator, .{
-        .token = "YOUR_BOT_TOKEN",
-        .intents = .{
-            .guilds = true,
-            .guild_messages = true,
-            .voice_states = true,
-            .guild_members = true,
-        },
-    });
+    // Create client
+    const token = "YOUR_BOT_TOKEN";
+    var client = zignal.Client.init(allocator, token);
     defer client.deinit();
 
     // Initialize voice manager
@@ -50,10 +43,14 @@ pub fn main() !void {
 
 fn setupVoiceEventHandlers(
     client: *zignal.Client,
-    _voice_manager: *zignal.voice.VoiceManager,
-    _cache: *zignal.cache.Cache,
-    _logger: *zignal.logging.Logger,
+    voice_manager: *zignal.voice.VoiceManager,
+    cache: *zignal.cache.Cache,
+    logger: *zignal.logging.Logger,
 ) !void {
+    // Mark parameters as used (they're passed to event handlers)
+    _ = voice_manager;
+    _ = cache;
+    _ = logger;
     // Ready event
     client.on(.ready, struct {
         fn handler(event: zignal.events.ReadyEvent, event_logger: *zignal.logging.Logger) !void {
@@ -77,9 +74,10 @@ fn setupVoiceEventHandlers(
     client.on(.voice_state_update, struct {
         fn handler(
             voice_state: zignal.models.VoiceState,
-            _vm: *zignal.voice.VoiceManager,
+            vm: *zignal.voice.VoiceManager,
             vs_logger: *zignal.logging.Logger,
         ) !void {
+            _ = vm; // Voice manager available for state tracking
             vs_logger.info("Voice state update for user {d}", .{voice_state.user_id});
         }
     }.handler);
@@ -143,7 +141,7 @@ fn handleVoiceJoin(
     };
 
     // Join voice channel
-    const _voice_connection = try voice_manager.joinVoiceChannel(
+    _ = try voice_manager.joinVoiceChannel(
         guild_id,
         voice_channel.id,
         user_id,
@@ -332,7 +330,8 @@ fn handleVoiceServerUpdate(
     try connection.updateVoiceServer(voice_server.endpoint, voice_server.token);
 }
 
-fn findUserVoiceChannel(guild: zignal.models.Guild, _user_id: u64) ?zignal.models.Channel {
+fn findUserVoiceChannel(guild: zignal.models.Guild, user_id: u64) ?zignal.models.Channel {
+    _ = user_id; // Will be used when voice states are implemented
     // This would typically involve checking voice states
     // For now, return the first voice channel as a placeholder
     for (guild.channels) |channel| {

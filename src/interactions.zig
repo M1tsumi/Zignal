@@ -536,7 +536,7 @@ pub const InteractionHandler = struct {
     pub const SlashCommandHandler = struct {
         name: []const u8,
         description: []const u8,
-        options: []ApplicationCommand.ApplicationCommandOption,
+        options: []const ApplicationCommand.ApplicationCommandOption,
         execute: *const fn (ctx: *SlashCommandContext) anyerror!void,
 
         pub const SlashCommandContext = struct {
@@ -598,29 +598,29 @@ pub const InteractionHandler = struct {
     }
 
     pub fn deinit(self: *InteractionHandler) void {
-        var iter = self.slash_commands.iterator();
-        while (iter.next()) |entry| {
+        var slash_iter = self.slash_commands.iterator();
+        while (slash_iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
             self.allocator.destroy(entry.value_ptr.*);
         }
         self.slash_commands.deinit();
 
-        iter = self.component_handlers.iterator();
-        while (iter.next()) |entry| {
+        var comp_iter = self.component_handlers.iterator();
+        while (comp_iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
             self.allocator.destroy(entry.value_ptr.*);
         }
         self.component_handlers.deinit();
 
-        iter = self.modal_handlers.iterator();
-        while (iter.next()) |entry| {
+        var modal_iter = self.modal_handlers.iterator();
+        while (modal_iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
             self.allocator.destroy(entry.value_ptr.*);
         }
         self.modal_handlers.deinit();
 
-        iter = self.autocomplete_handlers.iterator();
-        while (iter.next()) |entry| {
+        var auto_iter = self.autocomplete_handlers.iterator();
+        while (auto_iter.next()) |entry| {
             self.allocator.free(entry.key_ptr.*);
             self.allocator.destroy(entry.value_ptr.*);
         }

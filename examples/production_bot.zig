@@ -122,7 +122,9 @@ fn registerSlashCommands(handler: *zignal.interactions.InteractionHandler, alloc
             .{
                 .type = .string,
                 .name = "message",
+                .name_localizations = null,
                 .description = "Message to echo",
+                .description_localizations = null,
                 .required = true,
                 .choices = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption.ApplicationCommandOptionChoice{},
                 .options = &[_]zignal.interactions.ApplicationCommand.ApplicationCommandOption{},
@@ -230,7 +232,7 @@ fn handlePing(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.S
         },
     };
 
-    ctx.respond(ctx, response);
+    try ctx.respond(ctx, response);
 }
 
 fn handleEcho(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
@@ -259,7 +261,7 @@ fn handleEcho(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.S
         },
     };
 
-    ctx.respond(ctx, response);
+    try ctx.respond(ctx, response);
 }
 
 fn handleVoiceJoin(ctx: *zignal.interactions.InteractionHandler.SlashCommandHandler.SlashCommandContext) !void {
@@ -290,7 +292,7 @@ fn handleVoiceJoin(ctx: *zignal.interactions.InteractionHandler.SlashCommandHand
         },
     };
 
-    ctx.respond(ctx, response);
+    try ctx.respond(ctx, response);
 }
 
 fn handleTextCommand(message: zignal.models.Message, cache: *zignal.cache.Cache, logger: *zignal.logging.Logger) !void {
